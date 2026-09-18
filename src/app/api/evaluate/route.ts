@@ -105,5 +105,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "llm_call_failed" }, { status: 502 });
   }
 
+  // 응답에서 빠진 항목만 한 번 더 물어본다. 그래도 없으면 기본값으로 채운다.
+  const got = new Set(parsed.items.map((r) => r.id));
+  const missing = items.filter((it) => !got.has(it.id));
+  if (missing.length > 0) {
+    const again = await callClaudeOnce(missing);
+    if (again?.items?.length) parsed = { items: [...parsed.items, ...again.items] };
+  }
+
   return NextResponse.json({ items: fillMissing(items, parsed) });
 }
