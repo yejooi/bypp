@@ -53,8 +53,18 @@ type ImageBox = { x: number; y: number; w: number; h: number };
 // 좌표가 이상하면(범위 밖/너무 작음) null -> 이미지 없이 등록.
 function cropThumb(canvas: HTMLCanvasElement, box: ImageBox | null | undefined): string | null {
   if (!box) return null;
-  const { x, y, w, h } = box;
+  let { x, y, w, h } = box;
+  // 모델은 픽셀 좌표를 돌려준다. (예전처럼 0~1 비율로 와도 처리)
+  if ([x, y, w, h].every((n) => typeof n === "number") && (x > 1.5 || y > 1.5 || w > 1.5 || h > 1.5)) {
+    x /= canvas.width;
+    w /= canvas.width;
+    y /= canvas.height;
+    h /= canvas.height;
+  }
   if (![x, y, w, h].every((n) => typeof n === "number" && Number.isFinite(n))) return null;
+  // 상품 사진은 대체로 정사각에 가깝다. 아주 가로로 길거나(로고/배너) 세로로 긴 박스는 버린다.
+  const ratio = (w * canvas.width) / (h * canvas.height);
+  if (ratio < 0.6 || ratio > 1.6) return null;
   if (w < 0.03 || h < 0.03 || x < 0 || y < 0 || x + w > 1.02 || y + h > 1.02) return null;
   const sx = x * canvas.width;
   const sy = y * canvas.height;
@@ -83,7 +93,7 @@ export function ScreenshotImportForm() {
       const res = await authedFetch("/api/parse-screenshot", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ imageBase64: base64, mediaType }),
+        body: JSON.stringify({ imageBase64: base64, mediaType, width: canvas.width, height: canvas.height }),
       });
       if (!res.ok) throw new Error("parse_failed");
       const data: { items: { name: string; price: number | null; image_box?: ImageBox | null }[] } = await res.json();
