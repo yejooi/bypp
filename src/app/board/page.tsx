@@ -807,9 +807,7 @@ function SlotDrop({ id, label, children }: { id: string; label: string; children
 function EmptyShelf({ label, faint }: { label: string; faint?: boolean }) {
   return (
     <div
-      className={`w-full aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center ${
-        faint ? "bg-[#E8DCC2]/70 border-[#D4C7A7]" : "bg-[#E8DCC2] border-[#C9B693]"
-      }`}
+      className={`pocket-slot w-full aspect-square rounded-2xl flex flex-col items-center justify-center ${faint ? "opacity-60" : ""}`}
     >
       <div className="w-3 h-3 rounded-full bg-[#C9BFAB]" />
       <span className="text-[10px] text-[#A89481] font-bold mt-1">{label}</span>
@@ -846,7 +844,7 @@ function ItemTile({
         className={`pocket-slot active w-full aspect-square rounded-2xl flex flex-col items-center justify-between p-1.5 cursor-grab hover:-translate-y-1 transition-all border-2 relative ${
           showcase
             ? dim
-              ? "border-dashed border-[#CFB7A1] !bg-[#FFFBF0]/90 opacity-95"
+              ? "border-[#CFB7A1] !bg-[#FFFBF0]/90 opacity-95"
               : "border-[#A36B3E] !bg-[#FFFDF7]"
             : "border-[#549E32]"
         }`}
