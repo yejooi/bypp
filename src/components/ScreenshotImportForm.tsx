@@ -180,8 +180,7 @@ export function ScreenshotImportForm() {
         <button
           disabled={loading}
           onClick={() => inputRef.current?.click()}
-          className="self-start flex items-center gap-2 px-4 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
-          style={{ backgroundColor: "#4F8B33", boxShadow: "0 3px 0 0 rgba(74,46,53,0.16)" }}
+          className="btn-soft-green self-start flex items-center gap-2 px-4 py-2 text-sm rounded-xl"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path
@@ -272,8 +271,7 @@ export function ScreenshotImportForm() {
       <div className="flex gap-2 pt-1">
         <button
           onClick={addAll}
-          className="px-4 py-2 text-white font-bold text-sm rounded-xl transition-all active:translate-y-0.5"
-          style={{ backgroundColor: "var(--primary)", boxShadow: "0 3px 0 0 var(--primary-hover)" }}
+          className="btn-soft-green px-4 py-2 text-sm rounded-xl"
         >
           전체 장바구니에 담기
         </button>

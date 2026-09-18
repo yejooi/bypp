@@ -104,8 +104,7 @@ export function AddItemForm() {
           <button
             disabled={!url || loading}
             onClick={handleFetch}
-            className="px-6 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
-            style={{ backgroundColor: "#4F8B33", boxShadow: "0 3px 0 0 rgba(74,46,53,0.16)" }}
+            className="btn-soft-green px-6 py-2 text-sm rounded-xl"
           >
             {loading ? "가져오는 중..." : "가져오기"}
           </button>
@@ -194,8 +193,7 @@ export function AddItemForm() {
             });
             reset();
           }}
-          className="px-4 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
-          style={{ backgroundColor: "var(--primary)", boxShadow: "0 3px 0 0 var(--primary-hover)" }}
+          className="btn-soft-green px-4 py-2 text-sm rounded-xl"
         >
           장바구니에 추가
         </button>

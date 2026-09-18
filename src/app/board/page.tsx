@@ -447,7 +447,7 @@ export default function BoardPage() {
 
               <button
                 onClick={() => setAddOpen(true)}
-                className="relative z-10 shrink-0 w-full mb-3 xl:mb-2 flex items-center justify-center gap-2.5 py-2.5 rounded-2xl border-[3px] border-[#6FAE4A] bg-[#E5F5D4] text-[#2D6C2A] font-black text-base hover:bg-[#D6EEBE] active:translate-y-0.5 transition shadow-[0_3px_0_rgba(63,138,58,0.35)]"
+                className="relative z-10 shrink-0 w-full mb-3 xl:mb-2 flex items-center justify-center gap-2.5 py-2.5 rounded-2xl btn-soft-green text-base"
               >
                 <span className="w-7 h-7 rounded-full bg-[#3F8A3A] text-white flex items-center justify-center text-xl leading-none pb-0.5">
                   +
@@ -546,9 +546,9 @@ export default function BoardPage() {
                 <button
                   onClick={handleEvaluate}
                   disabled={judgeItems.length === 0 || evalState === "loading"}
-                  className={`w-full py-2.5 px-4 bg-[#4EA434] hover:bg-[#3F8829] active:translate-y-0.5 text-white font-black text-xs sm:text-sm rounded-2xl ${SHADOW_AC_SM} transition-all flex items-center justify-center gap-2 disabled:opacity-40`}
+                  className={`btn-soft-green w-full py-2.5 px-4 text-xs sm:text-sm rounded-2xl flex items-center justify-center gap-2`}
                 >
-                  <StarIcon className="w-4 h-4 text-[#FFE073]" />
+                  <StarIcon className="w-4 h-4 text-[#E09D1B]" />
                   <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 판정 부탁하기"}</span>
                 </button>
               </JudgeShell>
@@ -674,7 +674,7 @@ export default function BoardPage() {
                 <button
                   onClick={() => setConfirmBulk(true)}
                   disabled={shelf1.length === 0}
-                  className={`w-full py-2 rounded-2xl text-sm font-black text-[#2D6C2A] bg-[#F4FBEA] border-2 border-[#8DBF6A] hover:bg-[#E5F5D4] ${SHADOW_AC_SM} active:translate-y-0.5 disabled:opacity-40 transition-all flex items-center justify-center gap-2`}
+                  className={`btn-soft-green w-full py-2 rounded-2xl text-sm flex items-center justify-center gap-2`}
                 >
                   🧾 1층 전체 계산하기 ({shelf1.length}개 · {won(shelf1Sum)})
                 </button>
@@ -845,7 +845,7 @@ export default function BoardPage() {
                 onClick={() => setAddMode("link")}
                 className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all flex items-center gap-1.5 ${
                   addMode === "link"
-                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
+                    ? "btn-soft-green"
                     : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
                 }`}
               >
@@ -856,7 +856,7 @@ export default function BoardPage() {
                 onClick={() => setAddMode("screenshot")}
                 className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all ${
                   addMode === "screenshot"
-                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
+                    ? "btn-soft-green"
                     : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
                 }`}
               >
@@ -890,7 +890,7 @@ export default function BoardPage() {
                   setConfirmBulk(false);
                   buyFirstFloor();
                 }}
-                className={`flex-1 py-2.5 rounded-full font-black text-white bg-[#3F8A3A] ${SHADOW_AC_SM}`}
+                className={`btn-soft-green flex-1 py-2.5 rounded-full`}
               >
                 네 계산할래요
               </button>
@@ -1205,7 +1205,7 @@ function SheetBtn({
   const palette = {
     cream: "bg-[#EFE8D6] border-[#D4C3A3] text-[#5B3E29]",
     wood: "bg-[#A36B3E] border-[#5E371C] text-[#FFF3DE]",
-    green: "bg-[#3F8A3A] border-[#2A6427] text-white",
+    green: "btn-soft-green",
     tape: "bg-[#E8B84A] border-[#B8862A] text-[#5B3E29]",
   }[tone];
   return (
