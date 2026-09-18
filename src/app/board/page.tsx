@@ -111,7 +111,11 @@ export default function BoardPage() {
   const cartSum = cartItems.reduce((s, it) => s + it.price, 0);
   const buySum = buyItems.reduce((s, it) => s + it.price, 0);
 
-  const budget = monthlyBudget ?? 0;
+  const totalBudget = monthlyBudget ?? 0;
+  const hasBudget = totalBudget > 0;
+  // 이미 구매(내리기)한 금액은 이번 달 예산에서 빼고, 남은 예산으로 1층/2층을 나눈다.
+  const purchasedSum = items.filter((it) => it.status === "purchased").reduce((a, it) => a + it.price, 0);
+  const budget = Math.max(0, totalBudget - purchasedSum);
 
   // 쇼케이스 순서는 사용자가 정한 대로(sortOrder). AI 판정은 "무엇이 쇼케이스에 들어가느냐"만 결정한다.
   const orderedBuy = buyItems
@@ -125,7 +129,7 @@ export default function BoardPage() {
   let over = false;
   let overCount = 0;
   const rows = orderedBuy.map((item, i) => {
-    if (!over && budget > 0 && cumulative + item.price > budget) over = true;
+    if (!over && hasBudget && cumulative + item.price > budget) over = true;
     const before = cumulative;
     if (!over) cumulative += item.price;
     const message = over
@@ -192,7 +196,7 @@ export default function BoardPage() {
       let over = false;
       let overSeen = 0;
       const entries = ranked.map((r, i) => {
-        if (!over && budget > 0 && run + r.price > budget) over = true;
+        if (!over && hasBudget && run + r.price > budget) over = true;
         const before = run;
         if (!over) run += r.price;
         const message = over
@@ -331,8 +335,16 @@ export default function BoardPage() {
                   </span>
                   <span className="text-xs text-[#8C6D53] font-bold">이번 달 예산:</span>
                   <span className="bg-[#FFF0D4] border-2 border-[#F6C644] text-[#A75D00] font-black text-sm sm:text-base px-2.5 py-0.5 rounded-full">
-                    {won(budget)}
+                    {won(totalBudget)}
                   </span>
+                  {purchasedSum > 0 && (
+                    <>
+                      <span className="text-xs text-[#8C6D53] font-bold">구매 {won(purchasedSum)} ·</span>
+                      <span className="bg-[#E5F5D4] border-2 border-[#AED48C] text-[#2D6C2A] font-black text-sm sm:text-base px-2.5 py-0.5 rounded-full">
+                        남은 {won(budget)}
+                      </span>
+                    </>
+                  )}
                   <Link href="/?edit=1" className="text-xs font-bold text-[#8C6D53] underline">
                     바꾸기
                   </Link>
@@ -639,7 +651,7 @@ export default function BoardPage() {
                     <div
                       className={`relative z-10 bg-[#FFDE59] border-2 border-[#B37400] text-[#693E00] text-xs font-black px-4 py-0.5 rounded-full ${SHADOW_AC} flex items-center gap-1.5`}
                     >
-                      <span>이번 달 예산 한도선 ({won(budget)})</span>
+                      <span>남은 예산 한도선 ({won(budget)})</span>
                       <span className="w-2 h-2 rounded-full bg-[#E09D1B] border border-[#693E00]" />
                     </div>
                   </div>
@@ -775,7 +787,7 @@ export default function BoardPage() {
           <div className={`bg-[#FFFBF2] border-4 border-[#85532F] rounded-[28px] p-6 max-w-sm w-full text-[#4A3324] ${SHADOW_AC}`}>
             <p className="text-lg font-black">이번 달 예산을 조금 넘어요</p>
             <p className="text-sm mt-1 font-medium">
-              {items.find((it) => it.id === pendingBuyId)?.name}은(는) 이번 달 예산({won(budget)})을 넘어요. 지금
+              {items.find((it) => it.id === pendingBuyId)?.name}은(는) 이번 달 남은 예산({won(budget)})을 넘어요. 지금
               살까요, 다음 달로 미룰까요?
             </p>
             <div className="flex gap-2 mt-4">
