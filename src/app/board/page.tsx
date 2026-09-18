@@ -683,7 +683,7 @@ export default function BoardPage() {
 
             </ZoneShell>
 
-            {/* 드롭존: 구덩이(왼쪽) / 선물상자(오른쪽) */}
+            {/* 드롭존: 반품함(왼쪽) / 계산대(오른쪽) */}
             <ActionZone
               id="toss-zone"
               className="order-4 lg:order-none lg:col-start-1 lg:row-start-3 xl:col-start-1 xl:row-start-1"
@@ -692,63 +692,52 @@ export default function BoardPage() {
               visual={
                 <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:rotate-6 transition-transform">
                   <div
-                    className={`w-[72px] h-[72px] rounded-2xl bg-[#E8DCC2] border-2 border-[#9E8665] flex items-center justify-center ${SHADOW_AC_SM} relative overflow-hidden`}
+                    className={`w-[72px] h-[72px] rounded-2xl bg-[#E8DCC2] border-[#9E8665] border-2 flex items-center justify-center text-4xl ${SHADOW_AC_SM}`}
                   >
-                    <div className="w-14 h-14 rounded-full bg-[#C99863] border-2 border-[#85532F] flex items-center justify-center relative">
-                      <svg className="w-8 h-8 text-[#573318] fill-current" viewBox="0 0 24 24">
-                        <path d="M12 2L9.5 9 2 9.5 7.5 14.5 5.5 22 12 18 18.5 22 16.5 14.5 22 9.5 14.5 9z" />
-                      </svg>
-                    </div>
+                    📦
                   </div>
                   <span className="absolute -top-1 -right-1 text-[10px] bg-[#6B4A2F] text-white px-2 py-0.5 rounded-full font-black border border-white">
-                    묻기
+                    반품
                   </span>
                 </div>
               }
               titleChip={
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#6B4A2F] text-white">
-                  구덩이 (안 살래요)
+                  반품함 (안 살래요)
                 </span>
               }
               sub=""
               desc="안 사기로 정했어요. 목록이 가벼워졌어요."
-              hint="구덩이에 퐁당!"
+              hint="반품함에 쏙!"
               hintClass="bg-[#F5EADB] border-[#CBB394] text-[#694A2F]"
             />
             <ActionZone
               id="flush-zone"
               className="order-5 lg:order-none lg:col-start-2 lg:row-start-3 xl:col-start-4 xl:row-start-1"
-              borderClass="border-[#F0B2BA] hover:border-[#E84364]"
-              overClass="border-[#E84364] bg-[#FFF0F3]"
+              borderClass="border-[#A8D48C] hover:border-[#3F8A3A]"
+              overClass="border-[#3F8A3A] bg-[#F0FAEA]"
               visual={
-                <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:-rotate-6 transition-transform animate-balloon">
-                  <div className="relative flex flex-col items-center">
-                    <div className="w-10 h-10 rounded-full bg-[#FF4765] border-2 border-[#D12644] shadow-md flex items-center justify-center text-white relative">
-                      <div className="w-2.5 h-2.5 bg-white/40 rounded-full absolute top-1.5 left-2" />
-                    </div>
-                    <div className="w-0.5 h-3 bg-[#8C5D35]" />
-                    <div
-                      className={`w-11 h-9 rounded-lg bg-[#FFFDF0] border-2 border-[#D69651] ${SHADOW_AC_SM} flex items-center justify-center relative`}
-                    >
-                      <div className="absolute inset-y-0 w-2 bg-[#FF4765]" />
-                      <div className="absolute inset-x-0 h-2 bg-[#FF4765]" />
-                    </div>
+                <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:-rotate-6 transition-transform">
+                  <div
+                    className={`w-[72px] h-[72px] rounded-2xl bg-[#FFF3D0] border-[#D69651] border-2 flex items-center justify-center text-4xl ${SHADOW_AC_SM}`}
+                  >
+                    🧾
                   </div>
-                  <span className="absolute -top-1 -right-1 text-[10px] bg-[#E84364] text-white px-2 py-0.5 rounded-full font-black border border-white">
-                    구매 완료
+                  <span className="absolute -top-1 -right-1 text-[10px] bg-[#3F8A3A] text-white px-2 py-0.5 rounded-full font-black border border-white">
+                    계산
                   </span>
                 </div>
               }
               titleChip={
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#E84364] text-white">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#3F8A3A] text-white">
                   <StarIcon className="w-3.5 h-3.5 text-[#FFE073]" />
-                  선물상자 (샀어요!)
+                  계산대 (샀어요!)
                 </span>
               }
               sub=""
-              desc="구매 끝! 선물상자에 넣고 뿌듯하게."
-              hint="선물상자에 퐁당!"
-              hintClass="bg-[#FFEBF0] border-[#FFBFCE] text-[#D83A61]"
+              desc="구매 끝! 계산하고 뿌듯하게."
+              hint="계산대에 척!"
+              hintClass="bg-[#E5F5D4] border-[#AED48C] text-[#2D6C2A]"
             />
           </section>
         </main>
