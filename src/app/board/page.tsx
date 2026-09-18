@@ -417,7 +417,7 @@ export default function BoardPage() {
             </div>
             <div className="flex flex-col leading-tight text-right">
               <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
-              <span className="text-base font-black text-[#5B3E29] leading-8">
+              <span className="text-2xl font-bold text-[#5B3E29]" style={HAND}>
                 {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
               </span>
             </div>
