@@ -36,6 +36,8 @@ export type Item = {
   normalPrice?: number | null;
   saleRate?: number | null;
   sourceUrl?: string | null;
+  // §8-1 연출: 빼기/내리기 애니메이션이 도는 동안 실제 status 변경을 미룬다.
+  exiting?: "toss" | "flush" | null;
 };
 
 export type NewItemInput = {
@@ -84,6 +86,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const moveItem = (id: string, status: ItemStatus) => {
+    if (status === "removed" || status === "purchased") {
+      const exiting = status === "removed" ? "toss" : "flush";
+      setItems((prev) => prev.map((it) => (it.id === id ? { ...it, exiting } : it)));
+      const durationMs = exiting === "toss" ? 380 : 420;
+      setTimeout(() => {
+        setItems((prev) => prev.map((it) => (it.id === id ? { ...it, status, exiting: null } : it)));
+      }, durationMs);
+      return;
+    }
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, status } : it)));
   };
 

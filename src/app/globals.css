@@ -24,3 +24,59 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* §8-1 연출: 항목 옮기기(도착 시 반동), 빼기(확 털어냄), 내리기(변기물 내리듯).
+   색/폰트 같은 비주얼은 나중에 Stitch로 교체하지만, 이 동작감은 기능의 일부라 지금 만든다. */
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(4px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes toss-away {
+  0% {
+    opacity: 1;
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(60px) rotate(8deg);
+  }
+}
+
+@keyframes flush-down {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotate(0deg);
+  }
+  60% {
+    opacity: 0.6;
+    transform: scale(0.7) translateY(10px) rotate(-10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(30px) rotate(-25deg);
+  }
+}
+
+.animate-pop-in {
+  animation: pop-in 260ms ease-out;
+}
+
+.animate-toss-away {
+  animation: toss-away 380ms ease-in forwards;
+}
+
+.animate-flush-down {
+  animation: flush-down 420ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
