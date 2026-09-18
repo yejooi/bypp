@@ -411,7 +411,7 @@ export default function BoardPage() {
 
               <div className="relative z-10 flex items-center justify-between px-1 pb-2 mb-3 border-b-2 border-[#D9CDAF]">
                 <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
-                  {cartItems.length}/20 보관 중
+                  {cartItems.length}/{Math.max(10, cartItems.length)} 보관 중
                 </span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs font-bold text-[#8C6D53]">주머니 합계</span>
