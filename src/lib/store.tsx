@@ -42,6 +42,10 @@ export type Item = {
   // reasonCode가 "other"일 때의 자유 입력 텍스트. 점수 가중치엔 영향 없음(중립 1.0),
   // LLM 프롬프트에 보조 맥락으로만 전달한다 (원래 6개 선택지가 다양성을 못 담는 문제 보완).
   customReason?: string | null;
+  // 사용자가 직접 매기는 1~5 단계 (기본 3 = 중립). 점수 계산과 LLM 프롬프트에 함께 들어간다.
+  urgency?: number;
+  desire?: number;
+  longevity?: number;
   status: ItemStatus;
   imageUrl?: string | null;
   category?: string | null;
@@ -60,6 +64,9 @@ export type NewItemInput = {
   price: number;
   reasonCode: ReasonCode;
   customReason?: string | null;
+  urgency?: number;
+  desire?: number;
+  longevity?: number;
   imageUrl?: string | null;
   category?: string | null;
   brand?: string | null;
@@ -90,6 +97,9 @@ function rowToItem(row: {
   price: number;
   reason_code: ReasonCode;
   custom_reason?: string | null;
+  urgency?: number | null;
+  desire?: number | null;
+  longevity?: number | null;
   status: ItemStatus;
   image_url?: string | null;
   category?: string | null;
@@ -105,6 +115,9 @@ function rowToItem(row: {
     price: Number(row.price),
     reasonCode: row.reason_code,
     customReason: row.custom_reason ?? null,
+    urgency: row.urgency ?? 3,
+    desire: row.desire ?? 3,
+    longevity: row.longevity ?? 3,
     status: row.status,
     imageUrl: row.image_url ?? null,
     category: row.category ?? null,
@@ -187,13 +200,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     (async () => {
-      const { data: session, error: sessionErr } = await supabase
+      // 예전에 목표 없이 /board를 열어 생긴 "미정" 빈 세션이 최신이라 진짜 세션을 가리는 일이 있었다.
+      // 최근 세션 중 목표+예산이 있는 것 > 목표만 있는 것 > 최신 순으로 고른다.
+      const { data: sessionRows, error: sessionErr } = await supabase
         .from("sessions")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(20);
+      const session =
+        sessionRows?.find((r) => r.goal_type !== "미정" && r.monthly_budget != null) ??
+        sessionRows?.find((r) => r.goal_type !== "미정") ??
+        sessionRows?.[0] ??
+        null;
       if (sessionErr) {
         console.error("[bypp] session restore failed:", sessionErr);
         setDbError(`저장 안 됨 (세션을 불러오지 못했어요: ${sessionErr.message})`);
@@ -272,6 +291,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         price: input.price,
         reason_code: input.reasonCode,
         custom_reason: input.customReason ?? null,
+        urgency: input.urgency ?? 3,
+        desire: input.desire ?? 3,
+        longevity: input.longevity ?? 3,
         image_url: input.imageUrl ?? null,
         category: input.category ?? null,
         brand: input.brand ?? null,
@@ -285,9 +307,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (error) {
         // custom_reason/source_url 컬럼이 아직 없는 DB(마이그레이션 전)일 수 있으니 그 두 개만 빼고 재시도.
         console.error("[bypp] item insert failed, retrying without custom_reason/source_url:", error);
-        const { custom_reason, source_url, ...reducedPayload } = fullPayload;
+        const { custom_reason, source_url, urgency, desire, longevity, ...reducedPayload } = fullPayload;
         void custom_reason;
         void source_url;
+        void urgency;
+        void desire;
+        void longevity;
         const retry = await supabase.from("items").insert(reducedPayload).select().single();
         data = retry.data;
         error = retry.error;

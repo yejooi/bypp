@@ -5,6 +5,7 @@
 // 기능: 아이템 주머니(cart)에서 "AI에게 우선순위 배정 부탁하기" -> 판정 후 쇼케이스(buy)로 자동 진열.
 // 옮기기/빼기/내리기는 드래그.
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   DndContext,
@@ -161,6 +162,9 @@ export default function BoardPage() {
             category: it.category,
             reasonCode: it.reasonCode,
             customReason: it.customReason,
+            urgency: it.urgency,
+            desire: it.desire,
+            longevity: it.longevity,
           })),
         }),
       });
@@ -176,6 +180,9 @@ export default function BoardPage() {
           price: it.price,
           category: it.category,
           reasonCode: it.reasonCode,
+          urgency: it.urgency,
+          desire: it.desire,
+          longevity: it.longevity,
         })),
         data.items,
         qualWeight / 100
@@ -326,6 +333,9 @@ export default function BoardPage() {
                   <span className="bg-[#FFF0D4] border-2 border-[#F6C644] text-[#A75D00] font-black text-sm sm:text-base px-2.5 py-0.5 rounded-full">
                     {won(budget)}
                   </span>
+                  <Link href="/?edit=1" className="text-xs font-bold text-[#8C6D53] underline">
+                    바꾸기
+                  </Link>
                 </div>
                 <p className="mt-1" style={{ fontFamily: "var(--font-gaegu)" }}>
                   <span className="text-base text-[#467A26] font-bold">

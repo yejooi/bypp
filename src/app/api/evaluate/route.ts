@@ -29,11 +29,15 @@ function buildPrompt(items: EvalInput[]): string {
 reason_code가 "other"인 항목은 사용자가 직접 적은 이유가 따로 붙어있다. 그 문장을 참고해서
 satisfaction_months/usage_frequency를 판단해라 (이 이유 자체가 점수 가중치를 결정하진 않는다, 참고만).
 
+각 항목에는 사용자가 직접 매긴 1~5 평가(3=보통)가 붙어있다. 이 값을 무시하지 말고 상품 정보와 통합해서
+satisfaction_months/usage_frequency를 판단해라. 사용자 평가와 네 판단이 크게 다르면 reasoning 한 줄에 그 이유를 적어라.
+
 항목 목록:
 ${items
   .map((it) => {
     const custom = it.reasonCode === "other" && it.customReason ? ` 사용자가 적은 이유="${it.customReason}"` : "";
-    return `- id=${it.id} name="${it.name}" price=${it.price} category="${it.category ?? "미분류"}" reason_code=${it.reasonCode}(${REASON_LABEL[it.reasonCode]})${custom}`;
+    const ratings = ` 사용자 평가(1~5): 급한 정도=${it.urgency ?? 3}, 갖고 싶은 정도=${it.desire ?? 3}, 오래 쓸 것 같은 정도=${it.longevity ?? 3}`;
+    return `- id=${it.id} name="${it.name}" price=${it.price} category="${it.category ?? "미분류"}" reason_code=${it.reasonCode}(${REASON_LABEL[it.reasonCode]})${ratings}${custom}`;
   })
   .join("\n")}
 

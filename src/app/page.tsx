@@ -3,8 +3,8 @@
 // ① 목표 선택 (§4). 하이브리드: 고정 3개 + 기타 직접입력 (wayfinder #3 결정).
 // 비주얼: stitch_custom_ui_design_system/goal_selection.
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useApp } from "@/lib/store";
 
 // defaultManwon: 목표에 금액이 이름에 이미 들어있으면(예: 1억) 자동으로 채워준다 (만원 단위).
@@ -18,8 +18,22 @@ const FIXED_GOALS: { label: string; desc: string; icon: string; defaultManwon: n
 const AMOUNT_STEP_MANWON = 10;
 
 export default function GoalPage() {
+  return (
+    <Suspense>
+      <GoalForm />
+    </Suspense>
+  );
+}
+
+function GoalForm() {
   const router = useRouter();
-  const { setGoal } = useApp();
+  const editing = useSearchParams().get("edit") === "1";
+  const { setGoal, goalType: savedGoal, monthlyBudget } = useApp();
+  // 로그인해서 저장된 목표/예산이 복원되면 다시 묻지 않고 바로 이어간다 (?edit=1이면 수정하러 온 것).
+  useEffect(() => {
+    if (editing || !savedGoal || savedGoal === "미정") return;
+    router.replace(monthlyBudget != null ? "/board" : "/budget");
+  }, [editing, savedGoal, monthlyBudget, router]);
   const [selected, setSelected] = useState<string | null>(null);
   const [customGoal, setCustomGoal] = useState("");
   // 목표 금액은 만원 단위로 다룬다 (사용자 요청) -- 저장 시 * 10000.

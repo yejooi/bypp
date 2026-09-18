@@ -10,6 +10,9 @@ export type EvalInput = {
   category?: string | null;
   reasonCode: ReasonCode;
   customReason?: string | null;
+  urgency?: number;
+  desire?: number;
+  longevity?: number;
 };
 
 export type LlmEstimate = {
@@ -82,7 +85,12 @@ export function computeScores(
     const opportunityCost = item.price * Math.pow(1 + MONTHLY_RETURN, llm.satisfaction_months);
     const monthlyOpportunityCost = opportunityCost / llm.satisfaction_months;
 
+    // 사용자가 매긴 1~5 평균을 0.67~1.33배로 반영 (3 = 중립 1.0). LLM도 같은 값을 보고 추정하므로 과하게 두 번 세지 않게 폭을 좁혔다.
+    const userMean = ((item.urgency ?? 3) + (item.desire ?? 3) + (item.longevity ?? 3)) / 3;
+    const userFactor = 0.5 + userMean / 6;
+
     const qualitativeScore =
+      userFactor *
       llm.satisfaction_months *
       llm.usage_frequency *
       REASON_CODE_MULTIPLIER[item.reasonCode] *
