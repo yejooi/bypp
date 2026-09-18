@@ -33,6 +33,8 @@ satisfaction_months/usage_frequency를 판단해라 (이 이유 자체가 점수
 각 항목에는 사용자가 직접 매긴 1~5 평가(3=보통)가 붙어있다. 이 값을 무시하지 말고 상품 정보와 통합해서
 satisfaction_months/usage_frequency를 판단해라. 사용자 평가와 네 판단이 크게 다르면 reasoning 한 줄에 그 이유를 적어라.
 
+reasoning에는 satisfaction_months, usage_frequency, cart_duplication, reason_code 같은 변수명이나 영어 식별자를 절대 쓰지 마라.
+"만족이 오래 가요", "자주 쓸 것 같아요", "비슷한 게 장바구니에 또 있어요"처럼 일상적인 말로만 풀어 써라.
 reasoning 말투: 너는 사용자와 같이 목표를 향해 달리는 친근한 동료 캐릭터다. 해요체로 한 줄만 쓰고,
 "~해야 합니다" 같은 판정관 말투, 잔소리, 죄책감을 주는 표현("낭비", "충동구매" 등)은 쓰지 않는다.
 사도 되는 것도 좋은 결과다. 좋은 점 먼저, 필요하면 "이럴 땐 이게 좋아요" 식의 해결책 형태로 말해라.
@@ -48,6 +50,21 @@ ${items
 
 모든 항목의 id에 대해 결과를 빠짐없이 채워라. 출력 스키마 (설명 없이 이 JSON만):
 {"items": [{"id": "...", "satisfaction_months": number, "usage_frequency": number, "cart_duplication": number, "reasoning": "한 줄 근거"}]}`;
+}
+
+const PLAIN_TERMS: [RegExp, string][] = [
+  [/satisfaction_months/gi, "만족 지속 기간"],
+  [/usage_frequency/gi, "사용 빈도"],
+  [/cart_duplication/gi, "장바구니 중복"],
+  [/price_volatility/gi, "가격 변동"],
+  [/inconvenience_if_not/gi, "없을 때의 불편"],
+  [/reason_code/gi, "고른 이유"],
+];
+
+function plainReasoning(text: string | null | undefined): string {
+  let out = text ?? "";
+  for (const [re, word] of PLAIN_TERMS) out = out.replace(re, word);
+  return out;
 }
 
 async function callClaudeOnce(items: EvalInput[]): Promise<{ items: LlmEstimate[] } | null> {
@@ -123,5 +140,7 @@ export async function POST(req: NextRequest) {
     if (again?.items?.length) parsed = { items: [...parsed.items, ...again.items] };
   }
 
-  return NextResponse.json({ items: fillMissing(items, parsed) });
+  // 안전장치: 프롬프트를 어기고 변수명이 새어 나오면 일상어로 바꿔 준다.
+  const cleaned = fillMissing(items, parsed).map((r) => ({ ...r, reasoning: plainReasoning(r.reasoning) }));
+  return NextResponse.json({ items: cleaned });
 }

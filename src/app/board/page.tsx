@@ -598,7 +598,7 @@ export default function BoardPage() {
                               : "bg-[#FFF1D6] text-[#8A5A00] border-[#F0C77A]"
                           }`}
                         >
-                          {e.within ? "이번 달" : "다음 달"}
+                          {e.within ? "예산 안" : "예산 밖"}
                         </span>
                       </div>
                       <p className="text-xs font-bold text-[#82542B] mt-0.5">
