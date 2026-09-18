@@ -691,11 +691,7 @@ export default function BoardPage() {
               overClass="border-[#6B4B32] bg-[#FFF5E6]"
               visual={
                 <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:rotate-6 transition-transform">
-                  <div
-                    className={`w-[72px] h-[72px] rounded-2xl bg-[#E8DCC2] border-[#9E8665] border-2 flex items-center justify-center text-4xl ${SHADOW_AC_SM}`}
-                  >
-                    📦
-                  </div>
+                  <span className="text-6xl leading-none drop-shadow-sm">📦</span>
                   <span className="absolute -top-1 -right-1 text-[10px] bg-[#6B4A2F] text-white px-2 py-0.5 rounded-full font-black border border-white">
                     반품
                   </span>
@@ -718,11 +714,7 @@ export default function BoardPage() {
               overClass="border-[#3F8A3A] bg-[#F0FAEA]"
               visual={
                 <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:-rotate-6 transition-transform">
-                  <div
-                    className={`w-[72px] h-[72px] rounded-2xl bg-[#FFF3D0] border-[#D69651] border-2 flex items-center justify-center text-4xl ${SHADOW_AC_SM}`}
-                  >
-                    🧾
-                  </div>
+                  <span className="text-6xl leading-none drop-shadow-sm">🧾</span>
                   <span className="absolute -top-1 -right-1 text-[10px] bg-[#3F8A3A] text-white px-2 py-0.5 rounded-full font-black border border-white">
                     계산
                   </span>

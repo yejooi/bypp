@@ -197,7 +197,7 @@ export default function BudgetPage() {
       <button
         disabled={!canSubmit}
         onClick={() => {
-          setBudget(finalAmount);
+          setBudget(finalAmount, mode === "direct" || !mc ? null : Math.round(mc.recommendedSavings));
           router.push("/board");
         }}
         className="mt-auto w-full py-4 rounded-full text-white text-lg tracking-wide flex items-center justify-center gap-2 disabled:opacity-30 transition-all active:translate-y-1"

@@ -6,14 +6,15 @@
 import { useApp } from "@/lib/store";
 
 export function ProgressRunner() {
-  const { goalType, goalAmount, monthlyBudget, items } = useApp();
+  const { goalType, goalAmount, monthlyBudget, monthlySaving, items } = useApp();
 
   if (!goalType || !goalAmount) return null;
 
-  // 이번 달 저축액 = 예산 - 이미 산 금액. 예산을 다 지키면 예산 전액이 기준(시작값)이고,
-  // 사는 만큼 줄고 안 쓴 만큼 남는다. 후퇴 연출은 없으니 0 미만은 0으로 둔다 (원칙 ②).
+  // 이번 달 저축액 = 권장 월 저축액(몬테카를로) + (예산 - 이미 산 금액).
+  // 예산을 딱 맞추면 권장 저축액 그대로이고, 남기면 늘고 넘기면 준다. 후퇴 연출은 없으니 0 미만은 0 (원칙 ②).
+  // 직접 입력한 예산이면 권장 저축액이 없어 0으로 본다.
   const spent = items.filter((it) => it.status === "purchased").reduce((sum, it) => sum + it.price, 0);
-  const savedThisMonth = Math.max(0, (monthlyBudget ?? 0) - spent);
+  const savedThisMonth = Math.max(0, (monthlySaving ?? 0) + (monthlyBudget ?? 0) - spent);
   const progressPct = goalAmount > 0 ? Math.min(100, (savedThisMonth / goalAmount) * 100) : 0;
 
   return (

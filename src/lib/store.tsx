@@ -79,10 +79,12 @@ type AppState = {
   goalType: string | null;
   goalAmount: number | null;
   monthlyBudget: number | null;
+  // 몬테카를로로 함께 역산된 권장 월 저축액 (직접 입력 예산이면 null).
+  monthlySaving: number | null;
   items: Item[];
   dbError: string | null;
   setGoal: (goalType: string, goalAmount: number) => void;
-  setBudget: (monthlyBudget: number) => void;
+  setBudget: (monthlyBudget: number, monthlySaving?: number | null) => void;
   addItem: (input: NewItemInput) => void;
   moveItem: (id: string, status: ItemStatus) => void;
   reorderShowcase: (orderedIds: string[]) => void;
@@ -135,6 +137,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [goalType, setGoalType] = useState<string | null>(null);
   const [goalAmount, setGoalAmount] = useState<number | null>(null);
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
+  const [monthlySaving, setMonthlySaving] = useState<number | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [dbError, setDbError] = useState<string | null>(null);
 
@@ -195,6 +198,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setGoalType(null);
       setGoalAmount(null);
       setMonthlyBudget(null);
+      setMonthlySaving(null);
       setItems([]);
       return;
     }
@@ -224,6 +228,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setGoalType(session.goal_type);
       setGoalAmount(Number(session.goal_amount));
       setMonthlyBudget(session.monthly_budget != null ? Number(session.monthly_budget) : null);
+      setMonthlySaving(session.monthly_saving != null ? Number(session.monthly_saving) : null);
 
       const { data: itemRows, error: itemsErr } = await supabase
         .from("items")
@@ -260,12 +265,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })();
   };
 
-  const setBudget = (newBudget: number) => {
+  const setBudget = (newBudget: number, newSaving: number | null = null) => {
     setMonthlyBudget(newBudget);
+    setMonthlySaving(newSaving);
     (async () => {
       const id = await ensureSession();
       if (!id) return;
-      const { error } = await supabase.from("sessions").update({ monthly_budget: newBudget }).eq("id", id);
+      let { error } = await supabase
+        .from("sessions")
+        .update({ monthly_budget: newBudget, monthly_saving: newSaving })
+        .eq("id", id);
+      if (error) {
+        // monthly_saving 컬럼이 아직 없는 DB(마이그레이션 0005 전)면 예산만 저장한다.
+        ({ error } = await supabase.from("sessions").update({ monthly_budget: newBudget }).eq("id", id));
+      }
       if (error) {
         console.error("[bypp] budget update failed:", error);
         setDbError(`저장 안 됨 (예산 업데이트 실패: ${error.message})`);
@@ -383,6 +396,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         goalType,
         goalAmount,
         monthlyBudget,
+        monthlySaving,
         items,
         dbError,
         setGoal,
