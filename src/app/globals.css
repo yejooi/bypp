@@ -125,3 +125,14 @@ body {
   50% { transform: translateY(-8px) rotate(3deg); }
 }
 .animate-balloon { animation: balloon-sway 2.4s ease-in-out infinite; }
+
+/* 숫자 입력의 브라우저 기본 위아래 화살표(스피너)를 숨긴다. 직접 만든 −/+ 버튼과 겹치기 때문. */
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
