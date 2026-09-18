@@ -672,12 +672,12 @@ export default function BoardPage() {
                   </div>
                   <div className="grid grid-cols-4 gap-2.5">
                     {shelf2.map((r) => (
-                      <SlotDrop key={r.item.id} id={`slot-item-${r.item.id}`} label="다음 달">
+                      <SlotDrop key={r.item.id} id={`slot-item-${r.item.id}`} label="">
                         <ItemTile item={r.item} showcase dim />
                       </SlotDrop>
                     ))}
                     {Array.from({ length: Math.max(0, shelf2Slots - shelf2.length) }).map((_, i) => (
-                      <SlotDrop key={`s2-${i}`} id="slot-end2" label="다음 달">
+                      <SlotDrop key={`s2-${i}`} id="slot-end2" label="">
                         <EmptyShelf faint />
                       </SlotDrop>
                     ))}
@@ -849,7 +849,7 @@ function SlotDrop({ id, label, children }: { id: string; label: string; children
       ref={setNodeRef}
       className={`flex flex-col items-stretch gap-0.5 rounded-2xl ${isOver ? "ring-4 ring-[#4EA434]" : ""}`}
     >
-      <span className="text-[10px] font-black text-[#69421A] leading-none text-center">{label}</span>
+      {label && <span className="text-[10px] font-black text-[#69421A] leading-none text-center">{label}</span>}
       {children}
     </div>
   );
