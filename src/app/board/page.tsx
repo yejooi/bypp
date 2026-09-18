@@ -859,7 +859,7 @@ function ItemTile({
             {badge.text}
           </div>
         )}
-        <div className="w-full flex-1 min-h-0 rounded-xl overflow-hidden bg-[#E5F5D4] border border-[#BEE69E] flex items-center justify-center">
+        <div className="w-full flex-1 min-h-0 rounded-xl overflow-hidden bg-[#E5F5D4] flex items-center justify-center">
           {item.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={item.imageUrl} alt="" className="w-full h-full object-cover" draggable={false} />
