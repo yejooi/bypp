@@ -491,7 +491,7 @@ export default function BoardPage() {
               </div>
 
               <JudgeShell
-                className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-[1.5px] border-dashed border-[#F3DFA0] shrink-0 p-3.5 xl:p-2.5 ${SHADOW_AC_SM}`}
+                className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-2 border-dashed border-[#F5D671] shrink-0 p-3.5 xl:p-2.5 ${SHADOW_AC_SM}`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
