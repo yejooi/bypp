@@ -698,8 +698,8 @@ export default function BoardPage() {
               titleChip="반품함"
               titleStyle={{
                 color: "#5B3E29",
-                backgroundColor: "#E4BC6A",
-                backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.4), rgba(0,0,0,0.06))",
+                backgroundColor: "#E8B84A",
+                backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.28), rgba(0,0,0,0.06))",
                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 0 rgba(120,80,40,0.25)",
                 clipPath:
                   "polygon(0 0,100% 0,97% 25%,100% 50%,97% 75%,100% 100%,0 100%,3% 75%,0 50%,3% 25%)",
