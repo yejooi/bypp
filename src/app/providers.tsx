@@ -2,8 +2,11 @@
 
 import { AppProvider, useApp } from "@/lib/store";
 import { ThemeProvider } from "@/lib/theme";
+import { AuthProvider } from "@/lib/auth";
 import { ProgressRunner } from "@/components/ProgressRunner";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserBar } from "@/components/UserBar";
+import { AuthGate } from "@/components/AuthGate";
 
 function DbErrorBanner() {
   const { dbError } = useApp();
@@ -18,13 +21,16 @@ function DbErrorBanner() {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider>
-      <AppProvider>
-        <ThemeToggle />
-        <DbErrorBanner />
-        {children}
-        <ProgressRunner />
-      </AppProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <AppProvider>
+          <ThemeToggle />
+          <UserBar />
+          <DbErrorBanner />
+          <AuthGate>{children}</AuthGate>
+          <ProgressRunner />
+        </AppProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

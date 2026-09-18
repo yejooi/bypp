@@ -1,10 +1,20 @@
 -- bypp DB schema (CLAUDE.md §9-3)
 -- Run this once in the Supabase SQL Editor (Project > SQL Editor > New query).
+-- 이후 변경분은 supabase/migrations/*.sql 로 누적된다 (0001: RLS 수정 + other 컬럼,
+-- 0002: 로그인/닉네임/프로필). 처음 세팅이면 이 파일 다음에 migrations를 순서대로 실행.
 
 create extension if not exists "pgcrypto";
 
+create table if not exists profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  nickname text not null unique,
+  email text not null unique,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists sessions (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
   -- goal_type: 고정 선택지("1억 모으기" | "내집마련" | "여행 자금") 또는 "기타"로 자유 입력된 텍스트.
   -- 정책은 이슈 #3에서 하이브리드로 결정됨 — DB 단에서는 enum 제약을 두지 않는다.
   goal_type text not null,

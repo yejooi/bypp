@@ -1,7 +1,9 @@
 "use client";
 
-// Supabase에 실제로 저장한다 (§9-3 스키마). 새로고침해도 세션 id를 localStorage에 들고 있다가
-// 그걸로 다시 불러온다. DB 쓰기가 실패해도 로컬 상태로는 계속 동작시키고 에러만 배너로 띄운다 (§9-2).
+// Supabase에 실제로 저장한다 (§9-3 스키마). 세션은 로그인한 계정(user_id)에 묶여서,
+// 로그인만 하면 어느 기기에서든 최근 세션을 그대로 이어서 쓸 수 있다 (로그인 도입 후
+// localStorage 기반 복원은 폐기 -- 계정이 그 역할을 대신한다).
+// DB 쓰기가 실패해도 로컬 상태로는 계속 동작시키고 에러만 배너로 띄운다 (§9-2).
 //
 // 세션 생성은 ensureSession()으로 일원화한다: setGoal이 만든 세션이 아직 서버 응답을 못 받은 채로
 // addItem/setBudget이 먼저 불려도(경합), sessionIdRef를 통해 최신 값을 보고 없으면 그 자리에서
@@ -9,6 +11,7 @@
 
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth";
 
 export type ReasonCode =
   | "long_wanted"
@@ -77,8 +80,6 @@ type AppState = {
 
 const AppContext = createContext<AppState | null>(null);
 
-const SESSION_STORAGE_KEY = "bypp_session_id";
-
 // items 행을 DB 컬럼(snake_case) <-> 앱 모델(camelCase)로 변환.
 function rowToItem(row: {
   id: string;
@@ -111,6 +112,7 @@ function rowToItem(row: {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [sessionId, setSessionIdState] = useState<string | null>(null);
   const [goalType, setGoalType] = useState<string | null>(null);
   const [goalAmount, setGoalAmount] = useState<number | null>(null);
@@ -123,6 +125,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const pendingSessionRef = useRef<Promise<string | null> | null>(null);
   const goalRef = useRef<{ type: string | null; amount: number | null }>({ type: null, amount: null });
   goalRef.current = { type: goalType, amount: goalAmount };
+  const userIdRef = useRef<string | null>(null);
+  userIdRef.current = user?.id ?? null;
 
   function setSessionId(id: string | null) {
     sessionIdRef.current = id;
@@ -130,10 +134,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   // 세션이 없으면 그 자리에서 만든다. 동시에 여러 곳(addItem, setBudget)에서 불러도
-  // pendingSessionRef로 하나의 insert만 나가게 막는다.
+  // pendingSessionRef로 하나의 insert만 나가게 막는다. 로그인 안 했으면 만들 수 없다 (RLS가 막음).
   async function ensureSession(overrideGoalType?: string, overrideGoalAmount?: number): Promise<string | null> {
     if (sessionIdRef.current) return sessionIdRef.current;
     if (pendingSessionRef.current) return pendingSessionRef.current;
+    if (!userIdRef.current) {
+      setDbError("저장 안 됨 (로그인이 필요해요)");
+      return null;
+    }
 
     const gt = overrideGoalType ?? goalRef.current.type ?? "미정";
     const ga = overrideGoalAmount ?? goalRef.current.amount ?? 0;
@@ -141,7 +149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const promise = (async () => {
       const { data, error } = await supabase
         .from("sessions")
-        .insert({ goal_type: gt, goal_amount: ga })
+        .insert({ user_id: userIdRef.current, goal_type: gt, goal_amount: ga })
         .select()
         .single();
       if (error || !data) {
@@ -150,7 +158,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return null;
       }
       setSessionId(data.id);
-      localStorage.setItem(SESSION_STORAGE_KEY, data.id);
       return data.id as string;
     })();
 
@@ -162,22 +169,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // 새로고침 시 이전 세션 복원 (§9-2: DB 연결 실패해도 로컬 상태로는 동작).
+  // 로그인하면(또는 계정이 바뀌면) 그 계정의 가장 최근 세션을 불러온다.
+  // 로그아웃하면 로컬 상태를 비운다. (§9-2: DB 연결 실패해도 로컬 상태로는 동작)
   useEffect(() => {
-    const savedId = typeof window !== "undefined" ? localStorage.getItem(SESSION_STORAGE_KEY) : null;
-    if (!savedId) return;
+    if (!user) {
+      setSessionId(null);
+      setGoalType(null);
+      setGoalAmount(null);
+      setMonthlyBudget(null);
+      setItems([]);
+      return;
+    }
 
     (async () => {
       const { data: session, error: sessionErr } = await supabase
         .from("sessions")
         .select("*")
-        .eq("id", savedId)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
-      if (sessionErr || !session) {
+      if (sessionErr) {
         console.error("[bypp] session restore failed:", sessionErr);
-        localStorage.removeItem(SESSION_STORAGE_KEY);
+        setDbError(`저장 안 됨 (세션을 불러오지 못했어요: ${sessionErr.message})`);
         return;
       }
+      if (!session) return; // 이 계정으로 아직 세션을 만든 적 없음 -- ensureSession이 나중에 만든다.
+
       setSessionId(session.id);
       setGoalType(session.goal_type);
       setGoalAmount(Number(session.goal_amount));
@@ -186,7 +204,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const { data: itemRows, error: itemsErr } = await supabase
         .from("items")
         .select("*")
-        .eq("session_id", savedId)
+        .eq("session_id", session.id)
         .order("created_at", { ascending: true });
       if (itemsErr) {
         console.error("[bypp] items restore failed:", itemsErr);
@@ -195,7 +213,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       setItems((itemRows ?? []).map(rowToItem));
     })();
-  }, []);
+  }, [user]);
 
   const setGoal = (newGoalType: string, newGoalAmount: number) => {
     setGoalType(newGoalType);
@@ -244,6 +262,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       const fullPayload = {
         session_id: sid,
+        user_id: userIdRef.current,
         name: input.name,
         price: input.price,
         reason_code: input.reasonCode,

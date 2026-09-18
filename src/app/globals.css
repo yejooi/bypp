@@ -46,9 +46,11 @@
   --butter-dark: #e4a834;
   --runner-from: #ffa2bd;
   --runner-to: #ff407b;
-  --font-heading: var(--font-epilogue), sans-serif;
-  --font-body: var(--font-plus-jakarta), sans-serif;
-  --font-hand: var(--font-plus-jakarta), sans-serif;
+  /* 폰트는 cozy 테마와 동일하게 통일 (사용자 요청: 테마마다 글씨 크기/모양이 묘하게 달랐던 원인이
+     Jua/Epilogue처럼 서로 다른 서체를 썼기 때문 -- 색만 바뀌게 폰트는 고정한다). */
+  --font-heading: var(--font-jua), sans-serif;
+  --font-body: var(--font-noto-sans-kr), var(--font-gowun-dodum), sans-serif;
+  --font-hand: var(--font-gaegu), cursive;
 }
 
 body {
