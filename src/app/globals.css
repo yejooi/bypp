@@ -4,8 +4,7 @@
    두 테마를 라이트/다크처럼 토글 가능하게 CSS 변수로 분리한다 (사용자 요청).
    "cozy" = Cozy Meadow Cart (세이지그린/크림), "strawberry" = Strawberry Cocoa Confection (핑크/초콜릿). */
 
-:root,
-:root[data-theme="cozy"] {
+:root {
   --bg: #faf6ec;
   --surface: #ffffff;
   --surface-alt: #f5efe6;
@@ -23,31 +22,6 @@
   --butter-dark: #e4a834;
   --runner-from: #8fb98a;
   --runner-to: #e89b7d;
-  --font-heading: var(--font-jua), sans-serif;
-  --font-body: var(--font-noto-sans-kr), var(--font-gowun-dodum), sans-serif;
-  --font-hand: var(--font-gaegu), cursive;
-}
-
-:root[data-theme="strawberry"] {
-  --bg: #fff8f6;
-  --surface: #ffffff;
-  --surface-alt: #efebe9;
-  --primary: #ff5c8a;
-  --primary-hover: #f2588a;
-  --primary-light: #ffeaf1;
-  --on-primary: #ffffff;
-  --accent: #ff407b;
-  --accent-hover: #e8386e;
-  --accent-light: #fff0f5;
-  --text: #4a2e35;
-  --text-sub: #7a5b64;
-  --border: #f9d5e2;
-  --butter: #fff4d6;
-  --butter-dark: #e4a834;
-  --runner-from: #ffa2bd;
-  --runner-to: #ff407b;
-  /* 폰트는 cozy 테마와 동일하게 통일 (사용자 요청: 테마마다 글씨 크기/모양이 묘하게 달랐던 원인이
-     Jua/Epilogue처럼 서로 다른 서체를 썼기 때문 -- 색만 바뀌게 폰트는 고정한다). */
   --font-heading: var(--font-jua), sans-serif;
   --font-body: var(--font-noto-sans-kr), var(--font-gowun-dodum), sans-serif;
   --font-hand: var(--font-gaegu), cursive;
