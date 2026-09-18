@@ -5,6 +5,7 @@
 // 상품 사진은 스크린샷 픽셀일 뿐이라 URL로는 못 뽑는다 -> 이 경로로 추가한 항목은 이미지 없음.
 
 import { useRef, useState } from "react";
+import { RatingSliders, DEFAULT_RATINGS, type Ratings } from "@/components/RatingSliders";
 import { useApp, REASON_CODE_LABEL, type ReasonCode } from "@/lib/store";
 
 type Draft = {
@@ -13,6 +14,7 @@ type Draft = {
   price: string;
   reasonCode: ReasonCode;
   customReason: string;
+  ratings: Ratings;
 };
 
 const MAX_WIDTH = 1200;
@@ -74,6 +76,7 @@ export function ScreenshotImportForm() {
           price: it.price ? String(it.price) : "",
           reasonCode: "long_wanted" as ReasonCode,
           customReason: "",
+          ratings: DEFAULT_RATINGS,
         }))
       );
     } catch {
@@ -101,6 +104,7 @@ export function ScreenshotImportForm() {
         price: Number(d.price),
         reasonCode: d.reasonCode,
         customReason: d.reasonCode === "other" ? d.customReason.trim() : null,
+        ...d.ratings,
         imageUrl: null,
       });
     }
@@ -204,6 +208,9 @@ export function ScreenshotImportForm() {
           <button onClick={() => removeDraft(d.key)} className="text-xs underline text-[var(--text-sub)]">
             제외
           </button>
+          <div className="w-full">
+            <RatingSliders value={d.ratings} onChange={(ratings) => updateDraft(d.key, { ratings })} />
+          </div>
         </div>
       ))}
       <div className="flex gap-2 pt-1">

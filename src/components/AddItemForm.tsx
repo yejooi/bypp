@@ -3,6 +3,7 @@
 // §5: 링크 붙여넣기 -> 리다이렉트 -> OG 파싱 -> (실패시) 수동 입력 폴백 -> 이유 객관식.
 
 import { useState } from "react";
+import { RatingSliders, DEFAULT_RATINGS } from "@/components/RatingSliders";
 import { useApp, REASON_CODE_LABEL, type ReasonCode } from "@/lib/store";
 import type { ParsedProduct } from "@/app/api/parse-link/route";
 
@@ -41,7 +42,7 @@ export function AddItemForm() {
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [reasonCode, setReasonCode] = useState<ReasonCode>("long_wanted");
   const [customReason, setCustomReason] = useState("");
-  const [ratings, setRatings] = useState({ urgency: 3, desire: 3, longevity: 3 });
+  const [ratings, setRatings] = useState(DEFAULT_RATINGS);
 
   async function handleFetch() {
     if (!url) return;
@@ -84,7 +85,7 @@ export function AddItemForm() {
     setDraft(EMPTY_DRAFT);
     setFailReason(null);
     setCustomReason("");
-    setRatings({ urgency: 3, desire: 3, longevity: 3 });
+    setRatings(DEFAULT_RATINGS);
     setStage("link");
   }
 
@@ -151,31 +152,7 @@ export function AddItemForm() {
           {draft.saleRate && `할인율: ${draft.saleRate}%`}
         </p>
       )}
-      <div className="flex flex-col gap-1.5">
-        {(
-          [
-            ["urgency", "급한 정도", "여유 있음", "당장 필요"],
-            ["desire", "갖고 싶은 정도", "그냥 그래", "너무 갖고 싶어"],
-            ["longevity", "오래 쓸 것 같은 정도", "잠깐", "오래오래"],
-          ] as const
-        ).map(([key, label, lo, hi]) => (
-          <label key={key} className="flex items-center gap-2 text-xs font-bold text-[#7A5B3E]">
-            <span className="w-32 shrink-0">{label}</span>
-            <span className="w-14 text-right text-[10px] font-medium opacity-70">{lo}</span>
-            <input
-              type="range"
-              min={1}
-              max={5}
-              step={1}
-              value={ratings[key]}
-              onChange={(e) => setRatings({ ...ratings, [key]: Number(e.target.value) })}
-              className="flex-1 accent-[#4F8B33]"
-            />
-            <span className="w-14 text-[10px] font-medium opacity-70">{hi}</span>
-            <span className="w-4 text-center">{ratings[key]}</span>
-          </label>
-        ))}
-      </div>
+      <RatingSliders value={ratings} onChange={setRatings} />
       <div className="flex flex-wrap gap-2 items-center">
         <select
           value={reasonCode}

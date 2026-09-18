@@ -405,7 +405,17 @@ export default function BoardPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-xl sm:text-2xl font-bold text-[#5B3E29] tracking-tight" style={{ fontFamily: "var(--font-gaegu)" }}>
+                      <h2
+                        className="text-xl sm:text-2xl font-bold text-[#5B3E29] tracking-tight px-4 py-1 rounded-xl"
+                        style={{
+                          fontFamily: "var(--font-gaegu)",
+                          backgroundColor: "#E3CD98",
+                          backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(0,0,0,0.05))",
+                          outline: "2px dashed rgba(255,255,255,0.7)",
+                          outlineOffset: "-5px",
+                          boxShadow: "0 2px 0 rgba(120,80,40,0.25)",
+                        }}
+                      >
                         장바구니 주머니
                       </h2>
                       <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
