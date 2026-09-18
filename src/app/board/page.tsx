@@ -448,7 +448,7 @@ export default function BoardPage() {
 
               <button
                 onClick={() => setAddOpen(true)}
-                className="relative z-10 shrink-0 w-full mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1.5 rounded-2xl btn-soft-green text-lg"
+                className="relative z-10 shrink-0 mx-auto w-fit px-8 mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1.5 rounded-2xl btn-soft-green text-lg"
                 style={HAND}
               >
                 <svg className="w-6 h-6 text-[#3F8A3A]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -545,7 +545,7 @@ export default function BoardPage() {
                 <button
                   onClick={handleEvaluate}
                   disabled={judgeItems.length === 0 || evalState === "loading"}
-                  className={`btn-soft-green w-full py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
+                  className={`btn-soft-green mx-auto w-fit px-8 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
                   style={HAND}
                 >
                   <StarIcon className="w-4 h-4 text-[#E09D1B]" />
@@ -674,7 +674,7 @@ export default function BoardPage() {
                 <button
                   onClick={() => setConfirmBulk(true)}
                   disabled={shelf1.length === 0}
-                  className={`btn-soft-green w-full py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
+                  className={`btn-soft-green mx-auto w-fit px-8 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
                   style={HAND}
                 >
                   🧾 1층 전체 계산하기
