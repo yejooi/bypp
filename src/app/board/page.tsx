@@ -404,7 +404,7 @@ export default function BoardPage() {
                 <div className="flex items-center gap-1.5 px-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#5D8A37]" />
                   <h3 className="text-lg font-bold text-[#5B3E29]" style={HAND}>
-                    담아둔 물건
+                    내 주머니
                   </h3>
                   <span className="text-[10px] font-bold text-[#2D6C2A] bg-[#DCF2C7] px-2 rounded-full border border-[#AED48C]">
                     {pouchItems.length}/{pouchSlots} 보관
