@@ -396,15 +396,17 @@ export default function BoardPage() {
             className={`flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-[#FFF9EC]/90 backdrop-blur-md px-4 py-2 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
           >
             <UserControls />
-            <div className="flex items-center gap-2.5 min-w-0">
-              <Mascot size={44} mood="idle" className="hidden sm:block" />
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFF0D4] border-2 border-[#F0C77A] text-[#7A4A00] text-sm font-black rounded-full truncate">
-                <GoalIcon goal={goalType} className="w-4 h-4 text-[#C9820F]" />
-                {goalType ?? "-"}
-              </span>
-              <Link href="/?edit=1" className="text-xs font-bold text-[#6F523A] underline shrink-0">
-                바꾸기
-              </Link>
+            <div className="flex flex-col leading-tight min-w-0">
+              <span className="text-xs font-bold text-[#6F523A]">목표</span>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-[#FFF0D4] border-2 border-[#F0C77A] text-[#7A4A00] text-base font-black rounded-full truncate">
+                  <GoalIcon goal={goalType} className="w-4 h-4 text-[#C9820F]" />
+                  {goalType ?? "-"}
+                </span>
+                <Link href="/?edit=1" className="text-xs font-bold text-[#6F523A] underline shrink-0">
+                  바꾸기
+                </Link>
+              </div>
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-xs font-bold text-[#6F523A]">
