@@ -59,7 +59,7 @@ export function UserBar() {
       <Link
         href={onNeighborScreen ? (goalType && goalType !== "미정" ? "/board" : "/") : "/wishlists"}
         className={`px-3 py-1 rounded-full text-white text-xs shadow-[0_2px_0_rgba(0,0,0,0.18)] active:translate-y-0.5 transition ${
-          onNeighborScreen ? "bg-[#57351F] border-2 border-[#8C5D35] hover:bg-[#6B4526]" : "bg-[#4F8B33] hover:bg-[#3F7A2B]"
+          onNeighborScreen ? "bg-[#57351F] border-2 border-[#8C5D35] hover:bg-[#6B4526]" : "bg-[#F6C644] border-2 border-[#C9981A] !text-[#5B3E29] shadow-[0_2px_0_rgba(0,0,0,0.18)] hover:bg-[#F2BB2C] active:translate-y-0.5 transition"
         }`}
       >
         {onNeighborScreen ? "🏠 내 보드로" : "🏡 이웃 구경"}

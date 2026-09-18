@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 import { Mascot, SpeechBubble } from "@/components/Mascot";
+import { GoalIcon } from "@/components/GoalIcon";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   DndContext,
@@ -41,9 +42,6 @@ const SHADOW_INNER = "shadow-[inset_0_3px_6px_rgba(0,0,0,0.1)]";
 const HAND = { fontFamily: "var(--font-gaegu)" } as const;
 
 // 물건을 탭하면 옮기기 메뉴가 열린다 (모바일에서 긴 화면을 드래그로 오가기 어려워서 만든 기본 경로. 드래그는 추가 동작).
-// 목표 선택 화면의 아이콘과 같은 것을 헤더 칩에서도 쓴다. 직접 입력한 목표는 🎯.
-const GOAL_EMOJI: Record<string, string> = { "1억 모으기": "💰", 내집마련: "🏡", "여행 자금": "✈️" };
-
 const TileTapContext = createContext<(id: string) => void>(() => {});
 const won = (n: number) => `${n.toLocaleString()}원`;
 const short = (n: number) => (n >= 10000 ? `${+(n / 10000).toFixed(1)}만원` : `${n.toLocaleString()}원`);
@@ -386,31 +384,31 @@ export default function BoardPage() {
         <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-24 pb-32 flex flex-col gap-5">
           {/* 헤더 */}
           <header
-            className={`flex items-center gap-4 bg-[#FFF9EC]/90 backdrop-blur-md px-4 py-3 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
+            className={`flex flex-wrap items-center justify-between gap-x-8 gap-y-3 bg-[#FFF9EC]/90 backdrop-blur-md px-5 py-3 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
           >
-            <Mascot size={52} mood="idle" className="hidden sm:block" />
-            <div className="flex-1 flex flex-wrap items-center gap-x-6 gap-y-2">
+            <div className="flex items-center gap-3 min-w-0">
+              <Mascot size={52} mood="idle" className="hidden sm:block" />
               <div className="flex items-center gap-2 min-w-0">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#5D8A37] text-white text-sm font-black rounded-full truncate">
-                  <span className="text-sm leading-none">{GOAL_EMOJI[goalType ?? ""] ?? "🎯"}</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFF0D4] border-2 border-[#F0C77A] text-[#7A4A00] text-sm font-black rounded-full truncate">
+                  <GoalIcon goal={goalType} className="w-4 h-4 text-[#C9820F]" />
                   {goalType ?? "-"}
                 </span>
                 <Link href="/?edit=1" className="text-xs font-bold text-[#6F523A] underline shrink-0">
                   바꾸기
                 </Link>
               </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs font-bold text-[#6F523A]">
-                  이번 달 남은 예산 <span className="font-medium">(총 {won(totalBudget)}{purchasedSum > 0 && ` · 구매 ${won(purchasedSum)}`})</span>
-                </span>
-                <span className="text-xl font-black text-[#2D6C2A]">{won(budget)}</span>
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
-                <span className="text-base font-black text-[#5B3E29]">
-                  {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
-                </span>
-              </div>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-bold text-[#6F523A]">
+                이번 달 남은 예산 <span className="font-medium">(총 {won(totalBudget)}{purchasedSum > 0 && ` · 구매 ${won(purchasedSum)}`})</span>
+              </span>
+              <span className="text-xl font-black text-[#2D6C2A]">{won(budget)}</span>
+            </div>
+            <div className="flex flex-col gap-0.5 text-right">
+              <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
+              <span className="text-base font-black text-[#5B3E29]">
+                {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
+              </span>
             </div>
           </header>
 

@@ -5,6 +5,7 @@
 
 import { useApp } from "@/lib/store";
 import { Mascot, SpeechBubble } from "@/components/Mascot";
+import { GoalIcon } from "@/components/GoalIcon";
 
 export function ProgressRunner() {
   const { goalType, goalAmount, monthlyBudget, monthlySaving, items } = useApp();
@@ -44,7 +45,7 @@ export function ProgressRunner() {
           </div>
         </div>
         <div className="hidden sm:block shrink-0 max-w-[9rem] truncate text-xs font-bold text-[#7A5B40]">
-          🏁 {goalType}
+          <span className="inline-flex items-center gap-1"><GoalIcon goal={goalType} className="w-3.5 h-3.5" />{goalType}</span>
         </div>
         {spent > 0 && delta !== 0 && (
           <div className="hidden md:flex shrink-0 items-center gap-2">
