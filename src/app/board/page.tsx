@@ -382,14 +382,13 @@ export default function BoardPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-lg sm:text-xl font-black text-[#5B3E29] tracking-tight">아이템 주머니</h2>
+                      <h2 className="text-xl sm:text-2xl font-bold text-[#5B3E29] tracking-tight" style={{ fontFamily: "var(--font-gaegu)" }}>
+                        아이템 주머니
+                      </h2>
                       <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
                         {cartItems.length}/20 보관 중
                       </span>
                     </div>
-                    <p className="text-xs text-[#826954] mt-0.5 font-medium">
-                      일반 보관 주머니와 AI 우선순위 판정대로 나뉘어 있어요
-                    </p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -441,8 +440,7 @@ export default function BoardPage() {
                   </span>
                 </div>
                 <p className="text-[11px] text-[#7A5B3E] font-medium leading-tight">
-                  진짜 살 물건 후보만 위 주머니에서 이 칸으로 끌어다 놓으세요. 버튼을 누르면 여기 있는 아이템만 AI가
-                  판단해서 쇼케이스에 올려줘요. 쇼케이스 안의 순서는 직접 정하면 돼요!
+                  진짜 살 물건 후보만 끌어다 놓고 AI의 판정을 받아보세요!
                 </p>
                 <p className="text-[11px] text-[#7A5B3E] font-bold">
                   판정 기준 (버튼 누르기 전에 미리 정해두세요)
@@ -469,8 +467,6 @@ export default function BoardPage() {
                       key={`judge-empty-${i}`}
                       className="w-full aspect-square rounded-2xl bg-[#FFF9EC] border-2 border-dashed border-[#D6C2A0] flex flex-col items-center justify-center text-center p-1"
                     >
-                      <span className="text-[#A8582C] text-sm font-bold">+</span>
-                      <span className="text-[10px] text-[#A89481] font-bold leading-tight">아이템 담기</span>
                     </div>
                   ))}
                 </div>
@@ -542,10 +538,6 @@ export default function BoardPage() {
                 </div>
               )}
 
-              <div className="relative z-10 mt-3 text-center text-[11px] text-[#7A614B] font-medium flex items-center justify-center gap-1">
-                <LeafIcon className="w-3.5 h-3.5 text-[#5D8B33]" />
-                <span>주머니 속 아이템은 언제든 드래그해서 자유롭게 옮길 수 있어요.</span>
-              </div>
             </ZoneShell>
 
             {/* RIGHT: 쇼케이스 */}
@@ -563,7 +555,7 @@ export default function BoardPage() {
                       ★
                     </span>
                     <span className="tracking-tight text-base text-[#FFF3DE]" style={{ fontFamily: "var(--font-gaegu)" }}>
-                      나의 위시 원목 서랍 진열장
+                      진짜 살 물건 진열장
                     </span>
                   </div>
                   <span className="text-[11px] text-[#FFE8C2] bg-[#57351F] px-2.5 py-0.5 rounded-full border border-[#8C5D35]">
@@ -575,9 +567,6 @@ export default function BoardPage() {
               <div className="relative z-10 flex items-center justify-between pb-2 mb-2 border-b-2 border-[#E8DCC2]">
                 <div className="flex items-center gap-2">
                   <h3 className="text-xl font-black text-[#57351F] tracking-tight">진짜 살 물건 쇼케이스</h3>
-                  <span className="text-xs font-black text-[#C93B2B] bg-[#FFEAE6] px-2.5 py-0.5 rounded-full border border-[#FFAE9E]">
-                    이번 달 구매
-                  </span>
                 </div>
                 <span className="text-xs font-bold text-[#8A5A35]">{buyItems.length}개 진열 중</span>
               </div>
@@ -594,7 +583,7 @@ export default function BoardPage() {
                   <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
                     <span className="text-xs font-black text-[#69421A] flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-[#E09D1B]" />
-                      1층: 이번 달 구매 칸 (예산 내) · {won(shelf1Sum)}
+                      1층: 이번 달 구매 선반 · {won(shelf1Sum)}
                     </span>
                     <button
                       onClick={buyFirstFloor}
@@ -637,7 +626,7 @@ export default function BoardPage() {
                   <div className="flex items-center justify-between px-1">
                     <span className="text-xs font-black text-[#755541] flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-[#A8582C]" />
-                      2층: 예산 초과 서랍 (다음 달 후보)
+                      2층: 예산 초과 서랍
                     </span>
                     {overAmount > 0 && (
                       <span className="text-[11px] font-bold text-[#8C5D35] bg-[#FAF2DC] px-2 py-0.5 rounded-full border border-[#D9CAAF]">
@@ -696,12 +685,12 @@ export default function BoardPage() {
               }
               titleChip={
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#6B4A2F] text-white">
-                  빼기 (안 살 것 털어내기)
+                  빼기 (안 살 것)
                 </span>
               }
-              sub="별 구덩이에 묻기 & 비우기"
-              desc="땅속에 묻어 지름신 봉인하기! 충동구매를 시원하게 털어내고 소중한 돈을 아껴요."
-              hint="구덩이에 묻어버릴 아이템을 퐁당 던지기"
+              sub=""
+              desc="충동구매는 땅속에 묻고 돈을 아껴요."
+              hint="구덩이에 퐁당!"
               hintClass="bg-[#F5EADB] border-[#CBB394] text-[#694A2F]"
             />
             <ActionZone
@@ -733,9 +722,9 @@ export default function BoardPage() {
                   내리기 (샀음!)
                 </span>
               }
-              sub="선물상자 완성 & 구매 완료"
-              desc="선물상자 완성! 알뜰한 계획 소비로 결제 완료하고 뿌듯함을 챙겨요."
-              hint="결제 완료한 물건을 선물상자에 퐁당 던지기!"
+              sub=""
+              desc="구매 끝! 선물상자에 넣고 뿌듯하게."
+              hint="선물상자에 퐁당!"
               hintClass="bg-[#FFEBF0] border-[#FFBFCE] text-[#D83A61]"
             />
           </section>
@@ -927,7 +916,7 @@ function ActionZone({
       <div className="flex-1">
         <div className="flex flex-wrap items-center gap-2 mb-1">
           {titleChip}
-          <span className="text-[11px] font-bold text-[#80644D] bg-[#EFE4CF] px-2 py-0.5 rounded-md">{sub}</span>
+          {sub && <span className="text-[11px] font-bold text-[#80644D] bg-[#EFE4CF] px-2 py-0.5 rounded-md">{sub}</span>}
         </div>
         <p className="text-xs font-medium">{desc}</p>
         <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-[11px] font-black ${hintClass}`}>

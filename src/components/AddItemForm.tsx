@@ -89,17 +89,11 @@ export function AddItemForm() {
   if (stage === "link") {
     return (
       <div className="flex flex-col gap-2">
-        <p
-          className="text-sm font-bold px-3 py-2 rounded-xl border-2"
-          style={{ backgroundColor: "var(--primary-light)", color: "var(--primary-hover)", borderColor: "var(--primary)" }}
-        >
-          🔗 상품의 링크를 넣으면 상품 정보가 자동으로 채워져요
-        </p>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="상품 링크를 붙여넣으세요 (예: https://...)"
+            placeholder="상품의 링크를 넣으면 상품 정보가 자동으로 채워져요"
             className={`${inputCls} flex-1`}
             style={inputStyle}
           />
