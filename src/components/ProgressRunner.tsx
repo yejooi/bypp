@@ -10,12 +10,10 @@ export function ProgressRunner() {
 
   if (!goalType || !goalAmount) return null;
 
-  const buyTotal = items
-    .filter((it) => it.status === "buy" || it.status === "purchased")
-    .reduce((sum, it) => sum + it.price, 0);
-
-  // 이번 달 아낀 금액(예산 대비). 후퇴 없음 -> 최소 0.
-  const savedThisMonth = Math.max(0, (monthlyBudget ?? 0) - buyTotal);
+  // 이번 달 저축액 = 예산 - 이미 산 금액. 예산을 다 지키면 예산 전액이 기준(시작값)이고,
+  // 사는 만큼 줄고 안 쓴 만큼 남는다. 후퇴 연출은 없으니 0 미만은 0으로 둔다 (원칙 ②).
+  const spent = items.filter((it) => it.status === "purchased").reduce((sum, it) => sum + it.price, 0);
+  const savedThisMonth = Math.max(0, (monthlyBudget ?? 0) - spent);
   const progressPct = goalAmount > 0 ? Math.min(100, (savedThisMonth / goalAmount) * 100) : 0;
 
   return (
@@ -60,8 +58,8 @@ export function ProgressRunner() {
           </div>
         </div>
         <div className="flex items-center gap-3 text-xs text-[#523B28]">
-          <span className="text-[#7A5B40] font-bold">이번 달 참은 금액:</span>
-          <span className="font-black text-[#E84364] text-base">{savedThisMonth.toLocaleString()}원 적립 중!</span>
+          <span className="text-[#7A5B40] font-bold">이번 달 저축액:</span>
+          <span className="font-black text-[#E84364] text-base">{savedThisMonth.toLocaleString()}원 저축 중!</span>
         </div>
       </div>
     </footer>

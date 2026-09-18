@@ -389,11 +389,11 @@ export default function BoardPage() {
           </section>
 
           {/* 인벤토리 주머니 vs 가판대 */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[190px_1fr_1fr_190px] gap-6 items-stretch">
             {/* LEFT: 아이템 주머니 */}
             <ZoneShell
               id="cart-zone"
-              className={`order-1 lg:order-none lg:col-start-1 lg:row-start-1 flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+              className={`order-1 lg:order-none lg:col-start-1 lg:row-start-1 xl:col-start-2 flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2.5 rounded-[30px] border-2 border-dashed border-[#CCBFA3] pointer-events-none" />
               <div className="relative z-10 flex items-center justify-between pb-2 mb-3 border-b-2 border-[#D9CDAF]">
@@ -512,7 +512,7 @@ export default function BoardPage() {
 
               {judgeResult && (
                 <div
-                  className={`order-2 lg:order-none lg:col-start-1 lg:row-start-2 rounded-[26px] border-[3px] border-[#C8B693] bg-[#FFFDF7] p-3.5 ${SHADOW_AC_SM} flex flex-col gap-2`}
+                  className={`order-2 lg:order-none lg:col-start-1 lg:row-start-2 xl:col-start-2 rounded-[26px] border-[3px] border-[#C8B693] bg-[#FFFDF7] p-3.5 ${SHADOW_AC_SM} flex flex-col gap-2`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="text-xl font-bold text-[#5B3E29]" style={HAND}>
@@ -571,7 +571,7 @@ export default function BoardPage() {
             {/* RIGHT: 쇼케이스 */}
             <ZoneShell
               id="buy-zone"
-              className={`order-3 lg:order-none lg:col-start-2 lg:row-start-1 flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+              className={`order-3 lg:order-none lg:col-start-2 lg:row-start-1 xl:col-start-3 flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2 rounded-[28px] border-2 border-dashed border-[#D6C2A5] pointer-events-none" />
               <div
@@ -682,12 +682,11 @@ export default function BoardPage() {
               )}
 
             </ZoneShell>
-          </section>
 
-          {/* 드롭존: 빼기 / 내리기 */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+            {/* 드롭존: 구덩이(왼쪽) / 선물상자(오른쪽) */}
             <ActionZone
               id="toss-zone"
+              className="order-4 lg:order-none lg:col-start-1 lg:row-start-3 xl:col-start-1 xl:row-start-1 xl:row-span-2"
               borderClass="border-[#C9B693] hover:border-[#6B4B32]"
               overClass="border-[#6B4B32] bg-[#FFF5E6]"
               visual={
@@ -718,6 +717,7 @@ export default function BoardPage() {
             />
             <ActionZone
               id="flush-zone"
+              className="order-5 lg:order-none lg:col-start-2 lg:row-start-3 xl:col-start-4 xl:row-start-1 xl:row-span-2"
               borderClass="border-[#F0B2BA] hover:border-[#E84364]"
               overClass="border-[#E84364] bg-[#FFF0F3]"
               visual={
@@ -921,6 +921,7 @@ function ItemTile({
 
 function ActionZone({
   id,
+  className = "",
   borderClass,
   overClass,
   visual,
@@ -931,6 +932,7 @@ function ActionZone({
   hintClass,
 }: {
   id: string;
+  className?: string;
   borderClass: string;
   overClass: string;
   visual: React.ReactNode;
@@ -944,13 +946,13 @@ function ActionZone({
   return (
     <div
       ref={setNodeRef}
-      className={`group relative p-5 rounded-[32px] bg-[#FFFBF0]/95 border-[3px] border-dashed transition-all ${SHADOW_AC} flex items-center gap-5 text-[#523B28] ${
+      className={`group relative p-5 rounded-[32px] bg-[#FFFBF0]/95 border-[3px] border-dashed transition-all ${SHADOW_AC} flex items-center gap-5 xl:flex-col xl:justify-center xl:text-center xl:gap-3 xl:p-4 text-[#523B28] ${className} ${
         isOver ? overClass : borderClass
       }`}
     >
       {visual}
       <div className="flex-1">
-        <div className="flex flex-wrap items-center gap-2 mb-1">
+        <div className="flex flex-wrap items-center xl:justify-center gap-2 mb-1">
           {titleChip}
           {sub && <span className="text-xs font-bold text-[#80644D] bg-[#EFE4CF] px-2 py-0.5 rounded-md">{sub}</span>}
         </div>
