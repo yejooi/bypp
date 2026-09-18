@@ -5,7 +5,7 @@
 // 기능: 아이템 주머니(cart)에서 "AI에게 우선순위 배정 부탁하기" -> 판정 후 쇼케이스(buy)로 자동 진열.
 // 옮기기/빼기/내리기는 드래그.
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -65,14 +65,14 @@ function BagIcon({ className }: { className?: string }) {
 }
 
 export default function BoardPage() {
-  const { goalType, monthlyBudget, items, moveItem } = useApp();
+  const { goalType, monthlyBudget, items, moveItem, reorderShowcase } = useApp();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const [evalState, setEvalState] = useState<EvalState>("idle");
   const [llmEstimates, setLlmEstimates] = useState<LlmEstimate[] | null>(null);
   // wayfinder #5 결정: 30~100 슬라이더 (0=가격순, 100=AI 판단), 기본값 65.
   const [qualWeight, setQualWeight] = useState(Math.round(DEFAULT_QUAL_WEIGHT * 100));
-  const [revealedCount, setRevealedCount] = useState(0);
+  const [pendingBuyId, setPendingBuyId] = useState<string | null>(null);
   const [userPick, setUserPick] = useState<string | null>(null);
   const [addMode, setAddMode] = useState<"link" | "screenshot">("link");
   // 판정대에 올려둔 아이템 id. 순위 판정은 여기 있는 것만 대상으로 한다 (DB 상태는 cart 그대로).
@@ -89,20 +89,44 @@ export default function BoardPage() {
   const cartSum = cartItems.reduce((s, it) => s + it.price, 0);
   const buySum = buyItems.reduce((s, it) => s + it.price, 0);
 
-  // 순위 배정 후 쇼케이스에 뜬 항목들을 위에서부터 순차적으로 드러낸다 (§8-1).
-  useEffect(() => {
-    if (evalState !== "ready") return;
-    const total = buyItems.length;
-    for (let i = 0; i < total; i++) {
-      setTimeout(() => setRevealedCount((c) => Math.max(c, i + 1)), i * 250);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [evalState]);
-
   const budget = monthlyBudget ?? 0;
 
+  // 쇼케이스 순서는 사용자가 정한 대로(sortOrder). AI 판정은 "무엇이 쇼케이스에 들어가느냐"만 결정한다.
+  const orderedBuy = buyItems
+    .map((it, i) => ({ it, i }))
+    .sort((x, y) => (x.it.sortOrder ?? 1e9) - (y.it.sortOrder ?? 1e9) || x.i - y.i)
+    .map((x) => x.it);
+  const orderedBuyIds = orderedBuy.map((it) => it.id);
+
+  const estimateById = new Map((llmEstimates ?? []).map((e) => [e.id, e]));
+
+  // 순서대로 누적해서 예산을 딱 넘는 항목부터 그 뒤는 전부 2층.
+  let cumulative = 0;
+  let over = false;
+  let overCount = 0;
+  const rows = orderedBuy.map((item, i) => {
+    if (!over && budget > 0 && cumulative + item.price > budget) over = true;
+    const before = cumulative;
+    if (!over) cumulative += item.price;
+    const message = over
+      ? overCount++ === 0
+        ? smallGapMessage(item.price - Math.max(0, budget - before))
+        : bigGapMessage(2)
+      : i === 0
+        ? positiveMessage()
+        : null;
+    return { item, overBudget: over, message, reasoning: estimateById.get(item.id)?.reasoning ?? null, index: i };
+  });
+
+  const shelf1 = rows.filter((r) => !r.overBudget);
+  const shelf2 = rows.filter((r) => r.overBudget);
+  const shelf1Sum = shelf1.reduce((s2, r) => s2 + r.item.price, 0);
+  const overAmount = Math.max(0, buySum - budget);
+  const shelf2Ids = new Set(shelf2.map((r) => r.item.id));
+
+  // §6-3/§6-6: AI 기준 1위와 사용자가 고른 것 비교 (AI 판정을 한 번이라도 돌린 경우만).
   const scored =
-    evalState === "ready" && llmEstimates
+    llmEstimates && buyItems.length > 1
       ? computeScores(
           buyItems.map((it) => ({
             id: it.id,
@@ -115,43 +139,9 @@ export default function BoardPage() {
           qualWeight / 100
         )
       : null;
-
-  const buyItemById = new Map(buyItems.map((it) => [it.id, it]));
-  const orderedIds =
-    evalState === "ready" && scored
-      ? scored.map((s) => s.id)
-      : [...buyItems].sort((a, b) => b.price - a.price).map((it) => it.id);
-  const scoredById = new Map((scored ?? []).map((s) => [s.id, s]));
-
-  let cumulative = 0;
-  let overBudgetIndex = 0;
-  const rows = orderedIds.flatMap((id, i) => {
-    const item = buyItemById.get(id);
-    if (!item) return [];
-    const before = cumulative;
-    cumulative += item.price;
-    const overBudget = before >= budget && budget > 0;
-    const message =
-      evalState === "ready"
-        ? overBudget
-          ? overBudgetIndex++ === 0
-            ? smallGapMessage(item.price - Math.max(0, budget - before))
-            : bigGapMessage(2)
-          : i === 0
-            ? positiveMessage()
-            : null
-        : null;
-    const reasoning = evalState === "ready" ? scoredById.get(id)?.reasoning ?? null : null;
-    return [{ item, overBudget, message, reasoning, index: i }];
-  });
-
-  const shelf1 = rows.filter((r) => !r.overBudget);
-  const shelf2 = rows.filter((r) => r.overBudget);
-  const overAmount = Math.max(0, buySum - budget);
-
-  const topPick = evalState === "ready" && scored ? scored[0] : null;
-  const pickedItem = scored?.find((s) => s.id === userPick) ?? null;
-  const showGapExplanation = evalState === "ready" && pickedItem && topPick && pickedItem.id !== topPick.id;
+  const topPick = scored ? scored[0] : null;
+  const pickedItem = scored?.find((s2) => s2.id === userPick) ?? null;
+  const showGapExplanation = pickedItem && topPick && pickedItem.id !== topPick.id;
 
   // 순위 배정: 아이템 주머니(cart)에서 시작 -> 판정 끝나면 쇼케이스(buy)로 자동 승격.
   // llmEstimates는 id 기준으로 병합해서 여러 번 나눠 배정해도 누적 전체가 같은 기준으로 다시 랭킹된다.
@@ -178,10 +168,22 @@ export default function BoardPage() {
       const data: { items: LlmEstimate[] } = await res.json();
       const newIds = new Set(data.items.map((e) => e.id));
       setLlmEstimates((prev) => [...(prev ?? []).filter((e) => !newIds.has(e.id)), ...data.items]);
+      // AI 판정 순위는 "쇼케이스에 들어올 때의 초기 순서"로만 쓰고, 기존 진열 뒤에 붙인다. 이후 순서는 사용자가.
+      const ranked = computeScores(
+        toPromote.map((it) => ({
+          id: it.id,
+          name: it.name,
+          price: it.price,
+          category: it.category,
+          reasonCode: it.reasonCode,
+        })),
+        data.items,
+        qualWeight / 100
+      ).map((r) => r.id);
       toPromote.forEach((it) => moveItem(it.id, "buy"));
+      reorderShowcase([...orderedBuyIds.filter((id) => !newIds.has(id)), ...ranked]);
       setJudgeIds((prev) => prev.filter((id) => !newIds.has(id)));
       setEvalState("ready");
-      setRevealedCount(0);
     } catch {
       setEvalState("error");
     }
@@ -206,11 +208,35 @@ export default function BoardPage() {
       return;
     }
     setJudgeIds((prev) => prev.filter((x) => x !== id));
-    if (zone === "cart-zone") {
+
+    if (zone === "buy-zone" || zone.startsWith("slot-")) {
+      // slot-item-<id>: 그 항목 앞에 끼워넣기 / slot-end1: 1층 맨 끝 / slot-end2·buy-zone: 맨 끝
+      const rest = orderedBuyIds.filter((x) => x !== id);
+      let at = rest.length;
+      if (zone === `slot-item-${id}`) return;
+      if (zone.startsWith("slot-item-")) {
+        const idx = rest.indexOf(zone.slice("slot-item-".length));
+        if (idx >= 0) at = idx;
+      } else if (zone === "slot-end1") {
+        const firstOver = shelf2[0]?.item.id;
+        const idx = firstOver ? rest.indexOf(firstOver) : -1;
+        if (idx >= 0) at = idx;
+      }
+      const next = [...rest.slice(0, at), id, ...rest.slice(at)];
+      if (status !== "buy") moveItem(id, "buy");
+      reorderShowcase(next);
+    } else if (zone === "cart-zone") {
       if (status !== "cart") moveItem(id, "cart");
-    } else if (zone === "buy-zone") moveItem(id, "buy");
-    else if (zone === "toss-zone") moveItem(id, "removed");
-    else if (zone === "flush-zone") moveItem(id, "purchased");
+    } else if (zone === "toss-zone") moveItem(id, "removed");
+    else if (zone === "flush-zone") {
+      // 2층(예산 초과) 물건을 구매로 내리면 확인부터.
+      if (shelf2Ids.has(id)) setPendingBuyId(id);
+      else moveItem(id, "purchased");
+    }
+  }
+
+  function buyFirstFloor() {
+    shelf1.forEach((r) => moveItem(r.item.id, "purchased"));
   }
 
   const pouchSlots = Math.max(10, Math.ceil(pouchItems.length / 5) * 5);
@@ -378,9 +404,22 @@ export default function BoardPage() {
                   </span>
                 </div>
                 <p className="text-[11px] text-[#7A5B3E] font-medium leading-tight">
-                  순위를 정하고 싶은 아이템만 위 주머니에서 이 칸으로 끌어다 놓으세요. 버튼을 누르면 여기 있는 아이템만
-                  AI가 예산과 필요도를 따져 우측 선반에 자동 진열해요!
+                  진짜 살 물건 후보만 위 주머니에서 이 칸으로 끌어다 놓으세요. 버튼을 누르면 여기 있는 아이템만 AI가
+                  판단해서 쇼케이스에 올려줘요. 쇼케이스 안의 순서는 직접 정하면 돼요!
                 </p>
+                <div className="flex items-center gap-2 text-xs text-[#7A5B3E] font-bold">
+                  <span>가격순</span>
+                  <input
+                    type="range"
+                    min={30}
+                    max={100}
+                    value={qualWeight}
+                    onChange={(e) => setQualWeight(Number(e.target.value))}
+                    className="flex-1 accent-[#4EA434]"
+                  />
+                  <span>AI 판단</span>
+                  <span className="w-8 text-right">{qualWeight}</span>
+                </div>
                 <div className="grid grid-cols-5 gap-2 sm:gap-2.5 py-1">
                   {judgeItems.map((it) => (
                     <ItemTile key={it.id} item={it} badge={{ text: "판정 대기", kind: "gold" }} />
@@ -396,7 +435,7 @@ export default function BoardPage() {
                   ))}
                 </div>
                 {evalState === "error" && (
-                  <p className="text-xs font-bold text-[#C93B2B]">판정에 실패해서 가격순으로 보여드릴게요</p>
+                  <p className="text-xs font-bold text-[#C93B2B]">판정에 실패했어요. 잠시 뒤 다시 눌러주세요</p>
                 )}
                 <button
                   onClick={handleEvaluate}
@@ -404,9 +443,9 @@ export default function BoardPage() {
                   className={`w-full py-2.5 px-4 bg-[#4EA434] hover:bg-[#3F8829] active:translate-y-0.5 text-white font-black text-xs sm:text-sm rounded-2xl ${SHADOW_AC_SM} transition-all flex items-center justify-center gap-2 disabled:opacity-40`}
                 >
                   <StarIcon className="w-4 h-4 text-[#FFE073]" />
-                  <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 우선순위 배정 부탁하기"}</span>
+                  <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 쇼케이스 후보 판정 부탁하기"}</span>
                   <span className="text-[10px] bg-[#355E1D] text-[#D8F5AF] px-2 py-0.5 rounded-full font-bold">
-                    자동 정렬
+                    판정
                   </span>
                 </button>
               </JudgeShell>
@@ -436,7 +475,7 @@ export default function BoardPage() {
                     </span>
                   </div>
                   <span className="text-[11px] text-[#FFE8C2] bg-[#57351F] px-2.5 py-0.5 rounded-full border border-[#8C5D35]">
-                    우선순위 2단 선반 배치 중
+                    끌어서 순서 정하기
                   </span>
                 </div>
               </div>
@@ -451,54 +490,38 @@ export default function BoardPage() {
                 <span className="text-xs font-bold text-[#8A5A35]">{buyItems.length}개 진열 중</span>
               </div>
 
-              {evalState === "ready" && (
-                <div className="relative z-10 flex items-center gap-2 text-xs text-[#7A5B3E] font-bold mb-2">
-                  <span>가격순</span>
-                  <input
-                    type="range"
-                    min={30}
-                    max={100}
-                    value={qualWeight}
-                    onChange={(e) => setQualWeight(Number(e.target.value))}
-                    className="flex-1 accent-[#4EA434]"
-                  />
-                  <span>AI 판단</span>
-                  <span className="w-8 text-right">{qualWeight}</span>
-                </div>
-              )}
+              <p className="relative z-10 text-xs text-[#7A5B3E] font-bold mb-2">
+                1층에 원하는 순서대로 놓으세요. 예산을 넘는 물건부터 자동으로 2층으로 내려가요.
+              </p>
 
               <div
                 className={`relative z-10 rounded-[28px] bg-[#EFE4CF] border-[3px] border-[#C9B390] p-4 ${SHADOW_INNER} flex-1 flex flex-col justify-between gap-3 select-none`}
               >
                 {/* 1층 */}
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
                     <span className="text-xs font-black text-[#69421A] flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-[#E09D1B]" />
-                      1층: 이번 달 구매 확정 칸 (예산 내)
+                      1층: 이번 달 구매 칸 (예산 내) · {won(shelf1Sum)}
                     </span>
-                    <span className="text-[11px] font-bold text-[#4FA429] bg-[#DCF2C7] px-2 py-0.5 rounded-full border border-[#BBDC9F]">
-                      {shelf1.length}/{shelf1Slots} 전시 중
-                    </span>
+                    <button
+                      onClick={buyFirstFloor}
+                      disabled={shelf1.length === 0}
+                      className={`text-[11px] font-black text-white bg-[#E84364] hover:bg-[#C72E4E] px-3 py-1 rounded-full ${SHADOW_AC_SM} active:translate-y-0.5 disabled:opacity-40 transition-all`}
+                    >
+                      1층 전체 구매 ({shelf1.length}개)
+                    </button>
                   </div>
                   <div className="grid grid-cols-4 gap-2.5">
-                    {shelf1.map((r) => {
-                      if (evalState === "ready" && r.index >= revealedCount) return null;
-                      return (
-                        <ItemTile
-                          key={r.item.id}
-                          item={r.item}
-                          showcase
-                          badge={
-                            evalState === "ready"
-                              ? { text: r.index === 0 ? `${r.index + 1}위 확정` : `${r.index + 1}위`, kind: "gold" }
-                              : undefined
-                          }
-                        />
-                      );
-                    })}
+                    {shelf1.map((r) => (
+                      <SlotDrop key={r.item.id} id={`slot-item-${r.item.id}`} label={`${r.index + 1}위`}>
+                        <ItemTile item={r.item} showcase />
+                      </SlotDrop>
+                    ))}
                     {Array.from({ length: Math.max(0, shelf1Slots - shelf1.length) }).map((_, i) => (
-                      <EmptyShelf key={`s1-${i}`} label="빈 선반" />
+                      <SlotDrop key={`s1-${i}`} id="slot-end1" label={`${shelf1.length + i + 1}위`}>
+                        <EmptyShelf label="빈 선반" />
+                      </SlotDrop>
                     ))}
                   </div>
                 </div>
@@ -511,7 +534,7 @@ export default function BoardPage() {
                     <div
                       className={`relative z-10 bg-[#FFDE59] border-2 border-[#B37400] text-[#693E00] text-xs font-black px-4 py-0.5 rounded-full ${SHADOW_AC} flex items-center gap-1.5`}
                     >
-                      <span>이번 달 예산 한도선 선반 ({won(budget)})</span>
+                      <span>이번 달 예산 한도선 ({won(budget)})</span>
                       <span className="w-2 h-2 rounded-full bg-[#E09D1B] border border-[#693E00]" />
                     </div>
                   </div>
@@ -522,7 +545,7 @@ export default function BoardPage() {
                   <div className="flex items-center justify-between px-1">
                     <span className="text-xs font-black text-[#755541] flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-[#A8582C]" />
-                      2층: 다음 달 보관 서랍 (월급날 개봉)
+                      2층: 예산 초과 서랍 (다음 달 후보)
                     </span>
                     {overAmount > 0 && (
                       <span className="text-[11px] font-bold text-[#8C5D35] bg-[#FAF2DC] px-2 py-0.5 rounded-full border border-[#D9CAAF]">
@@ -531,49 +554,36 @@ export default function BoardPage() {
                     )}
                   </div>
                   <div className="grid grid-cols-4 gap-2.5">
-                    {shelf2.map((r) => {
-                      if (evalState === "ready" && r.index >= revealedCount) return null;
-                      return (
-                        <ItemTile
-                          key={r.item.id}
-                          item={r.item}
-                          showcase
-                          dim
-                          badge={
-                            evalState === "ready" ? { text: `${r.index + 1}위 대기`, kind: "brown" } : undefined
-                          }
-                        />
-                      );
-                    })}
+                    {shelf2.map((r) => (
+                      <SlotDrop key={r.item.id} id={`slot-item-${r.item.id}`} label="대기">
+                        <ItemTile item={r.item} showcase dim />
+                      </SlotDrop>
+                    ))}
                     {Array.from({ length: Math.max(0, shelf2Slots - shelf2.length) }).map((_, i) => (
-                      <EmptyShelf key={`s2-${i}`} label="서랍 칸" faint />
+                      <SlotDrop key={`s2-${i}`} id="slot-end2" label="대기">
+                        <EmptyShelf label="서랍 칸" faint />
+                      </SlotDrop>
                     ))}
                   </div>
                 </div>
               </div>
 
               {/* AI 한줄평 + 안내 문구 */}
-              {evalState === "ready" && rows.length > 0 && (
+              {rows.some((r) => r.reasoning || r.message) && (
                 <div className="relative z-10 mt-3 flex flex-col gap-2">
-                  {rows.map((r) => {
-                    if (r.index >= revealedCount) return null;
-                    return (
-                      <div
-                        key={r.item.id}
-                        className="rounded-2xl border-2 border-[#E3C59E] bg-[#FFFDF7] p-3 text-[#573A23]"
-                      >
-                        <p className="text-sm font-black">
-                          {r.index + 1}위 · {r.item.name} · {won(r.item.price)}
+                  {rows.map((r) => (
+                    <div key={r.item.id} className="rounded-2xl border-2 border-[#E3C59E] bg-[#FFFDF7] p-3 text-[#573A23]">
+                      <p className="text-sm font-black">
+                        {r.overBudget ? "2층" : `${r.index + 1}위`} · {r.item.name} · {won(r.item.price)}
+                      </p>
+                      {r.reasoning && <p className="text-xs italic mt-0.5 text-[#7A5B3E]">&quot;{r.reasoning}&quot;</p>}
+                      {r.message && (
+                        <p className="text-sm font-black mt-2 px-3 py-2 rounded-xl border-2 border-[#E09D1B] bg-[#FFF4D6] text-[#8A5A00]">
+                          💡 {r.message}
                         </p>
-                        {r.reasoning && <p className="text-xs italic mt-0.5 text-[#7A5B3E]">&quot;{r.reasoning}&quot;</p>}
-                        {r.message && (
-                          <p className="text-sm font-black mt-2 px-3 py-2 rounded-xl border-2 border-[#E09D1B] bg-[#FFF4D6] text-[#8A5A00]">
-                            💡 {r.message}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -582,38 +592,38 @@ export default function BoardPage() {
                   <div className="w-6 h-6 rounded-full bg-[#5BA431] text-white flex items-center justify-center font-black text-[11px] shrink-0">
                     !
                   </div>
-                  <span>예산선 아래 물건은 계획 재검토가 필요해요! 다음 달 월급날 서랍에서 꺼내는 건 어때요?</span>
+                  <span>2층 물건은 예산을 넘어요. 다음 달 월급날 꺼내거나, 1층 순서를 바꿔보세요.</span>
                 </div>
               )}
 
               {/* §6-3: 하나만 살 수 있다면? */}
-              {evalState === "ready" && revealedCount === (scored?.length ?? 0) && scored && scored.length > 1 && (
+              {scored && (
                 <div className="relative z-10 mt-3 pt-3 border-t-2 border-[#E8DCC2]">
                   <p className="text-sm font-black text-[#57351F] mb-1.5">이 중에 하나만 살 수 있다면?</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {scored.map((s) => (
+                    {scored.map((s2) => (
                       <button
-                        key={s.id}
-                        onClick={() => setUserPick(s.id)}
+                        key={s2.id}
+                        onClick={() => setUserPick(s2.id)}
                         className={`text-xs rounded-full px-3 py-1 border-2 font-bold transition-all ${
-                          userPick === s.id
+                          userPick === s2.id
                             ? "border-[#4EA434] bg-[#E4F5D2] text-[#2D6C2A]"
                             : "border-[#D6C2A5] bg-white text-[#694D36]"
                         }`}
                       >
-                        {s.name}
+                        {s2.name}
                       </button>
                     ))}
                   </div>
                   {showGapExplanation && pickedItem && topPick && (
                     <p className="text-sm mt-2 rounded-2xl p-3 bg-[#FAF2DC] text-[#573A23]">
-                      당신은 {pickedItem.name}를 골랐는데 계산상으로는 {topPick.name}가 앞서요. {pickedItem.name}는
+                      당신은 {pickedItem.name}를 골랐는데 AI 계산으로는 {topPick.name}가 앞서요. {pickedItem.name}는
                       만족이 {pickedItem.satisfaction_months}개월 정도인데 {topPick.name}는{" "}
                       {topPick.satisfaction_months}개월 가거든요. 그래도 {pickedItem.name}가 맞다면 그건 그것대로
                       괜찮아요.
                     </p>
                   )}
-                  {userPick === topPick?.id && (
+                  {userPick && userPick === topPick?.id && (
                     <p className="text-sm mt-2 text-[#2D6C2A] font-bold">
                       계산이랑 똑같이 고르셨네요, 좋은 선택이에요.
                     </p>
@@ -693,6 +703,35 @@ export default function BoardPage() {
         </main>
       </div>
 
+      {pendingBuyId && (
+        <div className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
+          <div className={`bg-[#FFFBF2] border-4 border-[#85532F] rounded-[28px] p-6 max-w-sm w-full text-[#4A3324] ${SHADOW_AC}`}>
+            <p className="text-lg font-black">예산을 초과합니다</p>
+            <p className="text-sm mt-1 font-medium">
+              {items.find((it) => it.id === pendingBuyId)?.name}은(는) 이번 달 예산({won(budget)})을 넘어요. 그래도
+              구매하시겠습니까?
+            </p>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setPendingBuyId(null)}
+                className="flex-1 py-2.5 rounded-full font-black bg-[#EFE8D6] border-2 border-[#D4C3A3]"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => {
+                  moveItem(pendingBuyId, "purchased");
+                  setPendingBuyId(null);
+                }}
+                className={`flex-1 py-2.5 rounded-full font-black text-white bg-[#E84364] ${SHADOW_AC_SM}`}
+              >
+                그래도 구매
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <DragOverlay>
         {activeItem ? (
           <div className="rounded-2xl px-3 py-2 shadow-lg border-2 border-[#4EA434] bg-[#FFFDF0] text-[#4A3324]">
@@ -718,6 +757,19 @@ function JudgeShell({ className, children }: { className: string; children: Reac
   const { setNodeRef, isOver } = useDroppable({ id: "judge-zone" });
   return (
     <div ref={setNodeRef} className={`${className} ${isOver ? "ring-4 ring-[#F6C644]" : ""}`}>
+      {children}
+    </div>
+  );
+}
+
+function SlotDrop({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex flex-col items-stretch gap-0.5 rounded-2xl ${isOver ? "ring-4 ring-[#4EA434]" : ""}`}
+    >
+      <span className="text-[10px] font-black text-[#69421A] leading-none text-center">{label}</span>
       {children}
     </div>
   );

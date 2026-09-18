@@ -49,6 +49,8 @@ export type Item = {
   normalPrice?: number | null;
   saleRate?: number | null;
   sourceUrl?: string | null;
+  // 쇼케이스 안에서 사용자가 정한 순서 (작을수록 앞). null이면 뒤로.
+  sortOrder?: number | null;
   // §8-1 연출: 빼기/내리기 애니메이션이 도는 동안 실제 status 변경을 미룬다.
   exiting?: "toss" | "flush" | null;
 };
@@ -76,6 +78,7 @@ type AppState = {
   setBudget: (monthlyBudget: number) => void;
   addItem: (input: NewItemInput) => void;
   moveItem: (id: string, status: ItemStatus) => void;
+  reorderShowcase: (orderedIds: string[]) => void;
 };
 
 const AppContext = createContext<AppState | null>(null);
@@ -94,6 +97,7 @@ function rowToItem(row: {
   normal_price?: number | null;
   sale_rate?: number | null;
   source_url?: string | null;
+  sort_order?: number | null;
 }): Item {
   return {
     id: row.id,
@@ -108,6 +112,7 @@ function rowToItem(row: {
     normalPrice: row.normal_price != null ? Number(row.normal_price) : null,
     saleRate: row.sale_rate != null ? Number(row.sale_rate) : null,
     sourceUrl: row.source_url ?? null,
+    sortOrder: row.sort_order ?? null,
   };
 }
 
@@ -326,6 +331,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     persist();
   };
 
+  // 쇼케이스 순서 저장. sort_order 컬럼이 아직 없는 DB(마이그레이션 0003 전)면 조용히 넘어가고 순서는 이번 화면 안에서만 유지된다.
+  const reorderShowcase = (orderedIds: string[]) => {
+    setItems((prev) =>
+      prev.map((it) => {
+        const idx = orderedIds.indexOf(it.id);
+        return idx >= 0 ? { ...it, sortOrder: idx } : it;
+      })
+    );
+    orderedIds.forEach((id, idx) => {
+      supabase
+        .from("items")
+        .update({ sort_order: idx })
+        .eq("id", id)
+        .then(({ error }) => {
+          if (error && error.code !== "PGRST204" && error.code !== "42703") {
+            console.error("[bypp] reorder failed:", error);
+          }
+        });
+    });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -338,6 +364,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setBudget,
         addItem,
         moveItem,
+        reorderShowcase,
       }}
     >
       {children}
