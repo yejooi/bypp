@@ -11,6 +11,8 @@ import { supabase } from "@/lib/supabase";
 type AuthState = {
   user: User | null;
   nickname: string | null;
+  avatarUrl: string | null;
+  setAvatar: (dataUrl: string) => Promise<{ error: string | null }>;
   loading: boolean;
   signUp: (nickname: string, password: string) => Promise<{ error: string | null }>;
   signIn: (nickname: string, password: string) => Promise<{ error: string | null }>;
@@ -22,6 +24,7 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [nickname, setNickname] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,14 +41,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) {
       setNickname(null);
+      setAvatarUrl(null);
       return;
     }
+    // avatar_url 컬럼이 아직 없는 DB(마이그레이션 0006 전)면 닉네임만 읽는다.
     supabase
       .from("profiles")
-      .select("nickname")
+      .select("nickname, avatar_url")
       .eq("id", user.id)
       .maybeSingle()
-      .then(({ data }) => setNickname(data?.nickname ?? null));
+      .then(async ({ data, error }) => {
+        if (error) {
+          const { data: basic } = await supabase.from("profiles").select("nickname").eq("id", user.id).maybeSingle();
+          setNickname(basic?.nickname ?? null);
+          return;
+        }
+        setNickname(data?.nickname ?? null);
+        setAvatarUrl(data?.avatar_url ?? null);
+      });
   }, [user]);
 
   async function signUp(newNickname: string, password: string): Promise<{ error: string | null }> {
@@ -84,12 +97,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   }
 
+  async function setAvatar(dataUrl: string): Promise<{ error: string | null }> {
+    if (!user) return { error: "로그인이 필요해요" };
+    const { error } = await supabase.from("profiles").update({ avatar_url: dataUrl }).eq("id", user.id);
+    if (error) return { error: error.message };
+    setAvatarUrl(dataUrl);
+    return { error: null };
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
   }
 
   return (
-    <AuthContext.Provider value={{ user, nickname, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, nickname, avatarUrl, setAvatar, loading, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

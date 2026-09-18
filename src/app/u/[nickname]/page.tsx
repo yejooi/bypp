@@ -66,15 +66,26 @@ export default function UserWishlistPage() {
 
   const [state, setState] = useState<"loading" | "not_found" | "empty" | "ready">("loading");
   const [goalType, setGoalType] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [items, setItems] = useState<ViewItem[]>([]);
 
   useEffect(() => {
     (async () => {
-      const { data: profile } = await supabase.from("profiles").select("id").eq("nickname", nickname).maybeSingle();
+      let { data: profile, error: pErr } = await supabase
+        .from("profiles")
+        .select("id, avatar_url")
+        .eq("nickname", nickname)
+        .maybeSingle();
+      if (pErr) {
+        // avatar_url 컬럼이 아직 없는 DB면 사진 없이 진행.
+        const basic = await supabase.from("profiles").select("id").eq("nickname", nickname).maybeSingle();
+        profile = basic.data ? { ...basic.data, avatar_url: null } : null;
+      }
       if (!profile) {
         setState("not_found");
         return;
       }
+      setAvatar(profile.avatar_url ?? null);
       // 목표 없이 만들어진 "미정" 빈 세션이 진짜 세션을 가리지 않게, 최근 것 중 목표가 있는 세션을 우선한다.
       const { data: sessionRows } = await supabase
         .from("sessions")
@@ -118,7 +129,7 @@ export default function UserWishlistPage() {
         <header
           className={`flex items-center gap-4 bg-[#FFF9EC]/95 px-5 py-4 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
         >
-          <Avatar name={nickname} size={64} />
+          <Avatar name={nickname} size={64} src={avatar} />
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl sm:text-3xl font-bold text-[#5B3E29] truncate" style={HAND}>
               {nickname}님의 위시리스트

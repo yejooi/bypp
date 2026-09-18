@@ -12,15 +12,41 @@ export function avatarColor(name: string) {
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
 
-export function Avatar({ name, size = 48 }: { name: string; size?: number }) {
+export function Avatar({ name, size = 48, src }: { name: string; size?: number; src?: string | null }) {
   return (
     <div
-      className={`shrink-0 rounded-full border-[3px] border-[#69421A] flex items-center justify-center font-black text-[#4A2810] ${SHADOW_AC_SM}`}
+      className={`shrink-0 rounded-full border-[3px] border-[#69421A] flex items-center justify-center font-black text-[#4A2810] overflow-hidden ${SHADOW_AC_SM}`}
       style={{ width: size, height: size, backgroundColor: avatarColor(name), fontSize: size * 0.42, ...HAND }}
     >
-      {name.slice(0, 1).toUpperCase()}
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" className="w-full h-full object-cover" />
+      ) : (
+        name.slice(0, 1).toUpperCase()
+      )}
     </div>
   );
+}
+
+// 사진을 정사각형으로 잘라 160px JPEG data URL로 줄인다.
+export async function fileToAvatarDataUrl(file: File, size = 160): Promise<string> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = reject;
+      el.src = url;
+    });
+    const side = Math.min(img.width, img.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    canvas.getContext("2d")!.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+    return canvas.toDataURL("image/jpeg", 0.8);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 // 나무 간판 제목 (가판대와 같은 나무결).

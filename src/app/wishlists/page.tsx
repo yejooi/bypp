@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { useApp } from "@/lib/store";
 import { Avatar, WoodSign, SHADOW_AC, HAND } from "@/components/neighbor-ui";
 
-type Neighbor = { id: string; nickname: string; goal: string | null };
+type Neighbor = { id: string; nickname: string; goal: string | null; avatar: string | null };
 
 export default function WishlistsPage() {
   const { goalType } = useApp();
@@ -17,8 +17,16 @@ export default function WishlistsPage() {
 
   useEffect(() => {
     (async () => {
-      const [{ data: profiles }, { data: sessions }] = await Promise.all([
-        supabase.from("profiles").select("id, nickname, created_at").order("created_at", { ascending: false }),
+      let { data: profiles, error: pErr } = await supabase
+        .from("profiles")
+        .select("id, nickname, avatar_url, created_at")
+        .order("created_at", { ascending: false });
+      if (pErr) {
+        // avatar_url 컬럼이 아직 없으면 사진 없이 불러온다.
+        const basic = await supabase.from("profiles").select("id, nickname, created_at").order("created_at", { ascending: false });
+        profiles = (basic.data ?? []).map((r) => ({ ...r, avatar_url: null }));
+      }
+      const [{ data: sessions }] = await Promise.all([
         supabase.from("sessions").select("user_id, goal_type, created_at").order("created_at", { ascending: false }),
       ]);
       // 사용자별 가장 최근의 "실제 목표" (미정은 건너뜀).
@@ -28,7 +36,7 @@ export default function WishlistsPage() {
           goalByUser.set(s.user_id, s.goal_type);
         }
       }
-      setNeighbors((profiles ?? []).map((p) => ({ id: p.id, nickname: p.nickname, goal: goalByUser.get(p.id) ?? null })));
+      setNeighbors((profiles ?? []).map((p) => ({ id: p.id, nickname: p.nickname, goal: goalByUser.get(p.id) ?? null, avatar: p.avatar_url ?? null })));
     })();
   }, []);
 
@@ -56,7 +64,7 @@ export default function WishlistsPage() {
               href={`/u/${encodeURIComponent(n.nickname)}`}
               className={`group rounded-[28px] border-[3px] border-[#D6C2A5] bg-[#FFF9EC] p-4 flex items-center gap-3.5 ${SHADOW_AC} hover:-translate-y-1 active:translate-y-0.5 transition-transform`}
             >
-              <Avatar name={n.nickname} size={52} />
+              <Avatar name={n.nickname} size={52} src={n.avatar} />
               <div className="min-w-0 flex-1">
                 <p className="text-xl font-bold text-[#5B3E29] truncate" style={HAND}>
                   {n.nickname}
