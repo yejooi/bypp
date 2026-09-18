@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/store";
+import { GoalIcon } from "@/components/GoalIcon";
 import { useAuth } from "@/lib/auth";
 import { Avatar, fileToAvatarDataUrl } from "@/components/neighbor-ui";
 
@@ -62,7 +63,10 @@ export function UserBar() {
           onNeighborScreen ? "bg-[#57351F] border-2 border-[#8C5D35] hover:bg-[#6B4526]" : "bg-[#F6C644] border-2 border-[#C9981A] !text-[#5B3E29] shadow-[0_2px_0_rgba(0,0,0,0.18)] hover:bg-[#F2BB2C] active:translate-y-0.5 transition"
         }`}
       >
-        {onNeighborScreen ? "🏠 내 보드로" : "🏡 이웃 구경"}
+        <span className="inline-flex items-center gap-1">
+          <GoalIcon goal="내집마련" className="w-3.5 h-3.5" />
+          {onNeighborScreen ? "내 보드로" : "이웃 구경"}
+        </span>
       </Link>
       <button
         onClick={() => signOut()}
