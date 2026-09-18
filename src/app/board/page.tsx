@@ -557,13 +557,13 @@ export default function BoardPage() {
               <div
                 className={`relative z-10 rounded-2xl overflow-hidden border-2 border-[#5E371C] ${SHADOW_AC_SM} mb-3 wood-grain`}
               >
-                <div className="py-4 px-5 flex items-center justify-between text-white text-xs font-black">
+                <div className="py-3 px-4 flex items-center justify-between text-white text-xs font-black">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#FFDE59] border-2 border-[#783F1E] inline-flex items-center justify-center text-xs text-[#734500]">
+                    <span className="w-5 h-5 rounded-full bg-[#FFDE59] border-2 border-[#783F1E] inline-flex items-center justify-center text-[10px] text-[#734500]">
                       ★
                     </span>
-                    <span className="tracking-tight text-xl sm:text-2xl text-[#FFF3DE]" style={{ fontFamily: "var(--font-gaegu)" }}>
-                      이번 달 진열장
+                    <span className="tracking-tight text-lg sm:text-xl text-[#FFF3DE]" style={{ fontFamily: "var(--font-gaegu)" }}>
+                      살 물건 가판대
                     </span>
                   </div>
                 </div>
