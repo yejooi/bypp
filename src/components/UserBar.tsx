@@ -8,7 +8,8 @@ import { GoalIcon } from "@/components/GoalIcon";
 import { useAuth } from "@/lib/auth";
 import { Avatar, fileToAvatarDataUrl } from "@/components/neighbor-ui";
 
-export function UserBar() {
+// 프로필 사진/닉네임/이웃 구경/로그아웃. 보드에서는 헤더 안에 끼워 넣고, 다른 화면에서는 왼쪽 위에 떠 있는 바로 쓴다.
+export function UserControls() {
   const { user, nickname, avatarUrl, setAvatar, signOut } = useAuth();
   const pathname = usePathname();
   const { goalType } = useApp();
@@ -29,9 +30,7 @@ export function UserBar() {
   }
 
   return (
-    <div
-      className="fixed top-3 left-3 z-50 flex items-center gap-2.5 bg-[#FFF9EC] border-[3px] border-[#D6C2A5] rounded-full pl-1.5 pr-2 py-1.5 shadow-[0_3px_0_rgba(74,46,53,0.16)] text-sm font-black text-[#5B3E29]"
-    >
+    <div className="flex items-center gap-2.5 text-sm font-black text-[#5B3E29]">
       <input
         ref={inputRef}
         type="file"
@@ -59,8 +58,10 @@ export function UserBar() {
       <span className="max-w-[8rem] truncate">{nickname ?? "..."}</span>
       <Link
         href={onNeighborScreen ? (goalType && goalType !== "미정" ? "/board" : "/") : "/wishlists"}
-        className={`px-3 py-1 rounded-full text-white text-xs shadow-[0_2px_0_rgba(0,0,0,0.18)] active:translate-y-0.5 transition ${
-          onNeighborScreen ? "bg-[#57351F] border-2 border-[#8C5D35] hover:bg-[#6B4526]" : "bg-[#F6C644] border-2 border-[#C9981A] !text-[#5B3E29] shadow-[0_2px_0_rgba(0,0,0,0.18)] hover:bg-[#F2BB2C] active:translate-y-0.5 transition"
+        className={`px-3 py-1 rounded-full text-xs shadow-[0_2px_0_rgba(0,0,0,0.18)] active:translate-y-0.5 transition ${
+          onNeighborScreen
+            ? "text-white bg-[#57351F] border-2 border-[#8C5D35] hover:bg-[#6B4526]"
+            : "bg-[#F6C644] border-2 border-[#C9981A] text-[#5B3E29] hover:bg-[#F2BB2C]"
         }`}
       >
         <span className="inline-flex items-center gap-1">
@@ -75,6 +76,17 @@ export function UserBar() {
         로그아웃
       </button>
       {error && <span className="text-xs text-[#C93B2B]">{error}</span>}
+    </div>
+  );
+}
+
+export function UserBar() {
+  const { user } = useAuth();
+  const pathname = usePathname();
+  if (!user || pathname === "/board") return null;
+  return (
+    <div className="fixed top-3 left-3 z-50 bg-[#FFF9EC] border-[3px] border-[#D6C2A5] rounded-full pl-1.5 pr-2 py-1.5 shadow-[0_3px_0_rgba(74,46,53,0.16)]">
+      <UserControls />
     </div>
   );
 }

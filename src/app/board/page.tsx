@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { Mascot, SpeechBubble } from "@/components/Mascot";
 import { GoalIcon } from "@/components/GoalIcon";
+import { UserControls } from "@/components/UserBar";
 import { authedFetch } from "@/lib/authedFetch";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
@@ -381,31 +382,30 @@ export default function BoardPage() {
       }}
     >
       <TileTapContext.Provider value={openSheet}>
-      <div className="grass-bg flex-1 text-[#4A3324]">
-        <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-24 pb-32 flex flex-col gap-5">
+      <div className="grass-bg flex-1 text-[#4A3324] xl:h-screen xl:overflow-hidden">
+        <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-4 pb-32 flex flex-col gap-5 xl:pt-3 xl:pb-[84px] xl:h-full xl:gap-3">
           {/* 헤더 */}
           <header
-            className={`flex flex-wrap items-center justify-between gap-x-8 gap-y-3 bg-[#FFF9EC]/90 backdrop-blur-md px-5 py-3 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
+            className={`flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-[#FFF9EC]/90 backdrop-blur-md px-4 py-2 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <Mascot size={52} mood="idle" className="hidden sm:block" />
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFF0D4] border-2 border-[#F0C77A] text-[#7A4A00] text-sm font-black rounded-full truncate">
-                  <GoalIcon goal={goalType} className="w-4 h-4 text-[#C9820F]" />
-                  {goalType ?? "-"}
-                </span>
-                <Link href="/?edit=1" className="text-xs font-bold text-[#6F523A] underline shrink-0">
-                  바꾸기
-                </Link>
-              </div>
+            <UserControls />
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Mascot size={44} mood="idle" className="hidden sm:block" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFF0D4] border-2 border-[#F0C77A] text-[#7A4A00] text-sm font-black rounded-full truncate">
+                <GoalIcon goal={goalType} className="w-4 h-4 text-[#C9820F]" />
+                {goalType ?? "-"}
+              </span>
+              <Link href="/?edit=1" className="text-xs font-bold text-[#6F523A] underline shrink-0">
+                바꾸기
+              </Link>
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col leading-tight">
               <span className="text-xs font-bold text-[#6F523A]">
                 이번 달 남은 예산 <span className="font-medium">(총 {won(totalBudget)}{purchasedSum > 0 && ` · 구매 ${won(purchasedSum)}`})</span>
               </span>
-              <span className="text-xl font-black text-[#2D6C2A]">{won(budget)}</span>
+              <span className="text-lg font-black text-[#2D6C2A]">{won(budget)}</span>
             </div>
-            <div className="flex flex-col gap-0.5 text-right">
+            <div className="flex flex-col leading-tight text-right">
               <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
               <span className="text-base font-black text-[#5B3E29]">
                 {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
@@ -415,11 +415,11 @@ export default function BoardPage() {
 
           {/* 항목 등록 (우드 팻말) */}
           <section
-            className={`bg-[#FFFBF2] rounded-[28px] border-[3px] border-[#D6C2A5] p-4 sm:p-5 ${SHADOW_AC} relative overflow-hidden`}
+            className={`bg-[#FFFBF2] rounded-[28px] border-[3px] border-[#D6C2A5] p-4 sm:p-5 xl:p-3 ${SHADOW_AC} relative overflow-hidden`}
           >
             <div className="absolute left-3 top-3 w-2.5 h-2.5 rounded-full bg-[#9E7A56] border border-[#6B4F33]" />
             <div className="absolute right-3 top-3 w-2.5 h-2.5 rounded-full bg-[#9E7A56] border border-[#6B4F33]" />
-            <div className="flex flex-wrap items-center gap-2 mb-3">
+            <div className="flex flex-wrap items-center gap-2 mb-3 xl:mb-2">
               <button
                 onClick={() => setAddMode("link")}
                 className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all flex items-center gap-1.5 ${
@@ -446,15 +446,15 @@ export default function BoardPage() {
           </section>
 
           {/* 인벤토리 주머니 vs 가판대 */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[190px_1fr_1fr_190px] gap-6 items-stretch">
+          <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[170px_1fr_1fr_170px] gap-6 xl:gap-4 items-stretch xl:flex-1 xl:min-h-0 xl:grid-rows-1">
             {/* LEFT: 아이템 주머니 */}
             <ZoneShell
               id="cart-zone"
-              className={`order-1 lg:order-none lg:col-start-1 lg:row-start-1 xl:col-start-2 flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+              className={`order-1 lg:order-none lg:col-start-1 lg:row-start-1 xl:col-start-2 flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 xl:p-4 xl:min-h-0 xl:overflow-y-auto relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2.5 rounded-[30px] border-2 border-dashed border-[#CCBFA3] pointer-events-none" />
               <div
-                className={`relative z-10 w-full rounded-2xl border-2 border-[#B89A62] mb-3 py-3 px-5 ${SHADOW_AC_SM}`}
+                className={`relative z-10 w-full rounded-2xl border-2 border-[#B89A62] mb-3 py-3 px-5 xl:mb-2 xl:py-1.5 ${SHADOW_AC_SM}`}
                 style={{
                   backgroundColor: "#E3CD98",
                   backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(0,0,0,0.05))",
@@ -467,7 +467,7 @@ export default function BoardPage() {
                 </h2>
               </div>
 
-              <div className="relative z-10 flex items-center justify-between px-1 pb-2 mb-3 border-b-2 border-[#D9CDAF]">
+              <div className="relative z-10 flex items-center justify-between px-1 pb-2 mb-3 xl:pb-1 xl:mb-2 border-b-2 border-[#D9CDAF]">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
                     {cartItems.length}/{Math.max(10, cartItems.length)} 보관 중
@@ -480,7 +480,7 @@ export default function BoardPage() {
               </div>
 
               <div
-                className={`relative z-10 flex flex-col gap-2 mb-3 bg-[#E2D9C2]/80 rounded-[24px] border-2 border-[#C2B18E] p-3 ${SHADOW_INNER}`}
+                className={`relative z-10 flex flex-col gap-2 mb-3 xl:mb-2 bg-[#E2D9C2]/80 rounded-[24px] border-2 border-[#C2B18E] p-3 xl:p-2 ${SHADOW_INNER}`}
               >
                 <div className="flex items-center gap-1.5 px-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#5D8A37]" />
@@ -504,7 +504,7 @@ export default function BoardPage() {
               </div>
 
               <JudgeShell
-                className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-[3px] border-dashed border-[#F6C644] p-3.5 ${SHADOW_AC_SM}`}
+                className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-[3px] border-dashed border-[#F6C644] p-3.5 xl:p-2.5 ${SHADOW_AC_SM}`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -571,7 +571,7 @@ export default function BoardPage() {
 
               {judgeResult && (
                 <div
-                  className={`order-2 lg:order-none lg:col-start-1 lg:row-start-2 xl:col-start-2 rounded-[26px] border-[3px] border-[#C8B693] bg-[#FFFDF7] p-3.5 ${SHADOW_AC_SM} flex flex-col gap-2`}
+                  className={`order-2 lg:order-none lg:col-start-1 lg:row-start-2 xl:fixed xl:left-1/2 xl:top-1/2 xl:-translate-x-1/2 xl:-translate-y-1/2 xl:w-[600px] xl:max-h-[80vh] xl:overflow-y-auto xl:z-[55] xl:shadow-2xl rounded-[26px] border-[3px] border-[#C8B693] bg-[#FFFDF7] p-3.5 ${SHADOW_AC_SM} flex flex-col gap-2`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5">
@@ -633,13 +633,13 @@ export default function BoardPage() {
             {/* RIGHT: 쇼케이스 */}
             <ZoneShell
               id="buy-zone"
-              className={`order-3 lg:order-none lg:col-start-2 lg:row-start-1 xl:col-start-3 flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+              className={`order-3 lg:order-none lg:col-start-2 lg:row-start-1 xl:col-start-3 flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 xl:p-4 xl:min-h-0 xl:overflow-y-auto relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2 rounded-[28px] border-2 border-dashed border-[#D6C2A5] pointer-events-none" />
               <div
-                className={`relative z-10 rounded-2xl overflow-hidden border-2 border-[#5E371C] ${SHADOW_AC_SM} mb-3 wood-grain`}
+                className={`relative z-10 rounded-2xl overflow-hidden border-2 border-[#5E371C] ${SHADOW_AC_SM} mb-3 xl:mb-2 wood-grain`}
               >
-                <div className="py-3 px-4 flex items-center justify-between text-white text-xs font-black">
+                <div className="py-3 px-4 xl:py-1.5 flex items-center justify-between text-white text-xs font-black">
                   <div className="flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-[#FFDE59] border-2 border-[#783F1E] inline-flex items-center justify-center text-[11px] text-[#734500]">
                       ★
@@ -651,7 +651,7 @@ export default function BoardPage() {
                 </div>
               </div>
 
-              <div className="relative z-10 flex items-center justify-between gap-3 pb-2 mb-2 border-b-2 border-[#E8DCC2]">
+              <div className="relative z-10 flex items-center justify-between gap-3 pb-2 mb-2 xl:pb-1 xl:mb-1.5 border-b-2 border-[#E8DCC2]">
                 <p className="text-xs text-[#7A5B3E] font-bold leading-snug">
                   1층에 원하는 순서대로 놓으세요.
                   <br />
@@ -661,7 +661,7 @@ export default function BoardPage() {
               </div>
 
               <div
-                className={`relative z-10 rounded-[28px] bg-[#EFE4CF] border-[3px] border-[#C9B390] p-4 ${SHADOW_INNER} flex-1 flex flex-col justify-between gap-3 select-none`}
+                className={`relative z-10 rounded-[28px] bg-[#EFE4CF] border-[3px] border-[#C9B390] p-4 xl:p-2.5 ${SHADOW_INNER} flex-1 flex flex-col justify-between gap-3 xl:gap-2 select-none`}
               >
                 {/* 1층 */}
                 <div className="flex flex-col gap-2">
@@ -792,10 +792,13 @@ export default function BoardPage() {
               hintClass="bg-[#E5F5D4] border-[#AED48C] text-[#2D6C2A]"
             />
           </section>
-          <p className="text-center text-xs font-medium text-[#3F5B2A] leading-relaxed px-4">
+          <p className="text-center text-xs font-medium text-[#3F5B2A] leading-relaxed px-4 xl:hidden">
             만족 지속 개월과 사용 빈도는 AI 추정값이며 실측이 아니에요. 참고용 판단이고 투자·재무 조언이 아니에요.
             <br />
             지출 결정의 책임은 사용자에게 있어요.
+          </p>
+          <p className="hidden xl:block text-center text-[11px] font-medium text-[#3F5B2A] leading-none -mt-1">
+            AI 추정값이며 실측이 아니에요 · 참고용이고 투자·재무 조언이 아니에요 · 지출 결정의 책임은 사용자에게 있어요
           </p>
         </main>
       </div>
@@ -1139,7 +1142,7 @@ function ActionZone({
     <div
       ref={setNodeRef}
       id={id}
-      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-6 transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${dim ? "opacity-50 saturate-50 hover:opacity-100 hover:saturate-100" : ""} ${className} ${
+      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-6 xl:p-4 xl:min-h-0 xl:overflow-hidden transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${dim ? "opacity-50 saturate-50 hover:opacity-100 hover:saturate-100" : ""} ${className} ${
         isOver ? overClass : borderClass
       }`}
     >

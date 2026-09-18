@@ -101,5 +101,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "llm_call_failed" }, { status: 502 });
   }
 
+  console.log("[parse-screenshot]", w, h, JSON.stringify(parsed.items?.map((i) => [i.name, i.price, i.image_box])));
   return NextResponse.json(parsed);
 }
