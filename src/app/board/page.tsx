@@ -404,7 +404,7 @@ export default function BoardPage() {
                   바꾸기
                 </Link>
               </span>
-              <span className="text-xl font-black text-[#A75D00] flex items-center gap-1.5 truncate">
+              <span className="text-2xl font-bold text-[#A75D00] flex items-center gap-1.5 truncate" style={HAND}>
                 <GoalIcon goal={goalType} className="w-5 h-5" />
                 {goalType ?? "-"}
               </span>
@@ -413,11 +413,11 @@ export default function BoardPage() {
               <span className="text-xs font-bold text-[#6F523A]">
                 이번 달 남은 예산 <span className="font-medium">(총 {won(totalBudget)}{purchasedSum > 0 && ` · 구매 ${won(purchasedSum)}`})</span>
               </span>
-              <span className="text-xl font-black text-[#2D6C2A]">{won(budget)}</span>
+              <span className="text-2xl font-bold text-[#2D6C2A]" style={HAND}>{won(budget)}</span>
             </div>
             <div className="flex flex-col leading-tight text-right">
               <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
-              <span className="text-xl font-black text-[#5B3E29]">
+              <span className="text-2xl font-bold text-[#5B3E29]" style={HAND}>
                 {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
               </span>
             </div>
@@ -448,7 +448,8 @@ export default function BoardPage() {
 
               <button
                 onClick={() => setAddOpen(true)}
-                className="relative z-10 shrink-0 w-full mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1 rounded-2xl btn-soft-green text-base"
+                className="relative z-10 shrink-0 w-full mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1 rounded-2xl btn-soft-green text-xl"
+                style={HAND}
               >
                 <svg className="w-6 h-6 text-[#3F8A3A]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                   <path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.86-7.01L19.42 4h-.01l-1.1 2-2.76 5H8.53l-.13-.27L6.16 6l-.95-2-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.13 0-.25-.11-.25-.25z" />
@@ -675,7 +676,8 @@ export default function BoardPage() {
                 <button
                   onClick={() => setConfirmBulk(true)}
                   disabled={shelf1.length === 0}
-                  className={`btn-soft-green w-full py-2 rounded-2xl text-sm flex items-center justify-center gap-2`}
+                  className={`btn-soft-green w-full py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
+                  style={HAND}
                 >
                   🧾 1층 전체 계산하기 ({shelf1.length}개 · {won(shelf1Sum)})
                 </button>
