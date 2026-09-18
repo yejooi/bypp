@@ -905,24 +905,23 @@ function ActionZone({
   return (
     <div
       ref={setNodeRef}
-      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-4 transition-all ${SHADOW_AC} flex flex-col items-center justify-center gap-3 text-center text-[#523B28] ${className} ${
+      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-4 transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${className} ${
         isOver ? overClass : borderClass
       }`}
     >
-      <div
-        className={`w-full rounded-2xl border-2 border-[#5E371C] wood-grain ${SHADOW_AC_SM} px-3 py-2 text-base font-black text-[#FFF3DE] tracking-tight`}
-        style={HAND}
-      >
+      <h3 className="self-stretch text-lg font-black text-[#5B3E29] tracking-tight" style={HAND}>
         {titleChip}
-      </div>
-      <div className="pocket-slot w-24 h-24 rounded-3xl flex items-center justify-center group-hover:-translate-y-1 transition-transform">
-        {visual}
-      </div>
-      <p className="text-base font-bold whitespace-pre-line break-keep leading-snug" style={HAND}>
-        {desc}
-      </p>
-      <div className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-xs font-black ${hintClass}`}>
-        <span>↓</span> {hint}
+      </h3>
+      <div className="flex-1 flex flex-col items-center justify-center gap-3">
+        <div className="pocket-slot w-24 h-24 rounded-3xl flex items-center justify-center group-hover:-translate-y-1 transition-transform">
+          {visual}
+        </div>
+        <p className="text-base font-bold whitespace-pre-line break-keep leading-snug" style={HAND}>
+          {desc}
+        </p>
+        <div className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-xs font-black ${hintClass}`}>
+          <span>↓</span> {hint}
+        </div>
       </div>
     </div>
   );
