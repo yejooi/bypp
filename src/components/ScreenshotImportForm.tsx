@@ -5,6 +5,7 @@
 // 상품 사진은 URL이 없으니, 모델이 알려준 썸네일 위치(image_box)를 원본에서 잘라 쓴다. 위치를 못 잡으면 이미지 없이 등록.
 
 import { useRef, useState } from "react";
+import { authedFetch } from "@/lib/authedFetch";
 import { RatingSliders, DEFAULT_RATINGS, type Ratings } from "@/components/RatingSliders";
 import { useApp, REASON_CODE_LABEL, type ReasonCode } from "@/lib/store";
 
@@ -79,7 +80,7 @@ export function ScreenshotImportForm() {
     setError(null);
     try {
       const { base64, mediaType, canvas } = await resizeToBase64(file);
-      const res = await fetch("/api/parse-screenshot", {
+      const res = await authedFetch("/api/parse-screenshot", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ imageBase64: base64, mediaType }),

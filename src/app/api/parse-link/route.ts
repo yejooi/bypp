@@ -2,6 +2,7 @@
 // 서버 라우트에서만 호출 (클라이언트가 임의 URL로 직접 fetch하면 CORS에 막힌다).
 
 import { NextRequest, NextResponse } from "next/server";
+import { requireUser } from "@/lib/apiAuth";
 import * as cheerio from "cheerio";
 
 export type ParsedProduct = {
@@ -30,6 +31,9 @@ function toNumber(value: string | null): number | null {
 }
 
 export async function POST(req: NextRequest) {
+  const uid = await requireUser(req);
+  if (!uid) return NextResponse.json<ParseFailure>({ success: false, reason: "unauthorized" }, { status: 401 });
+
   const { url } = await req.json();
   if (!url || typeof url !== "string") {
     return NextResponse.json<ParseFailure>({ success: false, reason: "no_url" }, { status: 400 });

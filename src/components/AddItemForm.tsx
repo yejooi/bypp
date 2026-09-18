@@ -3,6 +3,7 @@
 // §5: 링크 붙여넣기 -> 리다이렉트 -> OG 파싱 -> (실패시) 수동 입력 폴백 -> 이유 객관식.
 
 import { useState } from "react";
+import { authedFetch } from "@/lib/authedFetch";
 import { RatingSliders, DEFAULT_RATINGS } from "@/components/RatingSliders";
 import { useApp, REASON_CODE_LABEL, type ReasonCode } from "@/lib/store";
 import type { ParsedProduct } from "@/app/api/parse-link/route";
@@ -49,7 +50,7 @@ export function AddItemForm() {
     setLoading(true);
     setFailReason(null);
     try {
-      const res = await fetch("/api/parse-link", {
+      const res = await authedFetch("/api/parse-link", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ url }),
@@ -121,7 +122,7 @@ export function AddItemForm() {
     >
       {failReason && (
         <p className="text-xs font-medium" style={{ color: "var(--accent)" }}>
-          링크에서 정보를 못 가져왔어요 ({failReason}) — 직접 입력해주세요.
+          이 링크는 정보를 못 가져왔어요. 사이트에 따라 막혀 있을 수 있어요. 아래에 직접 적거나, 위의 "스샷으로 넣기"를 써 보세요.
         </p>
       )}
       {draft.imageUrl && (

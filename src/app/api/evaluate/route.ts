@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import type { EvalInput, LlmEstimate } from "@/lib/scoring";
+import { requireUser, withinRateLimit } from "@/lib/apiAuth";
 
 const MODEL = "claude-sonnet-5";
 
@@ -95,7 +96,12 @@ function fillMissing(items: EvalInput[], parsed: { items: LlmEstimate[] } | null
 }
 
 export async function POST(req: NextRequest) {
+  const uid = await requireUser(req);
+  if (!uid) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!withinRateLimit(`evaluate:${uid}`)) return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+
   const { items } = (await req.json()) as { items: EvalInput[] };
+  if (items && items.length > 40) return NextResponse.json({ error: "too_many_items" }, { status: 413 });
   if (!items?.length) {
     return NextResponse.json({ error: "no_items" }, { status: 400 });
   }

@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { Mascot, SpeechBubble } from "@/components/Mascot";
 import { GoalIcon } from "@/components/GoalIcon";
+import { authedFetch } from "@/lib/authedFetch";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   DndContext,
@@ -162,7 +163,7 @@ export default function BoardPage() {
     setEvalState("loading");
     const toPromote = judgeItems;
     try {
-      const res = await fetch("/api/evaluate", {
+      const res = await authedFetch("/api/evaluate", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -792,6 +793,11 @@ export default function BoardPage() {
               hintClass="bg-[#E5F5D4] border-[#AED48C] text-[#2D6C2A]"
             />
           </section>
+          <p className="text-center text-xs font-medium text-[#3F5B2A] leading-relaxed px-4">
+            만족 지속 개월과 사용 빈도는 AI 추정값이며 실측이 아니에요. 참고용 판단이고 투자·재무 조언이 아니에요.
+            <br />
+            지출 결정의 책임은 사용자에게 있어요.
+          </p>
         </main>
       </div>
 

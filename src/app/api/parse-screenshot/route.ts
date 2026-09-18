@@ -4,6 +4,7 @@
 // §9-2: JSON 파싱 실패 시 1회 재시도.
 
 import { NextRequest, NextResponse } from "next/server";
+import { requireUser, withinRateLimit } from "@/lib/apiAuth";
 
 const MODEL = "claude-sonnet-5";
 
@@ -63,10 +64,17 @@ async function callClaudeOnce(
 }
 
 export async function POST(req: NextRequest) {
+  const uid = await requireUser(req);
+  if (!uid) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!withinRateLimit(`screenshot:${uid}`, 20)) return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+
   const { imageBase64, mediaType } = (await req.json()) as {
     imageBase64: string;
     mediaType: string;
   };
+  if (imageBase64 && imageBase64.length > 8_000_000) {
+    return NextResponse.json({ error: "too_large" }, { status: 413 });
+  }
   if (!imageBase64) {
     return NextResponse.json({ error: "no_image" }, { status: 400 });
   }
