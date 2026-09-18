@@ -425,7 +425,7 @@ export default function BoardPage() {
                 onClick={() => setAddMode("link")}
                 className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all flex items-center gap-1.5 ${
                   addMode === "link"
-                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
+                    ? "btn-leaf"
                     : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
                 }`}
               >
@@ -436,7 +436,7 @@ export default function BoardPage() {
                 onClick={() => setAddMode("screenshot")}
                 className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all flex items-center gap-1.5 ${
                   addMode === "screenshot"
-                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
+                    ? "btn-leaf"
                     : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
                 }`}
               >
@@ -562,7 +562,7 @@ export default function BoardPage() {
                 <button
                   onClick={handleEvaluate}
                   disabled={judgeItems.length === 0 || evalState === "loading"}
-                  className={`w-full py-2.5 px-4 bg-[#4EA434] hover:bg-[#3F8829] active:translate-y-0.5 text-white font-black text-xs sm:text-sm rounded-2xl ${SHADOW_AC_SM} transition-all flex items-center justify-center gap-2 disabled:opacity-40`}
+                  className={`btn-leaf w-full py-2.5 px-4 font-black text-xs sm:text-sm rounded-2xl flex items-center justify-center gap-2`}
                 >
                   <StarIcon className="w-4 h-4 text-[#FFE073]" />
                   <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 판정 부탁하기"}</span>
@@ -861,7 +861,7 @@ export default function BoardPage() {
                   setConfirmBulk(false);
                   buyFirstFloor();
                 }}
-                className={`flex-1 py-2.5 rounded-full font-black text-white bg-[#3F8A3A] ${SHADOW_AC_SM}`}
+                className={`btn-leaf flex-1 py-2.5 rounded-full font-black`}
               >
                 네 계산할래요
               </button>
@@ -1176,7 +1176,7 @@ function SheetBtn({
   const palette = {
     cream: "bg-[#EFE8D6] border-[#D4C3A3] text-[#5B3E29]",
     wood: "bg-[#A36B3E] border-[#5E371C] text-[#FFF3DE]",
-    green: "bg-[#3F8A3A] border-[#2A6427] text-white",
+    green: "btn-leaf",
     tape: "bg-[#E8B84A] border-[#B8862A] text-[#5B3E29]",
   }[tone];
   return (
