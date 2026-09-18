@@ -602,7 +602,7 @@ export default function BoardPage() {
                     ))}
                     {Array.from({ length: Math.max(0, shelf1Slots - shelf1.length) }).map((_, i) => (
                       <SlotDrop key={`s1-${i}`} id="slot-end1" label={`${shelf1.length + i + 1}위`}>
-                        <EmptyShelf label="빈 선반" />
+                        <EmptyShelf />
                       </SlotDrop>
                     ))}
                   </div>
@@ -643,7 +643,7 @@ export default function BoardPage() {
                     ))}
                     {Array.from({ length: Math.max(0, shelf2Slots - shelf2.length) }).map((_, i) => (
                       <SlotDrop key={`s2-${i}`} id="slot-end2" label="대기">
-                        <EmptyShelf label="서랍 칸" faint />
+                        <EmptyShelf faint />
                       </SlotDrop>
                     ))}
                   </div>
@@ -804,13 +804,12 @@ function SlotDrop({ id, label, children }: { id: string; label: string; children
   );
 }
 
-function EmptyShelf({ label, faint }: { label: string; faint?: boolean }) {
+function EmptyShelf({ faint }: { faint?: boolean }) {
   return (
     <div
       className={`pocket-slot w-full aspect-square rounded-2xl flex flex-col items-center justify-center ${faint ? "opacity-60" : ""}`}
     >
-      <div className="w-3 h-3 rounded-full bg-[#C9BFAB]" />
-      <span className="text-[10px] text-[#A89481] font-bold mt-1">{label}</span>
+      <div className="w-2.5 h-2.5 rounded-full bg-[#C9BFAB]" />
     </div>
   );
 }
