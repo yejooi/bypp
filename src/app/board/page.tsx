@@ -41,6 +41,9 @@ const SHADOW_INNER = "shadow-[inset_0_3px_6px_rgba(0,0,0,0.1)]";
 const HAND = { fontFamily: "var(--font-gaegu)" } as const;
 
 // 물건을 탭하면 옮기기 메뉴가 열린다 (모바일에서 긴 화면을 드래그로 오가기 어려워서 만든 기본 경로. 드래그는 추가 동작).
+// 목표 선택 화면의 아이콘과 같은 것을 헤더 칩에서도 쓴다. 직접 입력한 목표는 🎯.
+const GOAL_EMOJI: Record<string, string> = { "1억 모으기": "💰", 내집마련: "🏡", "여행 자금": "✈️" };
+
 const TileTapContext = createContext<(id: string) => void>(() => {});
 const won = (n: number) => `${n.toLocaleString()}원`;
 const short = (n: number) => (n >= 10000 ? `${+(n / 10000).toFixed(1)}만원` : `${n.toLocaleString()}원`);
@@ -384,17 +387,13 @@ export default function BoardPage() {
           <header
             className={`flex items-center gap-4 bg-[#FFF9EC]/90 backdrop-blur-md px-4 py-3 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
           >
-            <div
-              className={`hidden sm:flex w-12 h-12 rounded-2xl bg-[#F6C644] border-2 border-[#C9981A] ${SHADOW_AC_SM} items-center justify-center shrink-0 text-[#8C5500] font-black text-xl`}
-            >
-              ₩
-            </div>
+            <Mascot size={52} mood="idle" className="hidden sm:block" />
             <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 items-center">
               <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-xs font-bold text-[#8C6D53]">목표</span>
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#5D8A37] text-white text-sm font-black rounded-full truncate">
-                    <LeafIcon className="w-3 h-3 text-[#BEE88A] shrink-0" />
+                    <span className="text-sm leading-none">{GOAL_EMOJI[goalType ?? ""] ?? "🎯"}</span>
                     {goalType ?? "-"}
                   </span>
                   <Link href="/?edit=1" className="text-xs font-bold text-[#8C6D53] underline shrink-0">
