@@ -665,3 +665,15 @@ UI는 나중에 고쳐도 되지만, LLM 순위가 엉망이면 서비스가 통
 | 데모용 시드 데이터 | 사용자가 실제 상품으로 준비 중. 가격순과 순위가 어긋나는 조합이어야 함 |
 
 이 항목들은 임의로 정하지 말고 물어볼 것.
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as GitHub issues in this repo (github.com/yejooi/bypp), managed via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
