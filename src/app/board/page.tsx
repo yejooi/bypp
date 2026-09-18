@@ -11,6 +11,7 @@ import { GoalIcon } from "@/components/GoalIcon";
 import { UserControls } from "@/components/UserBar";
 import { authedFetch } from "@/lib/authedFetch";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   DndContext,
   DragOverlay,
@@ -1028,6 +1029,12 @@ function ItemTile({
 
   const elRef = useRef<HTMLDivElement | null>(null);
   const onTap = useContext(TileTapContext);
+  // 이름 툴팁은 패널의 overflow에 잘리지 않게 body에 fixed로 띄운다 (가장 위 레이어).
+  const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
+  function showTip() {
+    const r = elRef.current?.getBoundingClientRect();
+    if (r) setTip({ x: r.left + r.width / 2, y: r.top });
+  }
 
   // 계산대로 내릴 때: 원본은 숨기고, 화면 위에 복제본을 띄워 계산대 카드 중심까지 날려 보낸다.
   // (패널이 overflow-hidden이라 원본을 그대로 옮기면 잘려서, fixed 복제본을 body에 붙인다.)
@@ -1081,6 +1088,8 @@ function ItemTile({
       {...listeners}
       {...attributes}
       onClick={() => onTap(item.id)}
+      onMouseEnter={showTip}
+      onMouseLeave={() => setTip(null)}
       className={`group relative flex flex-col items-center touch-manipulation select-none ${exitClass} ${
         isDragging ? "opacity-30" : ""
       } ${item.exiting ? "pointer-events-none" : ""}`}
@@ -1122,10 +1131,18 @@ function ItemTile({
         >
           {short(item.price)}
         </span>
-        <div className="opacity-0 group-hover:opacity-100 pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 z-30 max-w-[220px] bg-[#FFFDF0] border-2 border-[#68472E] text-[#4A3324] text-xs font-black py-0.5 px-2.5 rounded-full shadow-[0_3px_0_rgba(74,46,53,0.16)] truncate transition-opacity">
-          {item.name}
-        </div>
       </div>
+      {tip &&
+        !isDragging &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed z-[200] max-w-[280px] -translate-x-1/2 -translate-y-full bg-[#FFFDF0] border-2 border-[#68472E] text-[#4A3324] text-xs font-black py-1 px-3 rounded-2xl shadow-[0_3px_0_rgba(74,46,53,0.16)] leading-snug"
+            style={{ left: Math.min(Math.max(tip.x, 150), window.innerWidth - 150), top: Math.max(tip.y - 6, 40) }}
+          >
+            {item.name}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
