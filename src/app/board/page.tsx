@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { Mascot, SpeechBubble } from "@/components/Mascot";
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -39,6 +39,9 @@ const SHADOW_AC_SM = "shadow-[0_3px_0_rgba(74,46,53,0.16)]";
 const SHADOW_INNER = "shadow-[inset_0_3px_6px_rgba(0,0,0,0.1)]";
 
 const HAND = { fontFamily: "var(--font-gaegu)" } as const;
+
+// 물건을 탭하면 옮기기 메뉴가 열린다 (모바일에서 긴 화면을 드래그로 오가기 어려워서 만든 기본 경로. 드래그는 추가 동작).
+const TileTapContext = createContext<(id: string) => void>(() => {});
 const won = (n: number) => `${n.toLocaleString()}원`;
 const short = (n: number) => (n >= 10000 ? `${+(n / 10000).toFixed(1)}만원` : `${n.toLocaleString()}원`);
 
@@ -99,9 +102,11 @@ export default function BoardPage() {
   const [addMode, setAddMode] = useState<"link" | "screenshot">("link");
   // 판정대에 올려둔 아이템 id. 순위 판정은 여기 있는 것만 대상으로 한다 (DB 상태는 cart 그대로).
   const [judgeIds, setJudgeIds] = useState<string[]>([]);
+  const [sheetId, setSheetId] = useState<string | null>(null);
+  const justDraggedRef = useRef(false);
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 4 } });
-  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } });
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 300, tolerance: 8 } });
   const sensors = useSensors(mouseSensor, touchSensor);
 
   const cartItems = items.filter((it) => it.status === "cart");
@@ -230,11 +235,15 @@ export default function BoardPage() {
   const activeItem = items.find((it) => it.id === activeId) ?? null;
 
   function handleDragStart(event: DragStartEvent) {
+    justDraggedRef.current = true;
     setActiveId(String(event.active.id));
   }
 
   function handleDragEnd(event: DragEndEvent) {
     setActiveId(null);
+    setTimeout(() => {
+      justDraggedRef.current = false;
+    }, 150);
     const { active, over } = event;
     if (!over) return;
     const id = String(active.id);
@@ -303,6 +312,56 @@ export default function BoardPage() {
     shelf1.forEach((r) => moveItem(r.item.id, "purchased"));
   }
 
+  // ---- 탭 메뉴 동작들 ----
+  const sheetItem = items.find((it) => it.id === sheetId) ?? null;
+
+  function openSheet(id: string) {
+    if (justDraggedRef.current) return;
+    setSheetId(id);
+  }
+  function sheetToJudge(id: string) {
+    const st = items.find((it) => it.id === id)?.status;
+    if (st !== "cart") moveItem(id, "cart");
+    setJudgeIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setSheetId(null);
+  }
+  function sheetToPouch(id: string) {
+    setJudgeIds((prev) => prev.filter((x) => x !== id));
+    moveItem(id, "cart");
+    setSheetId(null);
+  }
+  function sheetToStall(id: string) {
+    setJudgeIds((prev) => prev.filter((x) => x !== id));
+    moveItem(id, "buy");
+    reorderShowcase([...orderedBuyIds.filter((x) => x !== id), id]);
+    setSheetId(null);
+  }
+  function sheetShift(id: string, dir: -1 | 1) {
+    const i = orderedBuyIds.indexOf(id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= orderedBuyIds.length) return;
+    const next = [...orderedBuyIds];
+    [next[i], next[j]] = [next[j], next[i]];
+    reorderShowcase(next);
+  }
+  function sheetToss(id: string) {
+    const st = items.find((it) => it.id === id)?.status ?? "cart";
+    setUndo({ text: "안 사기로 했어요. 목록이 가벼워졌어요!", prev: [{ id, status: st }] });
+    setJudgeIds((prev) => prev.filter((x) => x !== id));
+    moveItem(id, "removed");
+    setSheetId(null);
+  }
+  function sheetBuy(id: string) {
+    setSheetId(null);
+    if (shelf2Ids.has(id)) {
+      setPendingBuyId(id);
+      return;
+    }
+    const st = items.find((it) => it.id === id)?.status ?? "buy";
+    setUndo({ text: "1개 정리됐어요!", prev: [{ id, status: st }] });
+    moveItem(id, "purchased");
+  }
+
   const pouchSlots = Math.max(10, Math.ceil(pouchItems.length / 5) * 5);
   const judgeSlots = Math.max(5, Math.ceil(judgeItems.length / 5) * 5);
   const shelf1Slots = Math.max(8, Math.ceil(shelf1.length / 4) * 4);
@@ -313,8 +372,12 @@ export default function BoardPage() {
       sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragCancel={() => setActiveId(null)}
+      onDragCancel={() => {
+        setActiveId(null);
+        justDraggedRef.current = false;
+      }}
     >
+      <TileTapContext.Provider value={openSheet}>
       <div className="grass-bg flex-1 text-[#4A3324]">
         <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-24 pb-32 flex flex-col gap-5">
           {/* 헤더 */}
@@ -411,9 +474,12 @@ export default function BoardPage() {
               </div>
 
               <div className="relative z-10 flex items-center justify-between px-1 pb-2 mb-3 border-b-2 border-[#D9CDAF]">
-                <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
-                  {cartItems.length}/{Math.max(10, cartItems.length)} 보관 중
-                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
+                    {cartItems.length}/{Math.max(10, cartItems.length)} 보관 중
+                  </span>
+                  <span className="text-xs font-bold text-[#8C6D53]">물건을 톡 누르면 옮기기 메뉴가 열려요</span>
+                </div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs font-bold text-[#8C6D53]">주머니 합계</span>
                   <span className="text-sm font-black text-[#7A4924]">{won(cartSum)}</span>
@@ -780,6 +846,66 @@ export default function BoardPage() {
         </div>
       )}
 
+      {sheetItem && (
+        <div className="fixed inset-0 z-[60] bg-black/40 flex items-end sm:items-center justify-center" onClick={() => setSheetId(null)}>
+          <div
+            className={`w-full sm:max-w-sm bg-[#FFFBF2] border-4 border-[#85532F] rounded-t-[28px] sm:rounded-[28px] p-5 pb-6 text-[#4A3324] ${SHADOW_AC} flex flex-col gap-3`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="pocket-slot relative w-14 h-14 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
+                {sheetItem.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={sheetItem.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <BagIcon className="w-7 h-7 text-[#4F942B]" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-black leading-snug line-clamp-2">{sheetItem.name}</p>
+                <p className="text-sm font-black text-[#82542B]">{won(sheetItem.price)}</p>
+              </div>
+              <button onClick={() => setSheetId(null)} className="text-xs font-bold text-[#8C6D53] underline shrink-0">
+                닫기
+              </button>
+            </div>
+            <p className="text-xs font-bold text-[#7A5B3E]">어디로 옮길까요?</p>
+            <div className="flex flex-col gap-2">
+              {sheetItem.status === "cart" && !judgeIds.includes(sheetItem.id) && (
+                <SheetBtn onClick={() => sheetToJudge(sheetItem.id)}>🔍 AI 심사대에 올리기</SheetBtn>
+              )}
+              {sheetItem.status === "cart" && judgeIds.includes(sheetItem.id) && (
+                <SheetBtn onClick={() => sheetToPouch(sheetItem.id)}>👜 주머니로 돌려놓기</SheetBtn>
+              )}
+              {sheetItem.status === "cart" && (
+                <SheetBtn tone="wood" onClick={() => sheetToStall(sheetItem.id)}>
+                  🪵 살 물건 가판대에 올리기
+                </SheetBtn>
+              )}
+              {sheetItem.status === "buy" && (
+                <div className="flex gap-2">
+                  <SheetBtn className="flex-1" onClick={() => sheetShift(sheetItem.id, -1)}>
+                    ⬆ 앞으로
+                  </SheetBtn>
+                  <SheetBtn className="flex-1" onClick={() => sheetShift(sheetItem.id, 1)}>
+                    ⬇ 뒤로
+                  </SheetBtn>
+                </div>
+              )}
+              {sheetItem.status === "buy" && <SheetBtn onClick={() => sheetToPouch(sheetItem.id)}>👜 주머니로 돌려놓기</SheetBtn>}
+              {sheetItem.status === "buy" && (
+                <SheetBtn tone="green" onClick={() => sheetBuy(sheetItem.id)}>
+                  🧾 계산대 (샀어요!)
+                </SheetBtn>
+              )}
+              <SheetBtn tone="tape" onClick={() => sheetToss(sheetItem.id)}>
+                📦 반품함 (안 살래요)
+              </SheetBtn>
+            </div>
+          </div>
+        </div>
+      )}
+
       <DragOverlay>
         {activeItem ? (
           <div className="max-w-[180px] rounded-xl px-2.5 py-1.5 shadow-lg border-2 border-[#4EA434] bg-[#FFFDF0] text-[#4A3324]">
@@ -788,6 +914,7 @@ export default function BoardPage() {
           </div>
         ) : null}
       </DragOverlay>
+      </TileTapContext.Provider>
     </DndContext>
   );
 }
@@ -847,6 +974,7 @@ function ItemTile({
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: item.id });
 
   const elRef = useRef<HTMLDivElement | null>(null);
+  const onTap = useContext(TileTapContext);
 
   // 계산대로 내릴 때: 원본은 숨기고, 화면 위에 복제본을 띄워 계산대 카드 중심까지 날려 보낸다.
   // (패널이 overflow-hidden이라 원본을 그대로 옮기면 잘려서, fixed 복제본을 body에 붙인다.)
@@ -899,7 +1027,8 @@ function ItemTile({
       }}
       {...listeners}
       {...attributes}
-      className={`group relative flex flex-col items-center touch-none select-none ${exitClass} ${
+      onClick={() => onTap(item.id)}
+      className={`group relative flex flex-col items-center touch-manipulation select-none ${exitClass} ${
         isDragging ? "opacity-30" : ""
       } ${item.exiting ? "pointer-events-none" : ""}`}
     >
@@ -1001,5 +1130,32 @@ function ActionZone({
         </div>
       </div>
     </div>
+  );
+}
+
+function SheetBtn({
+  children,
+  onClick,
+  tone = "cream",
+  className = "",
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  tone?: "cream" | "wood" | "green" | "tape";
+  className?: string;
+}) {
+  const palette = {
+    cream: "bg-[#EFE8D6] border-[#D4C3A3] text-[#5B3E29]",
+    wood: "bg-[#A36B3E] border-[#5E371C] text-[#FFF3DE]",
+    green: "bg-[#3F8A3A] border-[#2A6427] text-white",
+    tape: "bg-[#E8B84A] border-[#B8862A] text-[#5B3E29]",
+  }[tone];
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full py-3 rounded-2xl border-2 font-black text-sm active:translate-y-0.5 transition ${SHADOW_AC_SM} ${palette} ${className}`}
+    >
+      {children}
+    </button>
   );
 }
