@@ -53,3 +53,13 @@ create table if not exists evaluations (
 );
 
 create index if not exists items_session_id_idx on items(session_id);
+
+-- RLS: 로그인 없이 UUID 링크로만 세션을 구분하는 구조라(§9-3) 사용자별 정책이 없다.
+-- Supabase 대시보드의 "RLS 꺼짐" 경고를 피하면서, anon key로의 전체 접근은 계속 허용한다.
+alter table sessions enable row level security;
+alter table items enable row level security;
+alter table evaluations enable row level security;
+
+create policy "anon full access" on sessions for all to anon using (true) with check (true);
+create policy "anon full access" on items for all to anon using (true) with check (true);
+create policy "anon full access" on evaluations for all to anon using (true) with check (true);
