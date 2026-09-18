@@ -37,6 +37,7 @@ const SHADOW_AC = "shadow-[0_6px_0_rgba(74,46,53,0.18)]";
 const SHADOW_AC_SM = "shadow-[0_3px_0_rgba(74,46,53,0.16)]";
 const SHADOW_INNER = "shadow-[inset_0_3px_6px_rgba(0,0,0,0.1)]";
 
+const HAND = { fontFamily: "var(--font-gaegu)" } as const;
 const won = (n: number) => `${n.toLocaleString()}원`;
 const short = (n: number) => (n >= 10000 ? `${+(n / 10000).toFixed(1)}만원` : `${n.toLocaleString()}원`);
 
@@ -402,7 +403,9 @@ export default function BoardPage() {
               >
                 <div className="flex items-center gap-1.5 px-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#5D8A37]" />
-                  <h3 className="text-xs font-black text-[#5B3E29]">내 주머니 (일반 보관)</h3>
+                  <h3 className="text-lg font-bold text-[#5B3E29]" style={HAND}>
+                    내 주머니 (일반 보관)
+                  </h3>
                   <span className="text-[10px] font-bold text-[#2D6C2A] bg-[#DCF2C7] px-2 rounded-full border border-[#AED48C]">
                     {pouchItems.length}/{pouchSlots} 보관
                   </span>
@@ -430,7 +433,9 @@ export default function BoardPage() {
                     <div className="w-6 h-6 rounded-full bg-[#FFDE59] border border-[#B37400] flex items-center justify-center text-[#734500]">
                       <StarIcon className="w-3.5 h-3.5" />
                     </div>
-                    <h3 className="text-xs font-black text-[#693E00]">AI 지름 우선순위 판정대</h3>
+                    <h3 className="text-lg font-bold text-[#693E00]" style={HAND}>
+                      AI 지름 우선순위 판정대
+                    </h3>
                     <span className="text-[10px] font-bold text-[#A16500] bg-[#FFF0D4] px-2 rounded-full border border-[#D9BA8B]">
                       연구소 바구니
                     </span>
@@ -439,10 +444,10 @@ export default function BoardPage() {
                     {judgeItems.length}개 후보 대기 중
                   </span>
                 </div>
-                <p className="text-[11px] text-[#7A5B3E] font-medium leading-tight">
+                <p className="text-base text-[#7A5B3E] font-bold leading-tight" style={HAND}>
                   진짜 살 물건 후보만 끌어다 놓고 AI의 판정을 받아보세요!
                 </p>
-                <p className="text-[11px] text-[#7A5B3E] font-bold">
+                <p className="text-base text-[#7A5B3E] font-bold" style={HAND}>
                   판정 기준 (버튼 누르기 전에 미리 정해두세요)
                 </p>
                 <div className="flex items-center gap-2 text-xs text-[#7A5B3E] font-bold">
@@ -491,7 +496,9 @@ export default function BoardPage() {
                   className={`relative z-10 mt-3 rounded-[26px] border-[3px] border-[#C8B693] bg-[#FFFDF7] p-3.5 ${SHADOW_AC_SM} flex flex-col gap-2`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-black text-[#5B3E29]">AI 판정 결과 (순위)</h3>
+                    <h3 className="text-xl font-bold text-[#5B3E29]" style={HAND}>
+                      AI 판정 결과 (순위)
+                    </h3>
                     <button
                       onClick={() => setJudgeResult(null)}
                       className="text-[11px] font-bold text-[#8C6D53] underline"
@@ -566,12 +573,14 @@ export default function BoardPage() {
 
               <div className="relative z-10 flex items-center justify-between pb-2 mb-2 border-b-2 border-[#E8DCC2]">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-black text-[#57351F] tracking-tight">진짜 살 물건 쇼케이스</h3>
+                  <h3 className="text-2xl font-bold text-[#57351F] tracking-tight" style={HAND}>
+                    진짜 살 물건 쇼케이스
+                  </h3>
                 </div>
                 <span className="text-xs font-bold text-[#8A5A35]">{buyItems.length}개 진열 중</span>
               </div>
 
-              <p className="relative z-10 text-xs text-[#7A5B3E] font-bold mb-2">
+              <p className="relative z-10 text-base text-[#7A5B3E] font-bold mb-2" style={HAND}>
                 1층에 원하는 순서대로 놓으세요. 예산을 넘는 물건부터 자동으로 2층으로 내려가요.
               </p>
 
@@ -581,7 +590,7 @@ export default function BoardPage() {
                 {/* 1층 */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
-                    <span className="text-xs font-black text-[#69421A] flex items-center gap-1">
+                    <span className="text-lg font-bold text-[#69421A] flex items-center gap-1" style={HAND}>
                       <span className="w-2 h-2 rounded-full bg-[#E09D1B]" />
                       1층: 이번 달 구매 선반 · {won(shelf1Sum)}
                     </span>
@@ -624,7 +633,7 @@ export default function BoardPage() {
                 {/* 2층 */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between px-1">
-                    <span className="text-xs font-black text-[#755541] flex items-center gap-1">
+                    <span className="text-lg font-bold text-[#755541] flex items-center gap-1" style={HAND}>
                       <span className="w-2 h-2 rounded-full bg-[#A8582C]" />
                       2층: 예산 초과 서랍
                     </span>
@@ -918,7 +927,9 @@ function ActionZone({
           {titleChip}
           {sub && <span className="text-[11px] font-bold text-[#80644D] bg-[#EFE4CF] px-2 py-0.5 rounded-md">{sub}</span>}
         </div>
-        <p className="text-xs font-medium">{desc}</p>
+        <p className="text-base font-bold" style={HAND}>
+          {desc}
+        </p>
         <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-[11px] font-black ${hintClass}`}>
           <span>↓</span> {hint}
         </div>
