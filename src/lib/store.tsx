@@ -2,8 +2,12 @@
 
 // Supabase에 실제로 저장한다 (§9-3 스키마). 새로고침해도 세션 id를 localStorage에 들고 있다가
 // 그걸로 다시 불러온다. DB 쓰기가 실패해도 로컬 상태로는 계속 동작시키고 에러만 배너로 띄운다 (§9-2).
+//
+// 세션 생성은 ensureSession()으로 일원화한다: setGoal이 만든 세션이 아직 서버 응답을 못 받은 채로
+// addItem/setBudget이 먼저 불려도(경합), sessionIdRef를 통해 최신 값을 보고 없으면 그 자리에서
+// 만들어버려서 "세션 없음" 때문에 저장이 통째로 실패하는 경우를 없앤다.
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 
 export type ReasonCode =
@@ -107,12 +111,56 @@ function rowToItem(row: {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionId, setSessionIdState] = useState<string | null>(null);
   const [goalType, setGoalType] = useState<string | null>(null);
   const [goalAmount, setGoalAmount] = useState<number | null>(null);
   const [monthlyBudget, setMonthlyBudget] = useState<number | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [dbError, setDbError] = useState<string | null>(null);
+
+  // 렌더 사이 타이밍 경합 없이 항상 최신 session id를 읽기 위한 ref (ensureSession의 핵심).
+  const sessionIdRef = useRef<string | null>(null);
+  const pendingSessionRef = useRef<Promise<string | null> | null>(null);
+  const goalRef = useRef<{ type: string | null; amount: number | null }>({ type: null, amount: null });
+  goalRef.current = { type: goalType, amount: goalAmount };
+
+  function setSessionId(id: string | null) {
+    sessionIdRef.current = id;
+    setSessionIdState(id);
+  }
+
+  // 세션이 없으면 그 자리에서 만든다. 동시에 여러 곳(addItem, setBudget)에서 불러도
+  // pendingSessionRef로 하나의 insert만 나가게 막는다.
+  async function ensureSession(overrideGoalType?: string, overrideGoalAmount?: number): Promise<string | null> {
+    if (sessionIdRef.current) return sessionIdRef.current;
+    if (pendingSessionRef.current) return pendingSessionRef.current;
+
+    const gt = overrideGoalType ?? goalRef.current.type ?? "미정";
+    const ga = overrideGoalAmount ?? goalRef.current.amount ?? 0;
+
+    const promise = (async () => {
+      const { data, error } = await supabase
+        .from("sessions")
+        .insert({ goal_type: gt, goal_amount: ga })
+        .select()
+        .single();
+      if (error || !data) {
+        console.error("[bypp] session create failed:", error);
+        setDbError(`저장 안 됨 (세션 생성 실패: ${error?.message ?? "unknown"})`);
+        return null;
+      }
+      setSessionId(data.id);
+      localStorage.setItem(SESSION_STORAGE_KEY, data.id);
+      return data.id as string;
+    })();
+
+    pendingSessionRef.current = promise;
+    try {
+      return await promise;
+    } finally {
+      pendingSessionRef.current = null;
+    }
+  }
 
   // 새로고침 시 이전 세션 복원 (§9-2: DB 연결 실패해도 로컬 상태로는 동작).
   useEffect(() => {
@@ -126,6 +174,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .eq("id", savedId)
         .maybeSingle();
       if (sessionErr || !session) {
+        console.error("[bypp] session restore failed:", sessionErr);
         localStorage.removeItem(SESSION_STORAGE_KEY);
         return;
       }
@@ -140,7 +189,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .eq("session_id", savedId)
         .order("created_at", { ascending: true });
       if (itemsErr) {
-        setDbError("저장 안 됨 (항목을 불러오지 못했어요)");
+        console.error("[bypp] items restore failed:", itemsErr);
+        setDbError(`저장 안 됨 (항목을 불러오지 못했어요: ${itemsErr.message})`);
         return;
       }
       setItems((itemRows ?? []).map(rowToItem));
@@ -152,37 +202,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setGoalAmount(newGoalAmount);
 
     (async () => {
-      if (sessionId) {
+      if (sessionIdRef.current) {
         const { error } = await supabase
           .from("sessions")
           .update({ goal_type: newGoalType, goal_amount: newGoalAmount })
-          .eq("id", sessionId);
-        if (error) setDbError("저장 안 됨 (목표 업데이트 실패)");
+          .eq("id", sessionIdRef.current);
+        if (error) {
+          console.error("[bypp] goal update failed:", error);
+          setDbError(`저장 안 됨 (목표 업데이트 실패: ${error.message})`);
+        }
         return;
       }
-      const { data, error } = await supabase
-        .from("sessions")
-        .insert({ goal_type: newGoalType, goal_amount: newGoalAmount })
-        .select()
-        .single();
-      if (error || !data) {
-        setDbError("저장 안 됨 (세션 생성 실패) — 그래도 계속 쓸 수 있어요");
-        return;
-      }
-      setSessionId(data.id);
-      localStorage.setItem(SESSION_STORAGE_KEY, data.id);
+      // 방금 정한 값으로 곧바로 세션을 만든다 (goalRef가 아직 안 갱신됐을 수 있어 override로 넘긴다).
+      await ensureSession(newGoalType, newGoalAmount);
     })();
   };
 
   const setBudget = (newBudget: number) => {
     setMonthlyBudget(newBudget);
-    if (!sessionId) return;
     (async () => {
-      const { error } = await supabase
-        .from("sessions")
-        .update({ monthly_budget: newBudget })
-        .eq("id", sessionId);
-      if (error) setDbError("저장 안 됨 (예산 업데이트 실패)");
+      const id = await ensureSession();
+      if (!id) return;
+      const { error } = await supabase.from("sessions").update({ monthly_budget: newBudget }).eq("id", id);
+      if (error) {
+        console.error("[bypp] budget update failed:", error);
+        setDbError(`저장 안 됨 (예산 업데이트 실패: ${error.message})`);
+      }
     })();
   };
 
@@ -190,14 +235,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const tempId = crypto.randomUUID();
     setItems((prev) => [...prev, { id: tempId, status: "cart", ...input }]);
 
-    if (!sessionId) {
-      setDbError("저장 안 됨 (세션 없음) — 이 항목은 새로고침하면 사라져요");
-      return;
-    }
-
     (async () => {
+      const sid = await ensureSession();
+      if (!sid) {
+        setDbError("저장 안 됨 (세션 생성 실패) — 이 항목은 새로고침하면 사라져요");
+        return;
+      }
+
       const fullPayload = {
-        session_id: sessionId,
+        session_id: sid,
         name: input.name,
         price: input.price,
         reason_code: input.reasonCode,
@@ -214,7 +260,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         // custom_reason/source_url 컬럼이 아직 없는 DB(마이그레이션 전)일 수 있으니 그 두 개만 빼고 재시도.
-        // supabase/migrations/0001_add_other_reason_and_urls.sql 을 SQL Editor에서 실행하면 이 fallback이 필요 없어진다.
+        console.error("[bypp] item insert failed, retrying without custom_reason/source_url:", error);
         const { custom_reason, source_url, ...reducedPayload } = fullPayload;
         void custom_reason;
         void source_url;
@@ -224,7 +270,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       if (error || !data) {
-        setDbError("저장 안 됨 (항목 추가 실패) — 새로고침하면 사라질 수 있어요");
+        console.error("[bypp] item insert failed:", error);
+        setDbError(`저장 안 됨 (항목 추가 실패: ${error?.message ?? "unknown"})`);
         return;
       }
       // 서버가 발급한 실제 id로 교체 (temp id로 만들어둔 로컬 항목을 대체).
@@ -239,7 +286,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .update({ status })
         .eq("id", id)
         .then(({ error }) => {
-          if (error) setDbError("저장 안 됨 (상태 변경 실패)");
+          if (error) {
+            console.error("[bypp] status update failed:", error);
+            setDbError(`저장 안 됨 (상태 변경 실패: ${error.message})`);
+          }
         });
     };
 
