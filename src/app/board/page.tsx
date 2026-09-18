@@ -5,7 +5,7 @@
 // 기능: 아이템 주머니(cart)에서 "AI에게 우선순위 배정 부탁하기" -> 판정 후 쇼케이스(buy)로 자동 진열.
 // 옮기기/빼기/내리기는 드래그.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -74,6 +74,13 @@ export default function BoardPage() {
   // wayfinder #5 결정: 30~100 슬라이더 (0=가격순, 100=AI 판단), 기본값 65.
   const [qualWeight, setQualWeight] = useState(Math.round(DEFAULT_QUAL_WEIGHT * 100));
   const [pendingBuyId, setPendingBuyId] = useState<string | null>(null);
+  // 빼기/내리기 직후 5초 동안 되돌릴 수 있게 이전 상태를 들고 있는다.
+  const [undo, setUndo] = useState<{ text: string; prev: { id: string; status: Item["status"] }[] } | null>(null);
+  useEffect(() => {
+    if (!undo) return;
+    const t = setTimeout(() => setUndo(null), 5000);
+    return () => clearTimeout(t);
+  }, [undo]);
   // 가장 최근 AI 판정 결과 스냅샷 (왼쪽 패널에 표시). baseSum = 판정 시점에 이미 1층에 있던 물건들의 합계.
   const [judgeResult, setJudgeResult] = useState<{
     baseSum: number;
@@ -265,15 +272,23 @@ export default function BoardPage() {
       reorderShowcase(next);
     } else if (zone === "cart-zone") {
       if (status !== "cart") moveItem(id, "cart");
-    } else if (zone === "toss-zone") moveItem(id, "removed");
+    } else if (zone === "toss-zone") {
+      setUndo({ text: "안 사기로 했어요. 목록이 가벼워졌어요!", prev: [{ id, status: status ?? "buy" }] });
+      moveItem(id, "removed");
+    }
     else if (zone === "flush-zone") {
       // 2층(예산 초과) 물건을 구매로 내리면 확인부터.
       if (shelf2Ids.has(id)) setPendingBuyId(id);
-      else moveItem(id, "purchased");
+      else {
+        setUndo({ text: "1개 정리됐어요!", prev: [{ id, status: status ?? "buy" }] });
+        moveItem(id, "purchased");
+      }
     }
   }
 
   function buyFirstFloor() {
+    if (shelf1.length === 0) return;
+    setUndo({ text: `${shelf1.length}개 정리됐어요!`, prev: shelf1.map((r) => ({ id: r.item.id, status: r.item.status })) });
     shelf1.forEach((r) => moveItem(r.item.id, "purchased"));
   }
 
@@ -393,7 +408,7 @@ export default function BoardPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-[11px] font-bold text-[#8C6D53]">주머니 합계</span>
+                  <span className="text-xs font-bold text-[#8C6D53]">주머니 합계</span>
                   <p className="text-sm font-black text-[#7A4924]">{won(cartSum)}</p>
                 </div>
               </div>
@@ -406,9 +421,6 @@ export default function BoardPage() {
                   <h3 className="text-lg font-bold text-[#5B3E29]" style={HAND}>
                     내 주머니
                   </h3>
-                  <span className="text-[10px] font-bold text-[#2D6C2A] bg-[#DCF2C7] px-2 rounded-full border border-[#AED48C]">
-                    {pouchItems.length}/{pouchSlots} 보관
-                  </span>
                 </div>
                 <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
                   {pouchItems.map((it) => (
@@ -444,10 +456,10 @@ export default function BoardPage() {
                     {judgeItems.length}개 후보 대기 중
                   </span>
                 </div>
-                <p className="text-[11px] text-[#7A5B3E] font-medium leading-tight">
+                <p className="text-xs text-[#7A5B3E] font-medium leading-tight">
                   진짜 살 물건 후보만 끌어다 놓고 AI의 판정을 받아보세요!
                 </p>
-                <p className="text-[11px] text-[#7A5B3E] font-bold">
+                <p className="text-xs text-[#7A5B3E] font-bold">
                   판정 기준
                 </p>
                 <div className="flex items-center gap-2 text-xs text-[#7A5B3E] font-bold">
@@ -499,7 +511,7 @@ export default function BoardPage() {
                     </h3>
                     <button
                       onClick={() => setJudgeResult(null)}
-                      className="text-[11px] font-bold text-[#8C6D53] underline"
+                      className="text-xs font-bold text-[#8C6D53] underline"
                     >
                       닫기
                     </button>
@@ -524,13 +536,13 @@ export default function BoardPage() {
                         </span>
                         <p className="flex-1 text-sm font-black">{e.name}</p>
                         <span
-                          className={`shrink-0 text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
+                          className={`shrink-0 text-xs font-black px-2.5 py-0.5 rounded-full border ${
                             e.within
                               ? "bg-[#DCF2C7] text-[#2D6C2A] border-[#AED48C]"
-                              : "bg-[#FFEAE6] text-[#C93B2B] border-[#FFAE9E]"
+                              : "bg-[#FFF1D6] text-[#8A5A00] border-[#F0C77A]"
                           }`}
                         >
-                          {e.within ? "예산 안" : "예산 초과"}
+                          {e.within ? "이번 달" : "다음 달"}
                         </span>
                       </div>
                       <p className="text-xs font-bold text-[#82542B] mt-0.5">
@@ -590,7 +602,7 @@ export default function BoardPage() {
                     <button
                       onClick={buyFirstFloor}
                       disabled={shelf1.length === 0}
-                      className={`text-[11px] font-black text-white bg-[#E84364] hover:bg-[#C72E4E] px-3 py-1 rounded-full ${SHADOW_AC_SM} active:translate-y-0.5 disabled:opacity-40 transition-all`}
+                      className={`text-xs font-black text-white bg-[#E84364] hover:bg-[#C72E4E] px-3 py-1 rounded-full ${SHADOW_AC_SM} active:translate-y-0.5 disabled:opacity-40 transition-all`}
                     >
                       1층 전체 구매 ({shelf1.length}개)
                     </button>
@@ -628,22 +640,22 @@ export default function BoardPage() {
                   <div className="flex items-center justify-between px-1">
                     <span className="text-lg font-bold text-[#755541] flex items-center gap-1" style={HAND}>
                       <span className="w-2 h-2 rounded-full bg-[#A8582C]" />
-                      2층: 예산 초과 서랍
+                      2층: 다음 달 선반
                     </span>
                     {overAmount > 0 && (
-                      <span className="text-[11px] font-bold text-[#8C5D35] bg-[#FAF2DC] px-2 py-0.5 rounded-full border border-[#D9CAAF]">
-                        +{won(overAmount)} 초과
+                      <span className="text-xs font-bold text-[#8C5D35] bg-[#FAF2DC] px-2 py-0.5 rounded-full border border-[#D9CAAF]">
+                        +{won(overAmount)} 넘는 물건
                       </span>
                     )}
                   </div>
                   <div className="grid grid-cols-4 gap-2.5">
                     {shelf2.map((r) => (
-                      <SlotDrop key={r.item.id} id={`slot-item-${r.item.id}`} label="대기">
+                      <SlotDrop key={r.item.id} id={`slot-item-${r.item.id}`} label="다음 달">
                         <ItemTile item={r.item} showcase dim />
                       </SlotDrop>
                     ))}
                     {Array.from({ length: Math.max(0, shelf2Slots - shelf2.length) }).map((_, i) => (
-                      <SlotDrop key={`s2-${i}`} id="slot-end2" label="대기">
+                      <SlotDrop key={`s2-${i}`} id="slot-end2" label="다음 달">
                         <EmptyShelf faint />
                       </SlotDrop>
                     ))}
@@ -653,7 +665,7 @@ export default function BoardPage() {
 
               {shelf2.length > 0 && (
                 <div className="relative z-10 mt-3 p-3 bg-[#FFFDF7] rounded-2xl border-2 border-[#E3C59E] flex items-center gap-2 text-sm text-[#573A23] font-bold">
-                  <div className="w-6 h-6 rounded-full bg-[#5BA431] text-white flex items-center justify-center font-black text-[11px] shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-[#5BA431] text-white flex items-center justify-center font-black text-xs shrink-0">
                     !
                   </div>
                   <span>2층 물건은 예산을 넘어요. 다음 달 월급날 꺼내거나, 1층 순서를 바꿔보세요.</span>
@@ -691,7 +703,7 @@ export default function BoardPage() {
                 </span>
               }
               sub=""
-              desc="충동구매는 땅속에 묻고 돈을 아껴요."
+              desc="안 사기로 정했어요. 목록이 가벼워졌어요."
               hint="구덩이에 퐁당!"
               hintClass="bg-[#F5EADB] border-[#CBB394] text-[#694A2F]"
             />
@@ -714,7 +726,7 @@ export default function BoardPage() {
                     </div>
                   </div>
                   <span className="absolute -top-1 -right-1 text-[10px] bg-[#E84364] text-white px-2 py-0.5 rounded-full font-black border border-white">
-                    배송 완료
+                    구매 완료
                   </span>
                 </div>
               }
@@ -733,29 +745,45 @@ export default function BoardPage() {
         </main>
       </div>
 
+      {undo && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 bg-[#57351F] text-[#FFF3DE] px-4 py-2.5 rounded-full border-2 border-[#8C5D35] shadow-lg">
+          <span className="text-sm font-black">{undo.text}</span>
+          <button
+            onClick={() => {
+              undo.prev.forEach((p) => moveItem(p.id, p.status));
+              setUndo(null);
+            }}
+            className="text-sm font-black text-[#FFDE59] underline"
+          >
+            되돌리기
+          </button>
+        </div>
+      )}
+
       {pendingBuyId && (
         <div className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
           <div className={`bg-[#FFFBF2] border-4 border-[#85532F] rounded-[28px] p-6 max-w-sm w-full text-[#4A3324] ${SHADOW_AC}`}>
-            <p className="text-lg font-black">예산을 초과합니다</p>
+            <p className="text-lg font-black">이번 달 예산을 조금 넘어요</p>
             <p className="text-sm mt-1 font-medium">
-              {items.find((it) => it.id === pendingBuyId)?.name}은(는) 이번 달 예산({won(budget)})을 넘어요. 그래도
-              구매하시겠습니까?
+              {items.find((it) => it.id === pendingBuyId)?.name}은(는) 이번 달 예산({won(budget)})을 넘어요. 지금
+              살까요, 다음 달로 미룰까요?
             </p>
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => setPendingBuyId(null)}
                 className="flex-1 py-2.5 rounded-full font-black bg-[#EFE8D6] border-2 border-[#D4C3A3]"
               >
-                취소
+                다음 달에
               </button>
               <button
                 onClick={() => {
+                  setUndo({ text: "1개 정리됐어요!", prev: [{ id: pendingBuyId, status: items.find((it) => it.id === pendingBuyId)?.status ?? "buy" }] });
                   moveItem(pendingBuyId, "purchased");
                   setPendingBuyId(null);
                 }}
                 className={`flex-1 py-2.5 rounded-full font-black text-white bg-[#E84364] ${SHADOW_AC_SM}`}
               >
-                그래도 구매
+                네 살래요
               </button>
             </div>
           </div>
@@ -870,11 +898,11 @@ function ItemTile({
         <span
           className={`text-[10px] font-bold leading-none mt-1 ${
             showcase && !dim ? "text-[#85532F]" : "text-[#82542B]"
-          } ${dim ? "line-through text-[#A89481]" : ""}`}
+          } ${dim ? "text-[#A89481]" : ""}`}
         >
           {short(item.price)}
         </span>
-        <div className="opacity-0 group-hover:opacity-100 pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 z-30 max-w-[220px] bg-[#FFFDF0] border-2 border-[#68472E] text-[#4A3324] text-[11px] font-black py-0.5 px-2.5 rounded-full shadow-[0_3px_0_rgba(74,46,53,0.16)] truncate transition-opacity">
+        <div className="opacity-0 group-hover:opacity-100 pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 z-30 max-w-[220px] bg-[#FFFDF0] border-2 border-[#68472E] text-[#4A3324] text-xs font-black py-0.5 px-2.5 rounded-full shadow-[0_3px_0_rgba(74,46,53,0.16)] truncate transition-opacity">
           {item.name}
         </div>
       </div>
@@ -915,12 +943,12 @@ function ActionZone({
       <div className="flex-1">
         <div className="flex flex-wrap items-center gap-2 mb-1">
           {titleChip}
-          {sub && <span className="text-[11px] font-bold text-[#80644D] bg-[#EFE4CF] px-2 py-0.5 rounded-md">{sub}</span>}
+          {sub && <span className="text-xs font-bold text-[#80644D] bg-[#EFE4CF] px-2 py-0.5 rounded-md">{sub}</span>}
         </div>
         <p className="text-base font-bold" style={HAND}>
           {desc}
         </p>
-        <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-[11px] font-black ${hintClass}`}>
+        <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-xs font-black ${hintClass}`}>
           <span>↓</span> {hint}
         </div>
       </div>
