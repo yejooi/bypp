@@ -807,7 +807,7 @@ function SlotDrop({ id, label, children }: { id: string; label: string; children
 function EmptyShelf({ faint }: { faint?: boolean }) {
   return (
     <div
-      className={`pocket-slot w-full aspect-square rounded-2xl flex flex-col items-center justify-center ${faint ? "opacity-60" : ""}`}
+      className={`pocket-slot w-full aspect-square rounded-2xl flex flex-col items-center justify-center opacity-60`}
     >
       <div className="w-2.5 h-2.5 rounded-full bg-[#C9BFAB]" />
     </div>
