@@ -19,21 +19,26 @@ create table if not exists items (
   name text not null,
   price numeric not null,
   image_url text,
-  -- reason_code: §5 객관식 6개 중 하나
+  -- reason_code: §5 객관식 6개 + "other"(기타, 자유입력 -- 이슈: 6개가 다양성을 못 담는 문제 보완)
   reason_code text not null check (reason_code in (
     'long_wanted',      -- 오래전부터 갖고 싶었음
     'urgent_need',      -- 지금 당장 필요함
     'broke_replace',    -- 쓰던 게 망가짐/떨어짐
     'on_sale',          -- 세일 중이라서
     'social_proof',     -- 남들이 좋다고 해서
-    'mood_boost'        -- 그냥 기분전환
+    'mood_boost',       -- 그냥 기분전환
+    'other'             -- 기타 (자유 입력, custom_reason 참고)
   )),
+  -- reason_code가 'other'일 때의 자유 입력 텍스트. 점수 가중치엔 영향 없음, LLM 프롬프트 보조 맥락으로만 씀.
+  custom_reason text,
   status text not null default 'cart' check (status in ('cart', 'buy', 'removed', 'purchased')),
   -- OG 파싱으로 가져온 보조 필드 (§5) — 판정 정확도에 직접 쓰임
   category text,
   normal_price numeric,
   sale_rate numeric,
   brand text,
+  -- 원본 상품 링크 (§5). 링크로 등록한 항목만 값이 있고, 스크린샷/수동입력은 null.
+  source_url text,
   created_at timestamptz not null default now()
 );
 
