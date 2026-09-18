@@ -691,6 +691,14 @@ export default function BoardPage() {
               overClass="border-[#6B4B32] bg-[#FFF5E6] ring-4 ring-[#B89A72]"
               visual={<span className="text-6xl leading-none drop-shadow-sm">📦</span>}
               titleChip="반품함 (안 살래요)"
+              titleStyle={{
+                color: "#5B3E29",
+                backgroundColor: "#E2C48F",
+                backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.4), rgba(0,0,0,0.06))",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 0 rgba(120,80,40,0.25)",
+                clipPath:
+                  "polygon(0 0,100% 0,97% 25%,100% 50%,97% 75%,100% 100%,0 100%,3% 75%,0 50%,3% 25%)",
+              }}
               sub=""
               desc={"안 사기로 정했어요.\n목록이 가벼워졌어요."}
               hint="반품함에 쏙!"
@@ -703,6 +711,15 @@ export default function BoardPage() {
               overClass="border-[#3F8A3A] bg-[#F0FAEA] ring-4 ring-[#8DBF6A]"
               visual={<span className="text-6xl leading-none drop-shadow-sm">🧾</span>}
               titleChip="계산대 (샀어요!)"
+              titleStyle={{
+                color: "#FFF3DE",
+                backgroundColor: "#4A4A4A",
+                backgroundImage: "repeating-linear-gradient(90deg, #5C5C5C 0 6px, #454545 6px 12px)",
+                borderTop: "3px solid #2B2B2B",
+                borderBottom: "3px solid #2B2B2B",
+                borderRadius: "999px",
+                boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.08), 0 2px 0 rgba(0,0,0,0.25)",
+              }}
               sub=""
               desc={"구매 끝!\n계산하고 뿌듯하게."}
               hint="계산대에 척!"
@@ -880,6 +897,7 @@ function ItemTile({
 function ActionZone({
   id,
   className = "",
+  titleStyle,
   borderClass,
   overClass,
   visual,
@@ -891,6 +909,7 @@ function ActionZone({
 }: {
   id: string;
   className?: string;
+  titleStyle?: React.CSSProperties;
   borderClass: string;
   overClass: string;
   visual: React.ReactNode;
@@ -909,11 +928,14 @@ function ActionZone({
         isOver ? overClass : borderClass
       }`}
     >
-      <h3 className="self-stretch text-lg font-black text-[#5B3E29] tracking-tight" style={HAND}>
+      <h3
+        className="self-stretch px-4 py-1.5 text-lg font-black tracking-tight"
+        style={{ ...HAND, ...titleStyle }}
+      >
         {titleChip}
       </h3>
       <div className="flex-1 flex flex-col items-center justify-center gap-3">
-        <div className="pocket-slot w-24 h-24 rounded-3xl flex items-center justify-center group-hover:-translate-y-1 transition-transform">
+        <div className="w-24 h-24 flex items-center justify-center group-hover:-translate-y-1 transition-transform">
           {visual}
         </div>
         <p className="text-base font-bold whitespace-pre-line break-keep leading-snug" style={HAND}>
