@@ -686,7 +686,7 @@ export default function BoardPage() {
             {/* 드롭존: 구덩이(왼쪽) / 선물상자(오른쪽) */}
             <ActionZone
               id="toss-zone"
-              className="order-4 lg:order-none lg:col-start-1 lg:row-start-3 xl:col-start-1 xl:row-start-1 xl:row-span-2"
+              className="order-4 lg:order-none lg:col-start-1 lg:row-start-3 xl:col-start-1 xl:row-start-1"
               borderClass="border-[#C9B693] hover:border-[#6B4B32]"
               overClass="border-[#6B4B32] bg-[#FFF5E6]"
               visual={
@@ -717,7 +717,7 @@ export default function BoardPage() {
             />
             <ActionZone
               id="flush-zone"
-              className="order-5 lg:order-none lg:col-start-2 lg:row-start-3 xl:col-start-4 xl:row-start-1 xl:row-span-2"
+              className="order-5 lg:order-none lg:col-start-2 lg:row-start-3 xl:col-start-4 xl:row-start-1"
               borderClass="border-[#F0B2BA] hover:border-[#E84364]"
               overClass="border-[#E84364] bg-[#FFF0F3]"
               visual={
