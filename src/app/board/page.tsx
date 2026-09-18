@@ -214,15 +214,19 @@ export default function BoardPage() {
                   이번 달 예산: <strong className="text-[var(--accent)] font-bold">{budget.toLocaleString()}원</strong>
                 </span>
               </h1>
-              <p className="text-xs text-[var(--text-sub)]">
-                장바구니와 살 물건 사이를 드래그로 옮기며 소비 우선순위를 정해보세요.
-              </p>
             </div>
           </div>
           <div className="inline-flex items-center gap-2 bg-[var(--butter)] px-3 py-1.5 rounded-full border border-[var(--border)] text-xs font-semibold">
             🛒 총 담긴 금액: <strong>{cartTotal.toLocaleString()}원</strong>
           </div>
         </header>
+
+        <p
+          className="text-sm font-bold px-3 py-2.5 rounded-xl border-2"
+          style={{ backgroundColor: "var(--primary-light)", color: "var(--primary-hover)", borderColor: "var(--primary)" }}
+        >
+          🖐️ 장바구니와 살 물건 사이를 드래그로 옮기며 소비 우선순위를 정해보세요
+        </p>
 
         {/* ③ 항목 등록: 링크 파싱 -> 실패시 수동 입력 폴백 (§5). 스크린샷 일괄 등록은 장바구니 스크래핑이
             로그인/JS렌더링 문제로 불가능해서(무신사/지그재그/쿠팡/네이버 확인함) 나온 대안. */}

@@ -115,8 +115,11 @@ export function ScreenshotImportForm() {
   if (!drafts) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-[var(--text-sub)]">
-          장바구니 스크린샷을 넣으면 상품들의 정보가 자동으로 채워져요
+        <p
+          className="text-sm font-bold px-3 py-2 rounded-xl border-2"
+          style={{ backgroundColor: "var(--primary-light)", color: "var(--primary-hover)", borderColor: "var(--primary)" }}
+        >
+          📸 장바구니 스크린샷을 넣으면 상품들의 정보가 자동으로 채워져요
         </p>
         <input
           ref={inputRef}
