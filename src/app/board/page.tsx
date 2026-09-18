@@ -692,9 +692,6 @@ export default function BoardPage() {
               visual={
                 <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:rotate-6 transition-transform">
                   <span className="text-6xl leading-none drop-shadow-sm">📦</span>
-                  <span className="absolute -top-1 -right-1 text-[10px] bg-[#6B4A2F] text-white px-2 py-0.5 rounded-full font-black border border-white">
-                    반품
-                  </span>
                 </div>
               }
               titleChip={
@@ -703,7 +700,7 @@ export default function BoardPage() {
                 </span>
               }
               sub=""
-              desc="안 사기로 정했어요. 목록이 가벼워졌어요."
+              desc={"안 사기로 정했어요.\n목록이 가벼워졌어요."}
               hint="반품함에 쏙!"
               hintClass="bg-[#F5EADB] border-[#CBB394] text-[#694A2F]"
             />
@@ -715,9 +712,6 @@ export default function BoardPage() {
               visual={
                 <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:-rotate-6 transition-transform">
                   <span className="text-6xl leading-none drop-shadow-sm">🧾</span>
-                  <span className="absolute -top-1 -right-1 text-[10px] bg-[#3F8A3A] text-white px-2 py-0.5 rounded-full font-black border border-white">
-                    계산
-                  </span>
                 </div>
               }
               titleChip={
@@ -727,7 +721,7 @@ export default function BoardPage() {
                 </span>
               }
               sub=""
-              desc="구매 끝! 계산하고 뿌듯하게."
+              desc={"구매 끝!\n계산하고 뿌듯하게."}
               hint="계산대에 척!"
               hintClass="bg-[#E5F5D4] border-[#AED48C] text-[#2D6C2A]"
             />
@@ -932,12 +926,12 @@ function ActionZone({
       }`}
     >
       {visual}
-      <div className="flex-1">
+      <div className="flex-1 xl:flex-none flex flex-col xl:items-center">
         <div className="flex flex-wrap items-center xl:justify-center gap-2 mb-1">
           {titleChip}
           {sub && <span className="text-xs font-bold text-[#80644D] bg-[#EFE4CF] px-2 py-0.5 rounded-md">{sub}</span>}
         </div>
-        <p className="text-base font-bold" style={HAND}>
+        <p className="text-base font-bold whitespace-pre-line break-keep leading-snug" style={HAND}>
           {desc}
         </p>
         <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-xs font-black ${hintClass}`}>
