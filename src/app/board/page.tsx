@@ -305,8 +305,11 @@ export default function BoardPage() {
               </div>
             )}
 
-            <p className="text-xs text-[var(--text-sub)] mb-1">
-              ⑤ 예산선 아래 항목은 계획 재검토가 필요해요!
+            <p
+              className="text-sm font-bold px-3 py-2.5 rounded-xl border-2 mb-1"
+              style={{ backgroundColor: "var(--accent-light)", color: "var(--accent-hover)", borderColor: "var(--accent)" }}
+            >
+              📋 예산선 아래 항목은 계획 재검토가 필요해요!
             </p>
 
             {buyItems.length === 0 && <p className="text-sm text-[var(--text-sub)]">비어있음</p>}
@@ -317,15 +320,15 @@ export default function BoardPage() {
               return (
                 <div key={item.id}>
                   {overBudget && i > 0 && !rows[i - 1].overBudget && (
-                    <div className="py-2 my-1 flex items-center gap-3">
-                      <div className="flex-1 h-[2px]" style={{ backgroundColor: "var(--accent)", opacity: 0.4 }} />
+                    <div className="py-3 my-1 flex items-center gap-3">
+                      <div className="flex-1 h-1 rounded-full" style={{ backgroundColor: "var(--accent)" }} />
                       <div
-                        className="text-white text-xs font-extrabold px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 shrink-0"
+                        className="text-white text-sm font-extrabold px-4 py-1.5 rounded-full shadow-md flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                         style={{ backgroundColor: "var(--accent)" }}
                       >
-                        <span>✂️ 예산 한도선 ({budget.toLocaleString()}원)</span>
+                        <span>✂️ 여기까지 예산 안 ({budget.toLocaleString()}원)</span>
                       </div>
-                      <div className="flex-1 h-[2px]" style={{ backgroundColor: "var(--accent)", opacity: 0.4 }} />
+                      <div className="flex-1 h-1 rounded-full" style={{ backgroundColor: "var(--accent)" }} />
                     </div>
                   )}
                   <DraggableItemRow
@@ -552,18 +555,8 @@ function DraggableItemRow({
             🛍️
           </div>
         )}
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-bold truncate">{item.name}</h3>
-            {message && (
-              <span
-                className="text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0"
-                style={{ backgroundColor: "var(--butter)", color: "var(--butter-dark)", borderColor: "var(--butter-dark)" }}
-              >
-                💡 {message}
-              </span>
-            )}
-          </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-bold truncate">{item.name}</h3>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
             <span className="text-xs font-extrabold" style={{ color: dim ? "var(--text-sub)" : "var(--text)" }}>
               {item.price.toLocaleString()}원
@@ -576,6 +569,14 @@ function DraggableItemRow({
             </span>
           </div>
           {reasoning && <p className="text-xs italic mt-0.5 text-[var(--text-sub)]">&quot;{reasoning}&quot;</p>}
+          {message && (
+            <p
+              className="text-sm font-bold mt-2 px-3 py-2 rounded-xl border-2"
+              style={{ backgroundColor: "var(--butter)", color: "var(--butter-dark)", borderColor: "var(--butter-dark)" }}
+            >
+              💡 {message}
+            </p>
+          )}
         </div>
       </div>
 
