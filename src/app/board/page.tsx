@@ -417,7 +417,7 @@ export default function BoardPage() {
             </div>
             <div className="flex flex-col leading-tight text-right">
               <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
-              <span className="text-2xl font-bold text-[#5B3E29]" style={HAND}>
+              <span className="text-base font-black text-[#5B3E29] leading-8">
                 {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
               </span>
             </div>
@@ -448,14 +448,14 @@ export default function BoardPage() {
 
               <button
                 onClick={() => setAddOpen(true)}
-                className="relative z-10 shrink-0 w-full mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1 rounded-2xl btn-soft-green text-xl"
+                className="relative z-10 shrink-0 w-full mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1.5 rounded-2xl btn-soft-green text-lg"
                 style={HAND}
               >
                 <svg className="w-6 h-6 text-[#3F8A3A]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                   <path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.86-7.01L19.42 4h-.01l-1.1 2-2.76 5H8.53l-.13-.27L6.16 6l-.95-2-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.13 0-.25-.11-.25-.25z" />
                 </svg>
                 물건 추가하기
-                <span className="text-xs font-bold text-[#4F7A36]">링크 · 스크린샷</span>
+                <span className="text-xs font-bold text-[#4F7A36]" style={{ fontFamily: "var(--font-body)" }}>링크 · 스크린샷</span>
               </button>
 
               <div
@@ -548,7 +548,8 @@ export default function BoardPage() {
                 <button
                   onClick={handleEvaluate}
                   disabled={judgeItems.length === 0 || evalState === "loading"}
-                  className={`btn-soft-green w-full py-2.5 px-4 text-xs sm:text-sm rounded-2xl flex items-center justify-center gap-2`}
+                  className={`btn-soft-green w-full py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
+                  style={HAND}
                 >
                   <StarIcon className="w-4 h-4 text-[#E09D1B]" />
                   <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 판정 부탁하기"}</span>
@@ -679,7 +680,10 @@ export default function BoardPage() {
                   className={`btn-soft-green w-full py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
                   style={HAND}
                 >
-                  🧾 1층 전체 계산하기 ({shelf1.length}개 · {won(shelf1Sum)})
+                  🧾 1층 전체 계산하기
+                  <span className="text-xs font-bold text-[#4F7A36]" style={{ fontFamily: "var(--font-body)" }}>
+                    ({shelf1.length}개 · {won(shelf1Sum)})
+                  </span>
                 </button>
 
                 {/* 예산 한도선 리본 */}
