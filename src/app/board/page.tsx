@@ -314,7 +314,7 @@ export default function BoardPage() {
                 </div>
                 <p className="mt-1" style={{ fontFamily: "var(--font-gaegu)" }}>
                   <span className="text-base text-[#467A26] font-bold">
-                    주머니 물건을 꺼내 진열장에 올려보세요!
+                    주머니 물건을 꺼내 가판대에 올려보세요!
                   </span>
                 </p>
               </div>
