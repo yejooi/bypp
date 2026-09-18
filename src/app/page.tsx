@@ -10,7 +10,7 @@ import { useApp } from "@/lib/store";
 // defaultManwon: 목표에 금액이 이름에 이미 들어있으면(예: 1억) 자동으로 채워준다 (만원 단위).
 const FIXED_GOALS: { label: string; desc: string; icon: string; defaultManwon: number | null }[] = [
   { label: "1억 모으기", desc: "든든한 목돈의 첫 시작!", icon: "💰", defaultManwon: 10000 },
-  { label: "내집마련", desc: "따뜻하고 아늑한 나만의 보금자리", icon: "🏡", defaultManwon: null },
+  { label: "내집마련", desc: "따뜻하고 아늑한 나만의 보금자리", icon: "🏡", defaultManwon: 30000 },
   { label: "여행 자금", desc: "새로운 곳으로 떠나는 두근두근 힐링", icon: "✈️", defaultManwon: null },
   { label: "기타", desc: "나만의 특별한 버킷리스트", icon: "🎁", defaultManwon: null },
 ];
