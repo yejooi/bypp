@@ -1,27 +1,31 @@
 // 장바구니/위시리스트 스크린샷에서 상품명·가격을 추출한다.
 // 로그인/JS렌더링 문제로 장바구니 자동 스크래핑이 막혀서(무신사/지그재그/쿠팡/네이버 다 확인함) 나온 대안:
-// 사용자가 이미 가진 스크린샷을 Claude 이미지 인식으로 읽는다. 상품 사진 URL은 못 뽑는다 (픽셀일 뿐).
+// 사용자가 이미 가진 스크린샷을 Claude 이미지 인식으로 읽는다. 상품 사진은 URL이 없으니 각 상품 썸네일의 위치(image_box)를 함께 받아 클라이언트에서 잘라 쓴다.
 // §9-2: JSON 파싱 실패 시 1회 재시도.
 
 import { NextRequest, NextResponse } from "next/server";
 
 const MODEL = "claude-sonnet-5";
 
+type ImageBox = { x: number; y: number; w: number; h: number };
+
 const PROMPT = `이 이미지는 쇼핑몰 장바구니 또는 위시리스트 화면 캡처다.
 보이는 상품들을 전부 찾아서 아래 JSON 스키마로만 출력해라 (설명 문장 없이).
 
 - name: 상품명 (보이는 텍스트 그대로)
 - price: 가격 (숫자만, 원화 단위. 안 보이면 null)
+- image_box: 그 상품의 썸네일 사진이 이미지 안에서 차지하는 사각형. 이미지 전체를 1로 본 비율 좌표
+  {"x": 왼쪽, "y": 위쪽, "w": 너비, "h": 높이} (모두 0~1). 썸네일이 안 보이면 null.
 
 여러 상품이 있으면 전부 items 배열에 넣어라. 상품이 하나도 안 보이면 items를 빈 배열로 둔다.
 
 출력 스키마:
-{"items": [{"name": "...", "price": number | null}]}`;
+{"items": [{"name": "...", "price": number | null, "image_box": {"x": number, "y": number, "w": number, "h": number} | null}]}`;
 
 async function callClaudeOnce(
   imageBase64: string,
   mediaType: string
-): Promise<{ items: { name: string; price: number | null }[] } | null> {
+): Promise<{ items: { name: string; price: number | null; image_box?: ImageBox | null }[] } | null> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {

@@ -2,7 +2,7 @@
 
 // 장바구니 스크린샷 -> Claude 이미지 인식으로 상품명/가격 추출 -> 일괄 등록.
 // 로그인 필요/JS 렌더링 문제로 장바구니 자동 스크래핑이 불가능해서 나온 대안 (사이트 무관하게 동작).
-// 상품 사진은 스크린샷 픽셀일 뿐이라 URL로는 못 뽑는다 -> 이 경로로 추가한 항목은 이미지 없음.
+// 상품 사진은 URL이 없으니, 모델이 알려준 썸네일 위치(image_box)를 원본에서 잘라 쓴다. 위치를 못 잡으면 이미지 없이 등록.
 
 import { useRef, useState } from "react";
 import { RatingSliders, DEFAULT_RATINGS, type Ratings } from "@/components/RatingSliders";
@@ -15,11 +15,12 @@ type Draft = {
   reasonCode: ReasonCode;
   customReason: string;
   ratings: Ratings;
+  imageUrl: string | null;
 };
 
 const MAX_WIDTH = 1200;
 
-async function resizeToBase64(file: File): Promise<{ base64: string; mediaType: string }> {
+async function resizeToBase64(file: File): Promise<{ base64: string; mediaType: string; canvas: HTMLCanvasElement }> {
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
@@ -42,7 +43,28 @@ async function resizeToBase64(file: File): Promise<{ base64: string; mediaType: 
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
   const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.8);
-  return { base64: jpegDataUrl.split(",")[1], mediaType: "image/jpeg" };
+  return { base64: jpegDataUrl.split(",")[1], mediaType: "image/jpeg", canvas };
+}
+
+type ImageBox = { x: number; y: number; w: number; h: number };
+
+// 모델이 알려준 썸네일 위치(0~1 비율)를 원본 스크린샷에서 잘라 200px 정사각 JPEG로 만든다.
+// 좌표가 이상하면(범위 밖/너무 작음) null -> 이미지 없이 등록.
+function cropThumb(canvas: HTMLCanvasElement, box: ImageBox | null | undefined): string | null {
+  if (!box) return null;
+  const { x, y, w, h } = box;
+  if (![x, y, w, h].every((n) => typeof n === "number" && Number.isFinite(n))) return null;
+  if (w < 0.03 || h < 0.03 || x < 0 || y < 0 || x + w > 1.02 || y + h > 1.02) return null;
+  const sx = x * canvas.width;
+  const sy = y * canvas.height;
+  const sw = Math.min(w * canvas.width, canvas.width - sx);
+  const sh = Math.min(h * canvas.height, canvas.height - sy);
+  const side = Math.min(sw, sh);
+  const out = document.createElement("canvas");
+  out.width = 200;
+  out.height = 200;
+  out.getContext("2d")!.drawImage(canvas, sx + (sw - side) / 2, sy + (sh - side) / 2, side, side, 0, 0, 200, 200);
+  return out.toDataURL("image/jpeg", 0.8);
 }
 
 export function ScreenshotImportForm() {
@@ -56,14 +78,14 @@ export function ScreenshotImportForm() {
     setLoading(true);
     setError(null);
     try {
-      const { base64, mediaType } = await resizeToBase64(file);
+      const { base64, mediaType, canvas } = await resizeToBase64(file);
       const res = await fetch("/api/parse-screenshot", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ imageBase64: base64, mediaType }),
       });
       if (!res.ok) throw new Error("parse_failed");
-      const data: { items: { name: string; price: number | null }[] } = await res.json();
+      const data: { items: { name: string; price: number | null; image_box?: ImageBox | null }[] } = await res.json();
       if (!data.items?.length) {
         setError("이미지에서 상품을 못 찾았어요. 더 선명한 스크린샷으로 다시 시도해주세요.");
         setDrafts(null);
@@ -77,6 +99,7 @@ export function ScreenshotImportForm() {
           reasonCode: "long_wanted" as ReasonCode,
           customReason: "",
           ratings: DEFAULT_RATINGS,
+          imageUrl: cropThumb(canvas, it.image_box),
         }))
       );
     } catch {
@@ -105,7 +128,7 @@ export function ScreenshotImportForm() {
         reasonCode: d.reasonCode,
         customReason: d.reasonCode === "other" ? d.customReason.trim() : null,
         ...d.ratings,
-        imageUrl: null,
+        imageUrl: d.imageUrl,
       });
     }
     setDrafts(null);
@@ -162,7 +185,7 @@ export function ScreenshotImportForm() {
     >
       <p className="text-xs text-[var(--text-sub)]">
         {drafts.length}개 찾았어요. 확인하고 필요하면 고치거나 지운 다음 한 번에 담아주세요. (사진은
-        스크린샷에서 못 뽑아서 이미지 없이 등록돼요.)
+        스크린샷에서 잘라 왔어요. 이상하면 그대로 담고 나중에 지워도 돼요.)
       </p>
       {drafts.map((d) => (
         <div
@@ -170,6 +193,10 @@ export function ScreenshotImportForm() {
           className="flex flex-wrap gap-2 items-center border-t pt-2"
           style={{ borderColor: "var(--border)" }}
         >
+          {d.imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={d.imageUrl} alt="" className="w-12 h-12 object-cover rounded-xl border shrink-0" style={{ borderColor: "var(--border)" }} />
+          )}
           <input
             value={d.name}
             onChange={(e) => updateDraft(d.key, { name: e.target.value })}
