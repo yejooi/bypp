@@ -3,13 +3,17 @@
 // §8-2 ①: 진행률 러너. 화면 하단 고정. 후퇴 없음(원칙②).
 // 비주얼: stitch_custom_ui_design_system-2 SignatureGoalRunnerBar (원화 유지).
 
+import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/store";
 import { Mascot, SpeechBubble } from "@/components/Mascot";
 import { GoalIcon } from "@/components/GoalIcon";
 
 export function ProgressRunner() {
+  const pathname = usePathname();
   const { goalType, goalAmount, monthlyBudget, monthlySaving, items } = useApp();
 
+  // 목표/예산을 정하는 화면에서는 하단 바가 버튼을 가리므로 숨긴다.
+  if (pathname === "/" || pathname.startsWith("/budget")) return null;
   if (!goalType || !goalAmount) return null;
 
   // 이번 달 저축액 = 권장 월 저축액(몬테카를로) + (예산 - 이미 산 금액).
