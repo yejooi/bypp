@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>장바구니 정리 - 똑똑한 소비 실험실</title>
+<!-- Tailwind CSS v3 with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cozy: {
+              bg: '#FAF6EC',
+              card: '#FFFFFF',
+              peach: '#E89B7D',
+              peachLight: '#FCEFE9',
+              sage: '#8FB98A',
+              sageLight: '#EAF3EA',
+              cocoa: '#5C4A3A',
+              cocoaLight: '#8A7563',
+              butter: '#FFF4D6',
+              butterDark: '#E4A834',
+              line: '#EADFCF',
+              softGray: '#F5EFE6'
+            }
+          },
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif']
+          },
+          boxShadow: {
+            'cozy': '0 4px 0 0 #E4D7C5',
+            'cozy-hover': '0 6px 0 0 #E4D7C5',
+            'cozy-press': '0 1px 0 0 #E4D7C5',
+            'cozy-button': '0 3px 0 0 #46372A'
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Font: Gamja Flower for cute accent notes -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- BEGIN: CustomStyles -->
+<style data-purpose="custom-typography-and-effects">
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #FAF6EC;
+      color: #5C4A3A;
+    }
+    .font-hand {
+      font-family: 'Gaegu', cursive;
+    }
+    /* Dashed borders and drop zones */
+    .border-dashed-thick {
+      border: 2px dashed #D6C7B2;
+    }
+    .border-dashed-thick:hover {
+      border-color: #E89B7D;
+      background-color: #FFF9F5;
+    }
+    /* Playful runner animation keyframe */
+    @keyframes bobble {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-4px) rotate(3deg); }
+    }
+    .animate-bobble {
+      animation: bobble 1.2s ease-in-out infinite;
+    }
+    /* Dashed line effect for budget line */
+    .budget-dashed-line {
+      background-image: linear-gradient(to right, #E89B7D 60%, rgba(255,255,255,0) 0%);
+      background-position: bottom;
+      background-size: 14px 2px;
+      background-repeat: repeat-x;
+    }
+  </style>
+<!-- END: CustomStyles -->
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-cozy-peachLight selection:text-cozy-cocoa">
+<!-- BEGIN: NoticeBanner -->
+<!-- 따뜻한 펠트 리본 스타일 알림 바 -->
+<div class="w-full bg-[#FFEAD8] border-b border-[#F3D1BC] py-2 px-4 text-center text-xs sm:text-sm font-medium text-[#B85638] flex items-center justify-center gap-2 shadow-inner" data-purpose="status-notification-banner">
+<span class="inline-block w-2 h-2 rounded-full bg-[#E89B7D] animate-ping"></span>
+<span>저장 안 됨 (세션 생성 실패) — 그래도 이번 창에서 계속 똑똑하게 쓸 수 있어요! ☕</span>
+</div>
+<!-- END: NoticeBanner -->
+<!-- BEGIN: MainContentWrapper -->
+<div class="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-5 flex flex-col gap-5 pb-24">
+<!-- BEGIN: TopBarHeader -->
+<!-- 목표 및 기본 예산 정보 헤더 -->
+<header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-1 border-b border-cozy-line" data-purpose="budget-summary-header">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-2xl bg-cozy-peach flex items-center justify-center text-white shadow-sm font-bold text-lg">
+          🥜
+        </div>
+<div>
+<h1 class="text-base sm:text-lg font-bold text-cozy-cocoa tracking-tight flex items-center gap-2">
+            목표: 1억 모으기 <span class="text-cozy-line">|</span> <span class="text-cozy-cocoaLight font-medium">이번 달 잔여 예산: <strong class="text-cozy-peach font-bold">120,000원</strong></span>
+</h1>
+<p class="text-xs text-cozy-cocoaLight">장바구니와 살 물건 사이를 이동하며 소비 우선순위를 정해보세요.</p>
+</div>
+</div>
+<!-- 부가 뱃지 -->
+<div class="inline-flex items-center gap-2 bg-cozy-butter px-3 py-1.5 rounded-full border border-[#EEDBBA] text-xs font-semibold text-cozy-cocoa">
+<span>🛒 총 담긴 금액: <strong>215,000원</strong></span>
+</div>
+</header>
+<!-- END: TopBarHeader -->
+<!-- BEGIN: LinkInputBarSection -->
+<!-- 링크 및 스크린샷 수집 카드 섹션 -->
+<section class="bg-white rounded-[22px] border-2 border-cozy-line p-4 sm:p-5 shadow-cozy" data-purpose="link-input-container">
+<!-- 탭 컨트롤 -->
+<div class="flex items-center gap-2 mb-3">
+<button class="px-3.5 py-1.5 bg-cozy-cocoa text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm hover:opacity-95 transition-all" type="button">
+          링크로 추가
+        </button>
+<button class="px-3.5 py-1.5 bg-cozy-softGray text-cozy-cocoaLight text-xs sm:text-sm font-medium rounded-xl hover:bg-[#EFE6DA] transition-all" type="button">
+          스크린샷으로 추가
+        </button>
+<span class="text-xs text-cozy-cocoaLight ml-auto hidden md:inline font-hand text-base text-cozy-peach">
+          ✦ 쿠팡, 무신사, 네이버쇼핑 링크를 쏙 붙여넣으세요!
+        </span>
+</div>
+<!-- URL 입력 폼 필드 -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+<div class="relative flex-1">
+<input class="w-full h-11 px-4 text-sm rounded-xl border-2 border-cozy-line bg-[#FAF7F2] text-cozy-cocoa placeholder-cozy-cocoaLight/60 focus:bg-white focus:border-cozy-sage focus:ring-0 transition-all font-normal" placeholder="상품 링크를 붙여넣으세요 (예: https://...)" type="text" value="https://brand.naver.com/interior/products/vintagelamp882"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-cozy-cocoaLight bg-white px-2 py-0.5 rounded border border-cozy-line hidden sm:block">URL 감지됨</span>
+</div>
+<button class="h-11 px-6 bg-cozy-sage hover:bg-[#7FA77B] text-white font-bold text-sm rounded-xl transition-all shadow-cozy-button flex items-center justify-center gap-1.5 active:translate-y-0.5" data-purpose="fetch-button" type="button">
+<span>가져오기</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</button>
+</div>
+</section>
+<!-- END: LinkInputBarSection -->
+<!-- BEGIN: CozySplitBoard -->
+<!-- 메인 좌우 2분할 레이아웃 (장바구니 vs 진짜 살 물건) -->
+<main class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start" data-purpose="split-shopping-board">
+<!-- LEFT COLUMN: 장바구니 리스트 -->
+<section class="bg-white rounded-[24px] border-2 border-cozy-line p-5 sm:p-6 shadow-cozy min-h-[580px] flex flex-col justify-between" data-purpose="left-cart-column">
+<div>
+<!-- 좌측 컬럼 헤더 -->
+<div class="flex items-center justify-between pb-4 mb-4 border-b border-cozy-line/80">
+<div class="flex items-center gap-2">
+<span class="text-xl">🧺</span>
+<h2 class="text-lg font-bold text-cozy-cocoa">장바구니 <span class="text-cozy-peach font-extrabold">(3)</span></h2>
+</div>
+<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-cozy-softGray text-cozy-cocoaLight">
+              합계 135,000원
+            </span>
+</div>
+<p class="text-xs text-cozy-cocoaLight mb-4 font-hand text-base">
+            마음에 두고 있는 물건들이에요. 오른쪽으로 드래그해 진짜 살 것만 골라봐요!
+          </p>
+<!-- 장바구니 카드 리스트 -->
+<div class="space-y-3.5" data-purpose="cart-items-container">
+<!-- Item Card 1: 린넨 잠옷 -->
+<div class="group bg-[#FAF8F5] hover:bg-white rounded-[20px] border-2 border-cozy-line p-3.5 flex items-center justify-between gap-3 cursor-grab hover:shadow-md transition-all">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl bg-white border border-cozy-line flex items-center justify-center text-2xl shadow-inner">
+                  👕
+                </div>
+<div>
+<h3 class="text-sm font-bold text-cozy-cocoa group-hover:text-cozy-peach transition-colors">프렌치 린넨 파자마 세트</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs font-bold text-cozy-cocoa">38,000원</span>
+<span class="text-[11px] bg-cozy-sageLight text-cozy-cocoa px-2 py-0.5 rounded-full font-medium">#필수품</span>
+<span class="text-[10px] text-cozy-cocoaLight">쿠팡</span>
+</div>
+</div>
+</div>
+<button class="p-2 rounded-xl bg-white border border-cozy-line text-cozy-cocoaLight hover:text-cozy-peach hover:border-cozy-peach text-xs font-bold transition-all shadow-sm">
+                살 물건으로 ➔
+              </button>
+</div>
+<!-- Item Card 2: 드립포트 -->
+<div class="group bg-[#FAF8F5] hover:bg-white rounded-[20px] border-2 border-cozy-line p-3.5 flex items-center justify-between gap-3 cursor-grab hover:shadow-md transition-all">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl bg-white border border-cozy-line flex items-center justify-center text-2xl shadow-inner">
+                  🫖
+                </div>
+<div>
+<h3 class="text-sm font-bold text-cozy-cocoa group-hover:text-cozy-peach transition-colors">매트 블랙 구스넥 드립포트 600ml</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs font-bold text-cozy-cocoa">52,000원</span>
+<span class="text-[11px] bg-cozy-butter text-cozy-butterDark px-2 py-0.5 rounded-full font-medium">#취미생활</span>
+<span class="text-[10px] text-cozy-cocoaLight">29CM</span>
+</div>
+</div>
+</div>
+<button class="p-2 rounded-xl bg-white border border-cozy-line text-cozy-cocoaLight hover:text-cozy-peach hover:border-cozy-peach text-xs font-bold transition-all shadow-sm">
+                살 물건으로 ➔
+              </button>
+</div>
+<!-- Item Card 3: 블루투스 스피커 케이블 -->
+<div class="group bg-[#FAF8F5] hover:bg-white rounded-[20px] border-2 border-cozy-line p-3.5 flex items-center justify-between gap-3 cursor-grab hover:shadow-md transition-all">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl bg-white border border-cozy-line flex items-center justify-center text-2xl shadow-inner">
+                  🔌
+                </div>
+<div>
+<h3 class="text-sm font-bold text-cozy-cocoa group-hover:text-cozy-peach transition-colors">고속충전 패브릭 케이블 2m</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs font-bold text-cozy-cocoa">14,900원</span>
+<span class="text-[11px] bg-cozy-softGray text-cozy-cocoaLight px-2 py-0.5 rounded-full font-medium">#소모품</span>
+<span class="text-[10px] text-cozy-cocoaLight">네이버</span>
+</div>
+</div>
+</div>
+<button class="p-2 rounded-xl bg-white border border-cozy-line text-cozy-cocoaLight hover:text-cozy-peach hover:border-cozy-peach text-xs font-bold transition-all shadow-sm">
+                살 물건으로 ➔
+              </button>
+</div>
+</div>
+</div>
+<!-- 카드 하단 작은 안내 -->
+<div class="mt-6 pt-3 border-t border-cozy-line text-center text-xs text-cozy-cocoaLight font-medium">
+          💡 우선순위가 헷갈릴 땐 24시간 뒤에 다시 확인해보세요.
+        </div>
+</section>
+<!-- RIGHT COLUMN: 진짜 살 물건 리스트 (예산선 포함) -->
+<section class="bg-white rounded-[24px] border-2 border-cozy-line p-5 sm:p-6 shadow-cozy min-h-[580px] flex flex-col justify-between" data-purpose="right-essential-column">
+<div>
+<!-- 우측 컬럼 헤더 -->
+<div class="flex items-center justify-between pb-4 mb-4 border-b border-cozy-line/80">
+<div class="flex items-center gap-2">
+<span class="text-xl">✨</span>
+<h2 class="text-lg font-bold text-cozy-cocoa">
+                진짜 살 물건 <span class="text-cozy-sage font-extrabold">(2)</span>
+</h2>
+</div>
+<div class="flex items-center gap-2">
+<!-- 순위 보기 알약 버튼 -->
+<button class="px-3 py-1 bg-cozy-cocoa text-white text-xs font-bold rounded-full shadow-sm hover:bg-[#46372A] transition-all flex items-center gap-1" type="button">
+<span>순위 보기</span>
+<span class="text-[10px] bg-cozy-peach px-1 rounded">ON</span>
+</button>
+</div>
+</div>
+<!-- 서브 헤드 및 설명 -->
+<div class="flex items-center justify-between text-xs text-cozy-cocoaLight mb-3 font-medium">
+<span>⑤ 예산선 아래 항목은 계획 재검토가 필요해요!</span>
+<span class="font-hand text-sm text-cozy-peach">드래그로 순서 변경 가능 ↕</span>
+</div>
+<!-- 진짜 살 물건 리스트 -->
+<div class="space-y-3.5" data-purpose="priority-items-container">
+<!-- Priority Item 1: 레트로 조명 (예산 안) -->
+<div class="bg-white rounded-[20px] border-2 border-cozy-peach p-3.5 shadow-sm relative overflow-hidden flex items-center justify-between gap-3 group">
+<!-- 랭킹 뱃지 -->
+<span class="absolute top-0 left-0 bg-cozy-peach text-white text-[10px] font-bold px-2.5 py-0.5 rounded-br-xl">1위</span>
+<div class="flex items-center gap-3 pt-1">
+<div class="w-12 h-12 rounded-2xl bg-[#FFF5EF] border border-[#F3CDBF] flex items-center justify-center text-2xl shadow-inner">
+                  💡
+                </div>
+<div>
+<h3 class="text-sm font-bold text-cozy-cocoa">빈티지 버섯 무드등 램프</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs font-extrabold text-cozy-peach">45,000원</span>
+<span class="text-[11px] bg-[#FDEFE9] text-cozy-peach font-bold px-2 py-0.5 rounded-full">#기분전환</span>
+<span class="text-[10px] text-cozy-cocoaLight">책상용</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-cozy-sage bg-cozy-sageLight px-2.5 py-1 rounded-full border border-[#D5E8D3]">
+                  구매 확정권
+                </span>
+</div>
+</div>
+<!-- BEGIN: BudgetLine (Design Core Element) -->
+<!-- 예산 한도선 (DESIGN.md 핵심 요소) -->
+<div class="py-2.5 my-2" data-purpose="budget-limit-line-separator">
+<div class="flex items-center gap-3">
+<div class="flex-1 h-[2px] budget-dashed-line"></div>
+<div class="bg-cozy-peach text-white text-xs font-extrabold px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5">
+<span>✂️ 이번 달 남은 예산 한도선 (120,000원)</span>
+</div>
+<div class="flex-1 h-[2px] budget-dashed-line"></div>
+</div>
+</div>
+<!-- END: BudgetLine -->
+<!-- Priority Item 2: 예산선 아래 항목 (약간 흐리게, 제안 태그 부착) -->
+<div class="bg-white/80 rounded-[20px] border-2 border-dashed border-cozy-line p-3.5 opacity-85 hover:opacity-100 transition-all relative overflow-hidden flex items-center justify-between gap-3">
+<!-- 랭킹 뱃지 -->
+<span class="absolute top-0 left-0 bg-cozy-cocoaLight text-white text-[10px] font-bold px-2.5 py-0.5 rounded-br-xl">2위 (초과)</span>
+<div class="flex items-center gap-3 pt-1">
+<div class="w-12 h-12 rounded-2xl bg-cozy-softGray border border-cozy-line flex items-center justify-center text-2xl grayscale">
+                  🎧
+                </div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-sm font-bold text-cozy-cocoa">노이즈캔슬링 무선 헤드폰</h3>
+<!-- 제안 태그: DESIGN.md '1만원만 더 있으면!' -->
+<span class="text-[11px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full border border-amber-300">
+                      💡 1만원만 더 아끼면 가능!
+                    </span>
+</div>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-xs font-bold text-cozy-cocoaLight line-through">135,000원</span>
+<span class="text-xs font-bold text-cozy-peach">예산 초과 (+15,000원)</span>
+</div>
+</div>
+</div>
+<button class="px-2.5 py-1 text-xs text-cozy-cocoaLight hover:text-cozy-cocoa bg-cozy-softGray hover:bg-cozy-line rounded-lg transition-colors font-medium">
+                장바구니로 반환
+              </button>
+</div>
+</div>
+</div>
+<!-- 예산 피드백 정보 상자 -->
+<div class="mt-6 p-3 bg-cozy-peachLight/60 rounded-2xl border border-[#F5D8CA] flex items-center justify-between text-xs text-cozy-cocoa">
+<span class="font-medium">📌 예산선 아래 물건은 다음 달 월급날로 미뤄두는 건 어때요?</span>
+<span class="font-bold text-cozy-peach underline cursor-pointer">다음 달로 이동</span>
+</div>
+</section>
+</main>
+<!-- END: CozySplitBoard -->
+<!-- BEGIN: BottomActionDropZones -->
+<!-- 와이어프레임 하단 점선 드롭 영역 (빼기 vs 내리기) -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2" data-purpose="action-drop-zones">
+<!-- LEFT ACTION: 빼기 (안 살 것) -->
+<div class="border-dashed-thick rounded-2xl p-4 sm:p-5 flex items-center justify-center gap-3 bg-white/40 cursor-pointer transition-all hover:shadow-sm group" data-purpose="dropzone-discard">
+<div class="w-10 h-10 rounded-full bg-[#FAECE8] text-[#D86A50] flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+          🗑️
+        </div>
+<div class="text-left">
+<p class="text-sm font-bold text-cozy-cocoa group-hover:text-cozy-peach transition-colors">
+            빼기 (안 살 것)
+          </p>
+<p class="text-xs text-cozy-cocoaLight">
+            마음을 비우고 장바구니에서 털어내기
+          </p>
+</div>
+</div>
+<!-- RIGHT ACTION: 내리기 (샀음) -->
+<div class="border-dashed-thick rounded-2xl p-4 sm:p-5 flex items-center justify-center gap-3 bg-white/40 cursor-pointer transition-all hover:shadow-sm group" data-purpose="dropzone-completed">
+<div class="w-10 h-10 rounded-full bg-cozy-sageLight text-cozy-sage flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+          ✨
+        </div>
+<div class="text-left">
+<p class="text-sm font-bold text-cozy-cocoa group-hover:text-cozy-sage transition-colors">
+            내리기 (샀음!)
+          </p>
+<p class="text-xs text-cozy-cocoaLight">
+            구매 완료 체크하고 쾌감 느끼기
+          </p>
+</div>
+</div>
+</section>
+<!-- END: BottomActionDropZones -->
+</div>
+<!-- END: MainContentWrapper -->
+<!-- BEGIN: SignatureGoalRunnerBar -->
+<!-- DESIGN.md 6-5: 화면 하단 고정 목표 러너 바 -->
+<footer class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t-2 border-cozy-line py-2.5 px-4 sm:px-8 shadow-lg z-30" data-purpose="signature-runner-bar">
+<div class="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+<!-- 러너 게이지 트랙 및 캐릭터 -->
+<div class="w-full sm:w-2/3 flex items-center gap-3">
+<div class="text-xs font-bold text-cozy-cocoa shrink-0 flex items-center gap-1.5">
+<span>🏃 나의 절약 여정</span>
+<span class="text-cozy-peach font-extrabold text-sm">34%</span>
+</div>
+<!-- 프로그레스 트랙 바 -->
+<div class="relative flex-1 h-3.5 bg-cozy-softGray rounded-full p-0.5 border border-cozy-line overflow-visible">
+<!-- 채워진 게이지 -->
+<div class="h-full bg-gradient-to-r from-cozy-sage to-cozy-peach rounded-full transition-all duration-700" style="width: 34%;"></div>
+<!-- 귀여운 2D 러너 마스코트 (게이지 끝에 위치) -->
+<div class="absolute -top-3.5 -ml-4 flex flex-col items-center animate-bobble" style="left: 34%;">
+<span class="text-base select-none">🐾</span>
+</div>
+</div>
+<!-- 최종 목표 깃발 -->
+<div class="flex items-center gap-1 text-xs font-bold text-cozy-cocoa bg-cozy-butter px-2.5 py-1 rounded-full border border-[#E8D4A8] shrink-0">
+<span>🚩 1억 모으기</span>
+</div>
+</div>
+<!-- 우측 절약 총액 브리핑 -->
+<div class="flex items-center gap-3 text-xs text-cozy-cocoa">
+<span class="text-cozy-cocoaLight">오늘 참은 금액:</span>
+<span class="font-extrabold text-cozy-peach text-sm">90,000원 적립 중!</span>
+<button class="px-3 py-1 bg-cozy-cocoa hover:bg-[#46372A] text-white rounded-lg font-bold text-xs shadow-cozy-press transition-all" type="button">
+          저축 통장 보기
+        </button>
+</div>
+</div>
+</footer>
+<!-- END: SignatureGoalRunnerBar -->
+</body></html>

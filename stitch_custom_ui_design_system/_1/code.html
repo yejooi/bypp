@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="ko" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>목표를 골라주세요 - 힐링 저축 플래너</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Gaegu & Nunito for cozy game feeling -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Jua&amp;family=Nunito:wght@700;800;900&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'cream-bg': '#FAF6EC',
+            'cocoa': '#5C4A3A',
+            'cocoa-light': '#8A7563',
+            'sage-green': '#8FB98A',
+            'sage-dark': '#729E6E',
+            'sage-light': '#F0F6EE',
+            'card-border': '#D6C9B0',
+            'warm-peach': '#F5DDC4',
+          },
+          fontFamily: {
+            'game': ['Jua', 'Nunito', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Game-like Styles -->
+<style data-purpose="game-ui-styling">
+    body {
+      background-color: #ECE5D5;
+      font-family: 'Jua', 'Nunito', sans-serif;
+      color: #5C4A3A;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Subtle pasture/grass dots background pattern */
+    .pasture-bg {
+      background-color: #FAF6EC;
+      background-image: radial-gradient(#E8DEC8 2px, transparent 2px);
+      background-size: 24px 24px;
+    }
+
+    /* Chunky physical tactile button effect */
+    .tactile-card {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 0 #C4B69E;
+    }
+
+    .tactile-card:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #C4B69E;
+    }
+
+    .tactile-card-selected {
+      box-shadow: 0 4px 0 #729E6E;
+    }
+
+    .tactile-card-selected:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #729E6E;
+    }
+
+    /* Bottom game action button */
+    .game-action-btn {
+      transition: all 0.12s ease-in-out;
+      box-shadow: 0 5px 0 #6A9666;
+    }
+
+    .game-action-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #6A9666;
+    }
+
+    /* Soft floating leaf animation */
+    @keyframes gentleWiggle {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(6deg); }
+    }
+    .wiggle-hover:hover {
+      animation: gentleWiggle 0.6s ease-in-out infinite;
+    }
+  </style>
+<!-- END: Custom Game-like Styles -->
+</head>
+<body class="flex items-center justify-center min-h-screen p-0 sm:p-4" style="background-color: rgb(243, 233, 226); font-family: Jua, Nunito, sans-serif; color: rgb(62, 39, 35);">
+<!-- BEGIN: MobileFrameContainer -->
+<!-- iPhone mobile viewport mock (w-full max-w-[420px]) -->
+<div class="pasture-bg w-full max-w-[420px] min-h-screen sm:min-h-[844px] sm:h-[844px] sm:rounded-[42px] sm:border-[10px] sm:border-[#EDE5D3] sm:shadow-2xl flex flex-col justify-between p-6 sm:px-7 sm:py-8 relative overflow-hidden" style="border-color: rgb(220, 200, 189); background-color: rgb(250, 243, 236); background-image: radial-gradient(rgba(141, 110, 99, 0.16) 2px, transparent 2px); background-size: 24px 24px;">
+<!-- Decorative cute leaf watermark in corner -->
+<div class="absolute -top-6 -right-6 w-24 h-24 bg-sage-light rounded-full opacity-60 pointer-events-none" style="background-color: #FFE3EC;"></div>
+<!-- BEGIN: TopHeaderSection -->
+<header class="pt-4 z-10">
+<!-- Top Step & Subtitle Badge -->
+<div class="inline-flex items-center gap-2 bg-[#5D4037] px-4 py-1.5 rounded-full mb-3 text-xs tracking-wide text-[#FFF8F6] font-bold border-2 border-[#8D6E63] shadow-sm"><span class="text-sm animate-bounce">🍫</span><span class="text-[#FFE9E5] tracking-wide">초콜릿 퀘스트 · STEP 1</span></div>
+<!-- Main Title (① 목표를 골라주세요) -->
+<div class="flex items-center gap-3"><span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#5D4037] text-[#FFF8F6] text-base shadow-sm font-black border border-[#8D6E63]">1</span><h1 class="text-2xl sm:text-[26px] tracking-tight font-black text-[#3E2723]">목표를 골라주세요</h1><span class="text-2xl wiggle-hover inline-block cursor-default" title="초콜릿과 딸기">🍓🍫</span></div>
+<p class="text-[#8C5D69] text-sm mt-1.5 ml-11 font-medium">어떤 설레는 꿈을 향해 모아볼까요?</p>
+</header>
+<!-- END: TopHeaderSection -->
+<!-- BEGIN: GoalOptionsList -->
+<!-- Preserving the exact 4 options from Image 3: 1억 모으기, 내집마련, 여행 자금, 기타 -->
+<main class="my-auto py-6 space-y-4 z-10" data-purpose="goal-selection-group"><button class="w-full bg-[#FFF5F7] border-[2.5px] border-[#5D4037] rounded-[22px] p-4 flex items-center justify-between text-left group" data-purpose="goal-option" style="box-shadow: rgb(62, 39, 35) 0px 4px 0px; transform: translateY(0px);" type="button"><div class="flex items-center gap-3.5"><div class="w-12 h-12 rounded-2xl bg-[#FFE4EC] border border-[#5D4037]/20 flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">💰</div><div><div class="flex items-center gap-1.5"><span class="text-[19px] font-bold text-[#3E2723] block">1억 모으기</span><span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[#5D4037] text-[#FFE9E5] font-bold">PICK</span></div><span class="text-xs text-[#B32053] font-medium">달콤하고 든든한 목돈의 첫 시작!</span></div></div><div class="w-7 h-7 rounded-full bg-[#5D4037] border-2 border-[#8D6E63] flex items-center justify-center shadow-sm"><svg class="w-4 h-4 text-[#FFF8F6]" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div></button><button class="w-full bg-[#FAF5F0] border-[2px] border-[#D7CCC8] rounded-[22px] p-4 flex items-center justify-between text-left group hover:border-[#A1887F] transition-all" style="box-shadow: rgb(199, 183, 169) 0px 4px 0px;" data-purpose="goal-option" type="button"><div class="flex items-center gap-3.5"><div class="w-12 h-12 rounded-2xl bg-[#EDE0D4] border border-[#D7CCC8] flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">🏡</div><div><span class="text-[19px] font-bold text-[#4E342E] block">내집마련</span><span class="text-xs text-[#8D6E63] font-medium">따뜻하고 아늑한 나만의 보금자리</span></div></div><div class="w-6 h-6 rounded-full border-2 border-[#BCAAA4] bg-[#FFF8F6]"></div></button><button class="w-full bg-[#FAF5F0] border-[2px] border-[#D7CCC8] rounded-[22px] p-4 flex items-center justify-between text-left group hover:border-[#A1887F] transition-all" style="box-shadow: rgb(199, 183, 169) 0px 4px 0px;" data-purpose="goal-option" type="button"><div class="flex items-center gap-3.5"><div class="w-12 h-12 rounded-2xl bg-[#EDE0D4] border border-[#D7CCC8] flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">✈️</div><div><span class="text-[19px] font-bold text-[#4E342E] block">여행 자금</span><span class="text-xs text-[#8D6E63] font-medium">달콤한 휴식과 새로운 힐링 여행</span></div></div><div class="w-6 h-6 rounded-full border-2 border-[#BCAAA4] bg-[#FFF8F6]"></div></button><button class="w-full bg-[#FAF5F0] border-[2px] border-[#D7CCC8] rounded-[22px] p-4 flex items-center justify-between text-left group hover:border-[#A1887F] transition-all" style="box-shadow: rgb(199, 183, 169) 0px 4px 0px;" data-purpose="goal-option" type="button"><div class="flex items-center gap-3.5"><div class="w-12 h-12 rounded-2xl bg-[#EDE0D4] border border-[#D7CCC8] flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">🎁</div><div><span class="text-[19px] font-bold text-[#4E342E] block">기타</span><span class="text-xs text-[#8D6E63] font-medium">나만의 특별한 디저트 버킷리스트</span></div></div><div class="w-6 h-6 rounded-full border-2 border-[#BCAAA4] bg-[#FFF8F6]"></div></button></main>
+<!-- END: GoalOptionsList -->
+<!-- BEGIN: FooterActionSection -->
+<footer class="pb-2 pt-2 z-10">
+<!-- Primary Pill Game Action Button -->
+<button class="w-full py-4 rounded-full bg-[#FF6B99] text-white text-xl font-black tracking-wide border-[2.5px] border-[#5D4037] flex items-center justify-center gap-2 group transition-all" style="box-shadow: rgb(78, 52, 46) 0px 5px 0px;" data-purpose="submit-selection" id="next-step-btn" type="button"><span class="drop-shadow-sm">다음으로</span><svg class="w-5 h-5 transition-transform group-hover:translate-x-1 drop-shadow-sm" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+<!-- Bottom iOS Home Indicator safe area spacing for mobile realism -->
+<div class="w-32 h-1.5 bg-[#E8D4C8] rounded-full mx-auto mt-5 opacity-70"></div>
+</footer>
+<!-- END: FooterActionSection -->
+</div>
+<!-- END: MobileFrameContainer -->
+
+
+</body></html>

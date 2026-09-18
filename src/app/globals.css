@@ -1,28 +1,60 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* 디자인 테마 (Stitch 결과물, stitch_custom_ui_design_system/).
+   두 테마를 라이트/다크처럼 토글 가능하게 CSS 변수로 분리한다 (사용자 요청).
+   "cozy" = Cozy Meadow Cart (세이지그린/크림), "strawberry" = Strawberry Cocoa Confection (핑크/초콜릿). */
+
+:root,
+:root[data-theme="cozy"] {
+  --bg: #faf6ec;
+  --surface: #ffffff;
+  --surface-alt: #f5efe6;
+  --primary: #8fb98a;
+  --primary-hover: #7aa375;
+  --primary-light: #eaf3ea;
+  --on-primary: #ffffff;
+  --accent: #e89b7d;
+  --accent-hover: #d98a6c;
+  --accent-light: #fcefe9;
+  --text: #5c4a3a;
+  --text-sub: #8a7563;
+  --border: #eadfcf;
+  --butter: #fff4d6;
+  --butter-dark: #e4a834;
+  --runner-from: #8fb98a;
+  --runner-to: #e89b7d;
+  --font-heading: var(--font-jua), sans-serif;
+  --font-body: var(--font-noto-sans-kr), var(--font-gowun-dodum), sans-serif;
+  --font-hand: var(--font-gaegu), cursive;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root[data-theme="strawberry"] {
+  --bg: #fff8f6;
+  --surface: #ffffff;
+  --surface-alt: #efebe9;
+  --primary: #ff5c8a;
+  --primary-hover: #f2588a;
+  --primary-light: #ffeaf1;
+  --on-primary: #ffffff;
+  --accent: #ff407b;
+  --accent-hover: #e8386e;
+  --accent-light: #fff0f5;
+  --text: #4a2e35;
+  --text-sub: #7a5b64;
+  --border: #f9d5e2;
+  --butter: #fff4d6;
+  --butter-dark: #e4a834;
+  --runner-from: #ffa2bd;
+  --runner-to: #ff407b;
+  --font-heading: var(--font-epilogue), sans-serif;
+  --font-body: var(--font-plus-jakarta), sans-serif;
+  --font-hand: var(--font-plus-jakarta), sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
 }
 
 /* §8-1 연출: 항목 옮기기(도착 시 반동), 빼기(확 털어냄), 내리기(변기물 내리듯).

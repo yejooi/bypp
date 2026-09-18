@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>② 월 예산을 정해주세요 - 나만의 머니 아일랜드</title>
+<!-- Tailwind CSS v3 with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Gaegu & Gowun Dodum for cozy casual game vibes -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Gowun+Dodum&amp;family=Jua&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: {
+              50: '#FDFBF7',
+              100: '#FAF6EC',
+              200: '#F4ECE0',
+              300: '#EBDDC9'
+            },
+            cocoa: {
+              400: '#8A725D',
+              500: '#6E5844',
+              700: '#5C4A3A',
+              800: '#483A2E'
+            },
+            sage: {
+              100: '#E5EFE3',
+              400: '#A1C89C',
+              500: '#8FB98A',
+              600: '#7AA375'
+            },
+            pastelPeach: '#FAD9C4',
+            warmSand: '#F7EDE2'
+          },
+          fontFamily: {
+            gowun: ['"Gowun Dodum"', 'sans-serif'],
+            game: ['"Jua"', 'cursive'],
+            hand: ['"Gaegu"', 'cursive']
+          },
+          boxShadow: {
+            'game-btn': '0 4px 0 #6F986A',
+            'game-btn-active': '0 1px 0 #6F986A',
+            'card-soft': '0 6px 16px rgba(92, 74, 58, 0.06)'
+          }
+        }
+      }
+    }
+  </script>
+<!-- Base Custom Styles -->
+<style data-purpose="typography">
+    body {
+      font-family: 'Gowun Dodum', sans-serif;
+      background-color: #EDE5D8;
+      color: #5C4A3A;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-game {
+      font-family: 'Jua', cursive;
+    }
+    .font-bubble {
+      font-family: 'Gaegu', cursive;
+    }
+  </style>
+<style data-purpose="custom-elements">
+    /* Custom numeric input spinner styling */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      opacity: 0.6;
+      height: 28px;
+    }
+    .pixel-decor {
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 selection:bg-sage-400 selection:text-white">
+<!-- BEGIN: MobileFrameContainer -->
+<!-- Constrained container replicating iOS mobile canvas -->
+<div class="w-full max-w-[420px] min-h-screen sm:min-h-[850px] sm:max-h-[900px] bg-cream-100 flex flex-col justify-between relative shadow-2xl sm:rounded-[40px] border-0 sm:border-8 border-[#E6DBCE] overflow-hidden">
+<!-- BEGIN: TopBarArea -->
+<!-- iOS Dynamic / Status Bar Space & Top Decorative Bar -->
+<header class="pt-4 px-6 pb-2" data-purpose="status-header">
+<div class="flex items-center justify-between text-cocoa-400 text-xs font-semibold">
+<!-- Step progress indicator with game star theme -->
+<div class="flex items-center gap-1.5 bg-cream-200/80 px-3 py-1 rounded-full border border-cream-300">
+<span class="w-2 h-2 rounded-full bg-sage-500"></span>
+<span class="tracking-wide">STEP 02</span>
+</div>
+<!-- Island Level / Coin micro widget -->
+<div class="flex items-center gap-1 bg-[#F5EDDD] px-2.5 py-1 rounded-full border border-cream-300">
+<span class="text-amber-500 text-sm">🌰</span>
+<span class="font-bold text-cocoa-700 text-xs">Day 1</span>
+</div>
+</div>
+</header>
+<!-- END: TopBarArea -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 px-6 pt-5 pb-6 flex flex-col justify-between" data-purpose="step-content">
+<!-- Top Text & Goal Information Group -->
+<section data-purpose="step-title-and-goal">
+<!-- Step Title matching original wireframe with game flare -->
+<div class="flex items-center gap-2 mb-2">
+<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sage-500 text-white font-game text-lg shadow-sm">
+            ②
+          </span>
+<h1 class="text-2xl font-game text-cocoa-700 tracking-tight">
+            월 예산을 정해주세요
+          </h1>
+</div>
+<!-- Target Info Tag matching '목표: 1억 모으기 · 444원' -->
+<div class="inline-flex items-center gap-2 bg-[#FFFDF8] border-2 border-dashed border-[#DECEBE] px-3.5 py-1.5 rounded-2xl shadow-card-soft mt-1">
+<span class="text-base">🎯</span>
+<p class="text-xs text-cocoa-500 font-medium">
+            목표: <strong class="text-cocoa-700 font-bold">1억 모으기</strong> <span class="text-cocoa-400">·</span> <span class="text-sage-600 font-bold">444원</span>
+</p>
+</div>
+</section>
+<!-- Center Mascot & Visual Illustration -->
+<section class="my-4 flex flex-col items-center" data-purpose="mascot-section">
+<div class="relative w-full flex flex-col items-center">
+<!-- Thought/Speech Bubble -->
+<div class="relative bg-white border-2 border-cocoa-500/20 px-4 py-2.5 rounded-2xl shadow-card-soft max-w-[280px] mb-3 transition-transform hover:-translate-y-0.5">
+<p class="text-xs text-cocoa-700 leading-snug text-center font-medium">
+              "이번 달에 맛있는 도토리 모으듯<br/>
+<strong class="text-[#D37848]">편하게 쓸 수 있는 금액</strong>을 적어줘!"
+            </p>
+<!-- Bubble tail pointer -->
+<div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[8px] border-t-white"></div>
+</div>
+<!-- Original 2D Squirrel/Tanuki Mascot SVG Canvas (Vector Art) -->
+<div class="w-32 h-32 relative flex items-center justify-center">
+<!-- Shadow under character -->
+<div class="absolute bottom-2 w-20 h-5 bg-[#DECEBC]/50 rounded-full blur-[2px]"></div>
+<!-- Cozy 2D Mascot SVG -->
+<svg class="w-28 h-28 drop-shadow-md" fill="none" viewbox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<!-- Ears -->
+<ellipse cx="40" cy="38" fill="#C68B59" rx="12" ry="14"></ellipse>
+<ellipse cx="40" cy="38" fill="#FAD9C4" rx="7" ry="9"></ellipse>
+<ellipse cx="80" cy="38" fill="#C68B59" rx="12" ry="14"></ellipse>
+<ellipse cx="80" cy="38" fill="#FAD9C4" rx="7" ry="9"></ellipse>
+<!-- Big Fluffy Tail (Squirrel style) -->
+<path d="M78 85 C95 85 110 65 105 45 C100 28 82 22 75 30 C72 34 76 45 84 50 C80 62 75 75 70 82 Z" fill="#D39665" stroke="#8A5A36" stroke-linecap="round" stroke-width="2"></path>
+<path d="M85 45 C92 48 96 55 94 65" stroke="#FCECDD" stroke-linecap="round" stroke-width="3"></path>
+<!-- Body -->
+<rect fill="#C68B59" height="34" rx="17" stroke="#8A5A36" stroke-width="2" width="36" x="42" y="60"></rect>
+<!-- Belly patch -->
+<ellipse cx="60" cy="76" fill="#FDF7EA" rx="11" ry="12"></ellipse>
+<!-- Head -->
+<ellipse cx="60" cy="54" fill="#D39665" rx="26" ry="22" stroke="#8A5A36" stroke-width="2"></ellipse>
+<!-- Cheeks Cream Patches -->
+<ellipse cx="45" cy="58" fill="#FDF7EA" rx="10" ry="8"></ellipse>
+<ellipse cx="75" cy="58" fill="#FDF7EA" rx="10" ry="8"></ellipse>
+<!-- Blush -->
+<ellipse cx="42" cy="59" fill="#FF9E9E" fill-opacity="0.8" rx="3.5" ry="2"></ellipse>
+<ellipse cx="78" cy="59" fill="#FF9E9E" fill-opacity="0.8" rx="3.5" ry="2"></ellipse>
+<!-- Eyes -->
+<circle cx="50" cy="52" fill="#3D291D" r="3.2"></circle>
+<circle cx="51" cy="51" fill="#FFFFFF" r="1"></circle>
+<circle cx="70" cy="52" fill="#3D291D" r="3.2"></circle>
+<circle cx="71" cy="51" fill="#FFFFFF" r="1"></circle>
+<!-- Nose & Mouth -->
+<ellipse cx="60" cy="56" fill="#5C4A3A" rx="2.5" ry="1.8"></ellipse>
+<path d="M58 59 Q60 62 62 59" stroke="#5C4A3A" stroke-linecap="round" stroke-width="1.6"></path>
+<!-- Tiny Hands holding acorn coin -->
+<ellipse cx="50" cy="74" fill="#C68B59" rx="4" ry="3.5"></ellipse>
+<ellipse cx="70" cy="74" fill="#C68B59" rx="4" ry="3.5"></ellipse>
+<!-- Gold leaf coin held -->
+<circle cx="60" cy="73" fill="#F4C430" r="5" stroke="#D3A018" stroke-width="1"></circle>
+<text fill="#845D07" font-family="'Jua', cursive" font-size="6" text-anchor="middle" x="60" y="75">₩</text>
+</svg>
+</div>
+</div>
+</section>
+<!-- BEGIN: InputCardArea -->
+<!-- Preserved from Wireframe: Monthly budget input box & Monte Carlo note -->
+<section class="space-y-3" data-purpose="budget-input-group">
+<!-- Input Field Container with 18px rounded borders and gentle outline -->
+<div class="relative bg-[#FFFFFF] rounded-[18px] border-2 border-[#94BFE6] hover:border-[#7AAED9] transition-all p-1 shadow-sm focus-within:ring-4 focus-within:ring-[#A6CEF2]/40">
+<label class="sr-only" for="monthly-budget-input">월 예산 (원)</label>
+<div class="flex items-center px-4 py-3.5 gap-2">
+<span class="text-cocoa-400 font-bold text-lg select-none">₩</span>
+<input class="w-full bg-transparent border-0 p-0 text-cocoa-800 placeholder:text-[#A09384] text-lg font-bold focus:ring-0 focus:outline-none" id="monthly-budget-input" inputmode="numeric" placeholder="월 예산 (원)" type="text" value=""/>
+<!-- Number Stepper Icon (reproduced from Wireframe) -->
+<div class="flex flex-col text-cocoa-400 hover:text-cocoa-700 cursor-pointer pl-1" title="예산 증감">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M8 9l4-4 4 4m0 6l-4 4-4-4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- Note from Wireframe: Friendly mascot memo version -->
+<div class="bg-[#F4ECE0]/80 rounded-2xl p-3 border border-[#E8DCCD] flex items-start gap-2.5 text-left">
+<span class="text-base select-none mt-0.5">💡</span>
+<div class="space-y-0.5">
+<p class="text-xs text-cocoa-500 leading-relaxed">
+              (모르겠다 → 몬테카를로로 산출하는 경로는 아직 안 만들었어요. <strong class="text-cocoa-700 font-semibold">Phase 6</strong>에서 추가)
+            </p>
+<p class="text-[11px] text-sage-600 font-medium">
+              ✨ 대략적인 한 달 생활비나 용돈 기준으로 편하게 입력해보세요!
+            </p>
+</div>
+</div>
+</section>
+<!-- END: InputCardArea -->
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomCTA -->
+<!-- Sticky bottom button container styled in cozy casual game pill fashion -->
+<footer class="p-6 pt-2 pb-8 bg-gradient-to-t from-cream-100 via-cream-100 to-transparent" data-purpose="action-footer">
+<!-- "다음" Button (Sage green #8FB98A with tactile game click effect) -->
+<button class="w-full py-4 px-6 bg-sage-500 hover:bg-sage-600 active:translate-y-1 active:shadow-game-btn-active text-white text-lg font-game tracking-wider rounded-full shadow-game-btn transition-all duration-150 flex items-center justify-center gap-2 border-2 border-[#7DAA77]" id="next-button" type="button">
+<span>다음</span>
+<svg class="w-5 h-5 text-white/90 stroke-[3]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Safe Area Home Bar for Mobile view aesthetic -->
+<div class="w-32 h-1 bg-[#D8CEBF] rounded-full mx-auto mt-4 opacity-70"></div>
+</footer>
+<!-- END: BottomCTA -->
+</div>
+<!-- END: MobileFrameContainer -->
+<!-- Interactive Input Formatting Script -->
+<script data-purpose="budget-input-formatter">
+    const budgetInput = document.getElementById('monthly-budget-input');
+    const nextBtn = document.getElementById('next-button');
+
+    // Auto-format Korean Won numbers with comma separators
+    budgetInput.addEventListener('input', (e) => {
+      let val = e.target.value.replace(/[^0-9]/g, '');
+      if (val) {
+        e.target.value = Number(val).toLocaleString('ko-KR');
+      } else {
+        e.target.value = '';
+      }
+    });
+
+    // Gentle tactile feedback upon button click
+    nextBtn.addEventListener('click', () => {
+      const budgetVal = budgetInput.value.trim();
+      if (!budgetVal) {
+        budgetInput.focus();
+        // Shake animation effect for cute interaction
+        budgetInput.parentElement.parentElement.classList.add('animate-bounce');
+        setTimeout(() => {
+          budgetInput.parentElement.parentElement.classList.remove('animate-bounce');
+        }, 500);
+      } else {
+        // Ready for next flow
+        console.log("Budget confirmed:", budgetVal);
+      }
+    });
+  </script>
+</body></html>

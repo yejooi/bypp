@@ -108,6 +108,10 @@ export function ScreenshotImportForm() {
     if (inputRef.current) inputRef.current.value = "";
   }
 
+  const inputCls =
+    "border-2 rounded-xl px-2 py-1.5 text-sm bg-[var(--surface)] focus:outline-none focus:border-[var(--primary)]";
+  const inputStyle = { borderColor: "var(--border)" } as const;
+
   if (!drafts) {
     return (
       <div className="flex flex-col gap-2">
@@ -122,36 +126,50 @@ export function ScreenshotImportForm() {
           }}
           className="text-sm"
         />
-        {loading && <p className="text-xs text-gray-500">스크린샷 읽는 중...</p>}
-        {error && <p className="text-xs text-red-500">{error}</p>}
+        {loading && <p className="text-xs text-[var(--text-sub)]">스크린샷 읽는 중...</p>}
+        {error && (
+          <p className="text-xs" style={{ color: "var(--accent)" }}>
+            {error}
+          </p>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="border border-gray-200 rounded p-3 flex flex-col gap-2">
-      <p className="text-xs text-gray-500">
+    <div
+      className="rounded-2xl p-3.5 flex flex-col gap-2.5 border-2"
+      style={{ backgroundColor: "var(--surface-alt)", borderColor: "var(--border)" }}
+    >
+      <p className="text-xs text-[var(--text-sub)]">
         {drafts.length}개 찾았어요. 확인하고 필요하면 고치거나 지운 다음 한 번에 담아주세요. (사진은
         스크린샷에서 못 뽑아서 이미지 없이 등록돼요.)
       </p>
       {drafts.map((d) => (
-        <div key={d.key} className="flex flex-wrap gap-2 items-center border-t border-gray-100 pt-2">
+        <div
+          key={d.key}
+          className="flex flex-wrap gap-2 items-center border-t pt-2"
+          style={{ borderColor: "var(--border)" }}
+        >
           <input
             value={d.name}
             onChange={(e) => updateDraft(d.key, { name: e.target.value })}
-            className="border border-gray-300 rounded px-2 py-1 flex-1 min-w-[120px]"
+            className={`${inputCls} flex-1 min-w-[120px]`}
+            style={inputStyle}
           />
           <input
             value={d.price}
             onChange={(e) => updateDraft(d.key, { price: e.target.value })}
             type="number"
             placeholder="가격"
-            className="border border-gray-300 rounded px-2 py-1 w-24"
+            className={`${inputCls} w-24`}
+            style={inputStyle}
           />
           <select
             value={d.reasonCode}
             onChange={(e) => updateDraft(d.key, { reasonCode: e.target.value as ReasonCode })}
-            className="border border-gray-300 rounded px-2 py-1"
+            className={inputCls}
+            style={inputStyle}
           >
             {Object.entries(REASON_CODE_LABEL).map(([code, label]) => (
               <option key={code} value={code}>
@@ -164,19 +182,24 @@ export function ScreenshotImportForm() {
               value={d.customReason}
               onChange={(e) => updateDraft(d.key, { customReason: e.target.value })}
               placeholder="이유 직접 입력"
-              className="border border-gray-300 rounded px-2 py-1 flex-1 min-w-[140px]"
+              className={`${inputCls} flex-1 min-w-[140px]`}
+              style={inputStyle}
             />
           )}
-          <button onClick={() => removeDraft(d.key)} className="text-xs text-gray-400 underline">
+          <button onClick={() => removeDraft(d.key)} className="text-xs underline text-[var(--text-sub)]">
             제외
           </button>
         </div>
       ))}
       <div className="flex gap-2 pt-1">
-        <button onClick={addAll} className="bg-black text-white rounded px-3 py-1 text-sm">
+        <button
+          onClick={addAll}
+          className="px-4 py-2 text-white font-bold text-sm rounded-xl transition-all active:translate-y-0.5"
+          style={{ backgroundColor: "var(--primary)", boxShadow: "0 3px 0 0 var(--primary-hover)" }}
+        >
           전체 장바구니에 담기
         </button>
-        <button onClick={() => setDrafts(null)} className="text-xs text-gray-400 underline">
+        <button onClick={() => setDrafts(null)} className="text-xs underline text-[var(--text-sub)]">
           취소
         </button>
       </div>

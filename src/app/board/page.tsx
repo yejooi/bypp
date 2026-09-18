@@ -4,6 +4,7 @@
 // Phase 4: AI 판정 연결 + 순위 출력 + 공개 연출 (§6, §8-1).
 // - 옮기기/빼기/내리기는 드래그로 (Phase 3, 사용자 요청).
 // - "순위 보기" 전에는 가격순 폴백 (§9-2: 실패해도 빈 화면 금지 원칙과 동일한 이유로 기본값을 둔다).
+// 비주얼: stitch_custom_ui_design_system/main_organizer.
 
 import { useEffect, useState } from "react";
 import {
@@ -18,7 +19,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { useApp, REASON_CODE_LABEL, type Item } from "@/lib/store";
+import { useApp, REASON_CODE_LABEL, type Item, type ReasonCode } from "@/lib/store";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ScreenshotImportForm } from "@/components/ScreenshotImportForm";
 import {
@@ -31,6 +32,16 @@ import {
 } from "@/lib/scoring";
 
 type EvalState = "idle" | "loading" | "ready" | "error";
+
+const REASON_TAG_STYLE: Record<ReasonCode, { bg: string; color: string }> = {
+  broke_replace: { bg: "var(--primary-light)", color: "var(--primary-hover)" },
+  urgent_need: { bg: "var(--primary-light)", color: "var(--primary-hover)" },
+  long_wanted: { bg: "var(--butter)", color: "var(--butter-dark)" },
+  on_sale: { bg: "var(--accent-light)", color: "var(--accent-hover)" },
+  social_proof: { bg: "var(--accent-light)", color: "var(--accent-hover)" },
+  mood_boost: { bg: "var(--accent-light)", color: "var(--accent-hover)" },
+  other: { bg: "var(--surface-alt)", color: "var(--text-sub)" },
+};
 
 export default function BoardPage() {
   const { goalType, monthlyBudget, items, moveItem } = useApp();
@@ -52,6 +63,7 @@ export default function BoardPage() {
 
   const cartItems = items.filter((it) => it.status === "cart");
   const buyItems = items.filter((it) => it.status === "buy");
+  const cartTotal = cartItems.reduce((s, it) => s + it.price, 0) + buyItems.reduce((s, it) => s + it.price, 0);
 
   // 진짜 살 물건 목록이 바뀌면(추가/제거) 이전 판정 결과는 더 이상 안 맞으니 리셋 (§9-2 정신: 낡은 정보로 화면을 계속 보여주지 않는다)
   useEffect(() => {
@@ -181,26 +193,62 @@ export default function BoardPage() {
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
-      <main className="flex-1 flex flex-col gap-4 p-4 pb-36">
-        <header className="text-sm text-gray-500">
-          목표: {goalType ?? "-"} · 월 예산: {budget.toLocaleString()}원
+      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-5 flex flex-col gap-5 pb-40">
+        {/* 헤더: 목표/잔여예산/총액 */}
+        <header
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 border-b"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-[var(--accent)] flex items-center justify-center text-white shadow-sm font-bold text-lg shrink-0">
+              🥜
+            </div>
+            <div>
+              <h1
+                className="text-base sm:text-lg font-bold tracking-tight flex items-center gap-2 flex-wrap"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                목표: {goalType ?? "-"} <span style={{ color: "var(--border)" }}>|</span>{" "}
+                <span className="text-[var(--text-sub)] font-medium text-sm">
+                  이번 달 예산: <strong className="text-[var(--accent)] font-bold">{budget.toLocaleString()}원</strong>
+                </span>
+              </h1>
+              <p className="text-xs text-[var(--text-sub)]">
+                장바구니와 살 물건 사이를 드래그로 옮기며 소비 우선순위를 정해보세요.
+              </p>
+            </div>
+          </div>
+          <div className="inline-flex items-center gap-2 bg-[var(--butter)] px-3 py-1.5 rounded-full border border-[var(--border)] text-xs font-semibold">
+            🛒 총 담긴 금액: <strong>{cartTotal.toLocaleString()}원</strong>
+          </div>
         </header>
 
         {/* ③ 항목 등록: 링크 파싱 -> 실패시 수동 입력 폴백 (§5). 스크린샷 일괄 등록은 장바구니 스크래핑이
             로그인/JS렌더링 문제로 불가능해서(무신사/지그재그/쿠팡/네이버 확인함) 나온 대안. */}
-        <section className="border border-gray-300 rounded p-3 flex flex-col gap-2">
-          <div className="flex gap-2">
+        <section
+          className="bg-[var(--surface)] rounded-[22px] border-2 p-4 sm:p-5"
+          style={{ borderColor: "var(--border)", boxShadow: "0 4px 0 0 var(--border)" }}
+        >
+          <div className="flex items-center gap-2 mb-3">
             <button
               onClick={() => setAddMode("link")}
-              className={`text-sm px-2 py-1 rounded ${addMode === "link" ? "bg-black text-white" : "text-gray-500"}`}
+              className="px-3.5 py-1.5 text-xs sm:text-sm font-bold rounded-xl transition-all"
+              style={
+                addMode === "link"
+                  ? { backgroundColor: "var(--text)", color: "var(--surface)" }
+                  : { backgroundColor: "var(--surface-alt)", color: "var(--text-sub)" }
+              }
             >
               링크로 추가
             </button>
             <button
               onClick={() => setAddMode("screenshot")}
-              className={`text-sm px-2 py-1 rounded ${
-                addMode === "screenshot" ? "bg-black text-white" : "text-gray-500"
-              }`}
+              className="px-3.5 py-1.5 text-xs sm:text-sm font-bold rounded-xl transition-all"
+              style={
+                addMode === "screenshot"
+                  ? { backgroundColor: "var(--text)", color: "var(--surface)" }
+                  : { backgroundColor: "var(--surface-alt)", color: "var(--text-sub)" }
+              }
             >
               스크린샷으로 추가
             </button>
@@ -209,9 +257,9 @@ export default function BoardPage() {
         </section>
 
         {/* ④ 2단 구조 */}
-        <section className="flex-1 flex flex-col md:flex-row gap-4">
-          <ColumnDropZone id="cart-zone" title={`장바구니 (${cartItems.length})`}>
-            {cartItems.length === 0 && <p className="text-sm text-gray-400">비어있음</p>}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+          <ColumnDropZone id="cart-zone" icon="🧺" title="장바구니" count={cartItems.length}>
+            {cartItems.length === 0 && <p className="text-sm text-[var(--text-sub)]">비어있음</p>}
             {cartItems.map((it) => (
               <DraggableItemRow key={it.id} item={it} />
             ))}
@@ -219,24 +267,29 @@ export default function BoardPage() {
 
           <ColumnDropZone
             id="buy-zone"
-            title={`진짜 살 물건 (${buyItems.length}) — ⑤ 예산선 아래는 흐리게`}
-          >
-            <div className="flex items-center gap-2">
+            icon="✨"
+            title="진짜 살 물건"
+            count={buyItems.length}
+            action={
               <button
                 onClick={handleEvaluate}
                 disabled={buyItems.length === 0 || evalState === "loading"}
-                className="text-xs bg-black text-white rounded px-3 py-1 disabled:opacity-30"
+                className="px-3 py-1 text-white text-xs font-bold rounded-full shadow-sm transition-all disabled:opacity-40"
+                style={{ backgroundColor: "var(--text)" }}
               >
                 {evalState === "loading" ? "음... 잠깐 생각해볼게요" : "순위 보기"}
               </button>
-              {evalState === "error" && (
-                <span className="text-xs text-red-500">판정에 실패해서 가격순으로 보여드릴게요</span>
-              )}
-            </div>
+            }
+          >
+            {evalState === "error" && (
+              <p className="text-xs" style={{ color: "var(--accent)" }}>
+                판정에 실패해서 가격순으로 보여드릴게요
+              </p>
+            )}
 
             {/* §6-1: 결과를 본 다음 사용자가 직접 조정하는 두 번째 판단 기준. 30~100, 기본값 65 (wayfinder #5). */}
             {evalState === "ready" && (
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-[var(--text-sub)] mb-1">
                 <span>가격순</span>
                 <input
                   type="range"
@@ -251,26 +304,36 @@ export default function BoardPage() {
               </div>
             )}
 
-            {buyItems.length === 0 && <p className="text-sm text-gray-400">비어있음</p>}
+            <p className="text-xs text-[var(--text-sub)] mb-1">
+              ⑤ 예산선 아래 항목은 계획 재검토가 필요해요!
+            </p>
+
+            {buyItems.length === 0 && <p className="text-sm text-[var(--text-sub)]">비어있음</p>}
 
             {rows.map(({ item, overBudget, message, reasoning, index }, i) => {
               const revealed = evalState !== "ready" || index < revealedCount;
               if (!revealed) return null;
               return (
                 <div key={item.id}>
-                  {overBudget &&
-                    i > 0 &&
-                    !rows[i - 1].overBudget && (
-                      <div className="border-t-2 border-dashed border-red-400 my-1 text-xs text-red-400">
-                        예산선
+                  {overBudget && i > 0 && !rows[i - 1].overBudget && (
+                    <div className="py-2 my-1 flex items-center gap-3">
+                      <div className="flex-1 h-[2px]" style={{ backgroundColor: "var(--accent)", opacity: 0.4 }} />
+                      <div
+                        className="text-white text-xs font-extrabold px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 shrink-0"
+                        style={{ backgroundColor: "var(--accent)" }}
+                      >
+                        <span>✂️ 예산 한도선 ({budget.toLocaleString()}원)</span>
                       </div>
-                    )}
+                      <div className="flex-1 h-[2px]" style={{ backgroundColor: "var(--accent)", opacity: 0.4 }} />
+                    </div>
+                  )}
                   <DraggableItemRow
                     item={item}
                     dim={overBudget}
                     message={message}
                     reasoning={reasoning}
                     rank={evalState === "ready" ? index + 1 : undefined}
+                    positive={evalState === "ready" && !overBudget && index === 0}
                   />
                 </div>
               );
@@ -278,16 +341,19 @@ export default function BoardPage() {
 
             {/* §6-3: 하나만 살 수 있다면? */}
             {evalState === "ready" && revealedCount === (scored?.length ?? 0) && scored && scored.length > 1 && (
-              <div className="mt-2 border-t border-gray-200 pt-2">
-                <p className="text-sm font-medium mb-1">이 중에 하나만 살 수 있다면?</p>
-                <div className="flex flex-wrap gap-1">
+              <div className="mt-2 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
+                <p className="text-sm font-bold mb-1.5">이 중에 하나만 살 수 있다면?</p>
+                <div className="flex flex-wrap gap-1.5">
                   {scored.map((s) => (
                     <button
                       key={s.id}
                       onClick={() => setUserPick(s.id)}
-                      className={`text-xs border rounded px-2 py-1 ${
-                        userPick === s.id ? "border-black font-semibold" : "border-gray-300"
-                      }`}
+                      className="text-xs rounded-full px-3 py-1 border-2 font-medium transition-all"
+                      style={
+                        userPick === s.id
+                          ? { borderColor: "var(--primary)", backgroundColor: "var(--primary-light)" }
+                          : { borderColor: "var(--border)" }
+                      }
                     >
                       {s.name}
                     </button>
@@ -296,7 +362,10 @@ export default function BoardPage() {
 
                 {/* §6-6: 선택 갭 설명 */}
                 {showGapExplanation && pickedItem && topPick && (
-                  <p className="text-sm text-gray-600 mt-2 border border-gray-200 rounded p-2">
+                  <p
+                    className="text-sm mt-2 rounded-2xl p-3"
+                    style={{ backgroundColor: "var(--surface-alt)", color: "var(--text)" }}
+                  >
                     당신은 {pickedItem.name}를 골랐는데 계산상으로는 {topPick.name}가 앞서요.{" "}
                     {pickedItem.name}는 만족이 {pickedItem.satisfaction_months}개월 정도인데{" "}
                     {topPick.name}는 {topPick.satisfaction_months}개월 가거든요. 그래도{" "}
@@ -304,7 +373,9 @@ export default function BoardPage() {
                   </p>
                 )}
                 {evalState === "ready" && userPick === topPick?.id && (
-                  <p className="text-sm text-gray-600 mt-2">계산이랑 똑같이 고르셨네요, 좋은 선택이에요.</p>
+                  <p className="text-sm mt-2 text-[var(--primary-hover)] font-medium">
+                    계산이랑 똑같이 고르셨네요, 좋은 선택이에요.
+                  </p>
                 )}
               </div>
             )}
@@ -312,17 +383,23 @@ export default function BoardPage() {
         </section>
 
         {/* 빼기/내리기 드롭존 - 항상 노출. ProgressRunner(h-8)가 화면 맨 밑을 쓰므로 그 위에 쌓는다. */}
-        <div className="fixed bottom-8 left-0 right-0 flex gap-2 p-3 bg-white border-t border-gray-300">
-          <ActionDropZone id="toss-zone" label="빼기 (안 살 것)" />
-          <ActionDropZone id="flush-zone" label="내리기 (샀음)" />
+        <div
+          className="fixed bottom-8 left-0 right-0 grid grid-cols-2 gap-3 p-3 sm:px-6"
+          style={{ backgroundColor: "var(--surface)", borderTop: "2px solid var(--border)" }}
+        >
+          <ActionDropZone id="toss-zone" icon="🗑️" title="빼기 (안 살 것)" desc="마음을 비우고 털어내기" />
+          <ActionDropZone id="flush-zone" icon="✨" title="내리기 (샀음!)" desc="구매 완료, 쾌감 느끼기" />
         </div>
       </main>
 
       <DragOverlay>
         {activeItem ? (
-          <div className="border border-gray-300 rounded px-2 py-1 bg-white shadow-lg">
-            <span className="font-medium text-sm">{activeItem.name}</span>{" "}
-            <span className="text-gray-500 text-xs">{activeItem.price.toLocaleString()}원</span>
+          <div
+            className="rounded-2xl px-3 py-2 shadow-lg border-2"
+            style={{ backgroundColor: "var(--surface)", borderColor: "var(--primary)" }}
+          >
+            <span className="font-bold text-sm">{activeItem.name}</span>{" "}
+            <span className="text-[var(--text-sub)] text-xs">{activeItem.price.toLocaleString()}원</span>
           </div>
         ) : null}
       </DragOverlay>
@@ -332,37 +409,75 @@ export default function BoardPage() {
 
 function ColumnDropZone({
   id,
+  icon,
   title,
+  count,
+  action,
   children,
 }: {
   id: string;
+  icon: string;
   title: string;
+  count: number;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 border rounded p-3 flex flex-col gap-2 min-h-[200px] ${
-        isOver ? "border-black bg-gray-50" : "border-gray-300"
-      }`}
+      className="rounded-[24px] border-2 p-5 sm:p-6 flex flex-col gap-2 min-h-[300px] transition-colors"
+      style={{
+        backgroundColor: "var(--surface)",
+        borderColor: isOver ? "var(--primary)" : "var(--border)",
+        boxShadow: "0 4px 0 0 var(--border)",
+      }}
     >
-      <h2 className="font-semibold">{title}</h2>
+      <div className="flex items-center justify-between pb-3 mb-1 border-b" style={{ borderColor: "var(--border)" }}>
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{icon}</span>
+          <h2 className="text-lg font-bold">
+            {title} <span style={{ color: "var(--accent)" }}>({count})</span>
+          </h2>
+        </div>
+        {action}
+      </div>
       {children}
     </div>
   );
 }
 
-function ActionDropZone({ id, label }: { id: string; label: string }) {
+function ActionDropZone({
+  id,
+  icon,
+  title,
+  desc,
+}: {
+  id: string;
+  icon: string;
+  title: string;
+  desc: string;
+}) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 border-2 border-dashed rounded p-4 text-center text-sm ${
-        isOver ? "border-black bg-gray-100 font-semibold" : "border-gray-300 text-gray-500"
-      }`}
+      className="rounded-2xl p-3 sm:p-4 flex items-center justify-center gap-3 border-2 border-dashed transition-all"
+      style={{
+        borderColor: isOver ? "var(--accent)" : "var(--border)",
+        backgroundColor: isOver ? "var(--accent-light)" : "transparent",
+      }}
     >
-      {label}
+      <div
+        className="w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0"
+        style={{ backgroundColor: "var(--surface-alt)" }}
+      >
+        {icon}
+      </div>
+      <div className="text-left">
+        <p className="text-sm font-bold">{title}</p>
+        <p className="text-xs hidden sm:block text-[var(--text-sub)]">{desc}</p>
+      </div>
     </div>
   );
 }
@@ -373,12 +488,14 @@ function DraggableItemRow({
   message,
   reasoning,
   rank,
+  positive,
 }: {
   item: Item;
   dim?: boolean;
   message?: string | null;
   reasoning?: string | null;
   rank?: number;
+  positive?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: item.id });
 
@@ -390,39 +507,85 @@ function DraggableItemRow({
         ? "animate-flush-down"
         : "animate-pop-in";
 
+  const tag = REASON_TAG_STYLE[item.reasonCode];
+  const reasonLabel =
+    item.reasonCode === "other" && item.customReason ? item.customReason : REASON_CODE_LABEL[item.reasonCode];
+
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`flex gap-2 border border-gray-200 rounded p-2 select-none touch-none ${
+      className={`relative rounded-[20px] border-2 p-3.5 flex items-center justify-between gap-3 select-none touch-none overflow-hidden ${
         isDragging ? "opacity-30" : "cursor-grab"
-      } ${exitClass} ${dim ? "opacity-40" : ""} ${item.exiting ? "pointer-events-none" : ""}`}
+      } ${exitClass} ${dim ? "opacity-70" : ""} ${item.exiting ? "pointer-events-none" : ""}`}
+      style={{
+        backgroundColor: "var(--surface)",
+        borderColor: rank === 1 ? "var(--primary)" : dim ? "var(--border)" : "var(--border)",
+        borderStyle: dim ? "dashed" : "solid",
+      }}
     >
-      {rank != null && <span className="text-lg font-bold text-gray-400 w-5 shrink-0">{rank}</span>}
-
-      {item.imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={item.imageUrl}
-          alt=""
-          className="w-20 h-20 object-cover rounded shrink-0 bg-gray-100"
-        />
-      ) : (
-        <div className="w-20 h-20 rounded shrink-0 bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
-          이미지 없음
-        </div>
+      {rank != null && (
+        <span
+          className="absolute top-0 left-0 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-br-xl"
+          style={{ backgroundColor: rank === 1 ? "var(--primary)" : "var(--text-sub)" }}
+        >
+          {rank}위{dim ? " (초과)" : ""}
+        </span>
       )}
 
-      <div className="flex flex-col gap-0.5 min-w-0 flex-1 justify-center">
-        <p className="text-xs font-medium truncate">{item.name}</p>
-        <p className="text-xs text-gray-500">
-          {item.price.toLocaleString()}원 ·{" "}
-          {item.reasonCode === "other" && item.customReason ? item.customReason : REASON_CODE_LABEL[item.reasonCode]}
-        </p>
-        {reasoning && <p className="text-xs text-gray-400 italic">&quot;{reasoning}&quot;</p>}
-        {message && <p className="text-xs text-gray-600">{message}</p>}
+      <div className={`flex items-center gap-3 ${rank != null ? "pt-2" : ""}`}>
+        {item.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={item.imageUrl}
+            alt=""
+            className="w-14 h-14 object-cover rounded-2xl border shrink-0"
+            style={{ borderColor: "var(--border)" }}
+          />
+        ) : (
+          <div
+            className="w-14 h-14 rounded-2xl border flex items-center justify-center text-xl shrink-0"
+            style={{ backgroundColor: "var(--surface-alt)", borderColor: "var(--border)" }}
+          >
+            🛍️
+          </div>
+        )}
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-sm font-bold truncate">{item.name}</h3>
+            {message && (
+              <span
+                className="text-[11px] font-bold px-2 py-0.5 rounded-full border shrink-0"
+                style={{ backgroundColor: "var(--butter)", color: "var(--butter-dark)", borderColor: "var(--butter-dark)" }}
+              >
+                💡 {message}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            <span className="text-xs font-extrabold" style={{ color: dim ? "var(--text-sub)" : "var(--text)" }}>
+              {item.price.toLocaleString()}원
+            </span>
+            <span
+              className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: tag.bg, color: tag.color }}
+            >
+              #{reasonLabel}
+            </span>
+          </div>
+          {reasoning && <p className="text-xs italic mt-0.5 text-[var(--text-sub)]">&quot;{reasoning}&quot;</p>}
+        </div>
       </div>
+
+      {positive && (
+        <span
+          className="text-xs font-bold px-2.5 py-1 rounded-full border shrink-0"
+          style={{ backgroundColor: "var(--primary-light)", color: "var(--primary-hover)", borderColor: "var(--primary)" }}
+        >
+          구매 확정권
+        </span>
+      )}
     </div>
   );
 }

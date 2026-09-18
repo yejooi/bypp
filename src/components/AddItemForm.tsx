@@ -28,6 +28,10 @@ const EMPTY_DRAFT: Draft = {
   sourceUrl: null,
 };
 
+const inputCls =
+  "border-2 rounded-xl px-3 py-2 text-sm bg-[var(--surface)] focus:outline-none focus:border-[var(--primary)]";
+const inputStyle = { borderColor: "var(--border)" } as const;
+
 export function AddItemForm() {
   const { addItem } = useApp();
   const [url, setUrl] = useState("");
@@ -84,17 +88,19 @@ export function AddItemForm() {
 
   if (stage === "link") {
     return (
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
         <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="상품 링크를 붙여넣으세요"
-          className="border border-gray-300 rounded px-2 py-1 flex-1"
+          placeholder="상품 링크를 붙여넣으세요 (예: https://...)"
+          className={`${inputCls} flex-1`}
+          style={inputStyle}
         />
         <button
           disabled={!url || loading}
           onClick={handleFetch}
-          className="bg-black text-white rounded px-3 py-1 disabled:opacity-30"
+          className="px-6 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
+          style={{ backgroundColor: "var(--primary)", boxShadow: "0 3px 0 0 var(--primary-hover)" }}
         >
           {loading ? "가져오는 중..." : "가져오기"}
         </button>
@@ -103,33 +109,38 @@ export function AddItemForm() {
   }
 
   return (
-    <div className="border border-gray-200 rounded p-3 flex flex-col gap-2">
+    <div
+      className="rounded-2xl p-3.5 flex flex-col gap-2.5 border-2"
+      style={{ backgroundColor: "var(--surface-alt)", borderColor: "var(--border)" }}
+    >
       {failReason && (
-        <p className="text-xs text-orange-500">
+        <p className="text-xs font-medium" style={{ color: "var(--accent)" }}>
           링크에서 정보를 못 가져왔어요 ({failReason}) — 직접 입력해주세요.
         </p>
       )}
       {draft.imageUrl && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={draft.imageUrl} alt="" className="w-16 h-16 object-cover rounded" />
+        <img src={draft.imageUrl} alt="" className="w-16 h-16 object-cover rounded-2xl" />
       )}
       <div className="flex flex-wrap gap-2">
         <input
           value={draft.name}
           onChange={(e) => setDraft({ ...draft, name: e.target.value })}
           placeholder="상품명"
-          className="border border-gray-300 rounded px-2 py-1 flex-1 min-w-[120px]"
+          className={`${inputCls} flex-1 min-w-[120px]`}
+          style={inputStyle}
         />
         <input
           value={draft.price}
           onChange={(e) => setDraft({ ...draft, price: e.target.value })}
           type="number"
           placeholder="가격"
-          className="border border-gray-300 rounded px-2 py-1 w-28"
+          className={`${inputCls} w-28`}
+          style={inputStyle}
         />
       </div>
       {(draft.category || draft.brand || draft.saleRate) && (
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-[var(--text-sub)]">
           {draft.brand && `브랜드: ${draft.brand} · `}
           {draft.category && `카테고리: ${draft.category} · `}
           {draft.saleRate && `할인율: ${draft.saleRate}%`}
@@ -139,7 +150,8 @@ export function AddItemForm() {
         <select
           value={reasonCode}
           onChange={(e) => setReasonCode(e.target.value as ReasonCode)}
-          className="border border-gray-300 rounded px-2 py-1"
+          className={inputCls}
+          style={inputStyle}
         >
           {Object.entries(REASON_CODE_LABEL).map(([code, label]) => (
             <option key={code} value={code}>
@@ -152,7 +164,8 @@ export function AddItemForm() {
             value={customReason}
             onChange={(e) => setCustomReason(e.target.value)}
             placeholder="어떤 이유인지 직접 적어주세요"
-            className="border border-gray-300 rounded px-2 py-1 flex-1 min-w-[160px]"
+            className={`${inputCls} flex-1 min-w-[160px]`}
+            style={inputStyle}
           />
         )}
         <button
@@ -172,11 +185,12 @@ export function AddItemForm() {
             });
             reset();
           }}
-          className="bg-black text-white rounded px-3 py-1 disabled:opacity-30"
+          className="px-4 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
+          style={{ backgroundColor: "var(--primary)", boxShadow: "0 3px 0 0 var(--primary-hover)" }}
         >
           장바구니에 추가
         </button>
-        <button onClick={reset} className="text-xs text-gray-400 underline">
+        <button onClick={reset} className="text-xs underline text-[var(--text-sub)]">
           취소
         </button>
       </div>
