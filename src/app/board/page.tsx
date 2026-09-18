@@ -397,26 +397,26 @@ export default function BoardPage() {
           >
             <UserControls />
             <div className="flex flex-col leading-tight min-w-0">
-              <span className="text-xs font-bold text-[#6F523A]">목표</span>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-[#FFF0D4] border-2 border-[#F0C77A] text-[#7A4A00] text-base font-black rounded-full truncate">
-                  <GoalIcon goal={goalType} className="w-4 h-4 text-[#C9820F]" />
-                  {goalType ?? "-"}
-                </span>
-                <Link href="/?edit=1" className="text-xs font-bold text-[#6F523A] underline shrink-0">
+              <span className="text-xs font-bold text-[#6F523A] flex items-center gap-2">
+                목표
+                <Link href="/?edit=1" className="font-medium underline">
                   바꾸기
                 </Link>
-              </div>
+              </span>
+              <span className="text-xl font-black text-[#A75D00] flex items-center gap-1.5 truncate">
+                <GoalIcon goal={goalType} className="w-5 h-5" />
+                {goalType ?? "-"}
+              </span>
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-xs font-bold text-[#6F523A]">
                 이번 달 남은 예산 <span className="font-medium">(총 {won(totalBudget)}{purchasedSum > 0 && ` · 구매 ${won(purchasedSum)}`})</span>
               </span>
-              <span className="text-lg font-black text-[#2D6C2A]">{won(budget)}</span>
+              <span className="text-xl font-black text-[#2D6C2A]">{won(budget)}</span>
             </div>
             <div className="flex flex-col leading-tight text-right">
               <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
-              <span className="text-base font-black text-[#5B3E29]">
+              <span className="text-xl font-black text-[#5B3E29]">
                 {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
               </span>
             </div>
@@ -458,7 +458,7 @@ export default function BoardPage() {
                   </div>
                   <button
                     onClick={() => setAddOpen(true)}
-                    className={`px-3 py-1 rounded-full bg-[#4F8B33] text-white text-xs font-black ${SHADOW_AC_SM} active:translate-y-0.5 transition`}
+                    className={`px-4 py-1.5 rounded-full bg-[#3F8A3A] text-white text-sm font-black ring-2 ring-[#BEE88A] ${SHADOW_AC_SM} hover:bg-[#2F7A2B] active:translate-y-0.5 transition`}
                   >
                     ＋ 물건 추가
                   </button>
