@@ -431,8 +431,7 @@ export default function BoardPage() {
               id="cart-zone"
               className={`order-1 lg:order-none lg:col-start-1 lg:row-start-1 xl:col-start-2 flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 xl:p-4 xl:min-h-0 xl:overflow-y-auto relative ${SHADOW_AC} overflow-hidden`}
             >
-              <div className="absolute inset-2.5 rounded-[30px] border-2 border-dashed border-[#CCBFA3] pointer-events-none" />
-              <div
+                            <div
                 className={`relative z-10 w-full rounded-2xl border-2 border-[#B89A62] shrink-0 mb-3 py-3 px-5 xl:mb-2 xl:py-1.5 ${SHADOW_AC_SM}`}
                 style={{
                   backgroundColor: "#E3CD98",
