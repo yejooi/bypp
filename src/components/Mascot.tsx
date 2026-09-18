@@ -86,17 +86,38 @@ export function Mascot({ size = 32, mood = "idle", className = "" }: { size?: nu
   );
 }
 
-// 캐릭터가 하는 말풍선. 왼쪽에 꼬리가 달린다.
-export function SpeechBubble({ children, tone = "cream", className = "" }: { children: React.ReactNode; tone?: "cream" | "green" | "amber"; className?: string }) {
-  const palette =
-    tone === "green"
-      ? "bg-[#E5F5D4] border-[#AED48C] text-[#2D6C2A]"
-      : tone === "amber"
-        ? "bg-[#FFF1D6] border-[#F0C77A] text-[#8A5A00]"
-        : "bg-[#FFF9EC] border-[#D6C2A5] text-[#5B3E29]";
+// 캐릭터가 하는 말풍선. tail="left": 캐릭터가 왼쪽 옆에 있을 때, tail="top": 캐릭터가 위에 있을 때.
+const TONES = {
+  cream: { bg: "#FFF9EC", border: "#D6C2A5", text: "#5B3E29" },
+  green: { bg: "#E5F5D4", border: "#AED48C", text: "#2D6C2A" },
+  amber: { bg: "#FFF1D6", border: "#F0C77A", text: "#8A5A00" },
+} as const;
+
+export function SpeechBubble({
+  children,
+  tone = "cream",
+  tail = "left",
+  className = "",
+}: {
+  children: React.ReactNode;
+  tone?: keyof typeof TONES;
+  tail?: "left" | "top";
+  className?: string;
+}) {
+  const c = TONES[tone];
   return (
-    <div className={`relative rounded-2xl border-2 px-3 py-1.5 text-xs font-black leading-snug ${palette} ${className}`}>
-      <span className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-3 h-3 rotate-45 bg-inherit border-l-2 border-b-2 border-inherit" />
+    <div
+      className={`relative rounded-2xl border-2 px-3.5 py-2 text-xs font-black leading-snug ${className}`}
+      style={{ backgroundColor: c.bg, borderColor: c.border, color: c.text }}
+    >
+      <span
+        className="absolute w-2.5 h-2.5 rotate-45"
+        style={
+          tail === "left"
+            ? { left: -7, top: "50%", marginTop: -5, backgroundColor: c.bg, borderLeft: `2px solid ${c.border}`, borderBottom: `2px solid ${c.border}` }
+            : { top: -7, left: 22, backgroundColor: c.bg, borderLeft: `2px solid ${c.border}`, borderTop: `2px solid ${c.border}` }
+        }
+      />
       {children}
     </div>
   );

@@ -461,7 +461,7 @@ export default function BoardPage() {
                     {judgeItems.length}개 후보 대기 중
                   </span>
                 </div>
-                <SpeechBubble className="self-start ml-2">
+                <SpeechBubble tail="top" className="self-start ml-3 mt-1">
                   {evalState === "loading"
                     ? "음... 잠깐 생각해볼게요"
                     : "살까 말까 고민되는 것만 끌어다 놓아 보세요. 같이 골라 볼게요!"}
