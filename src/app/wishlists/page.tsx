@@ -33,7 +33,7 @@ export default function WishlistsPage() {
   }, []);
 
   return (
-    <div className="grass-bg flex-1 text-[#4A3324]">
+    <div className="flex-1 bg-[#E8EDD6] text-[#4A3324]">
       <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 pt-16 pb-16 flex flex-col gap-6">
         <div className="flex flex-col gap-2 items-start">
           <WoodSign>🏡 이웃 위시리스트</WoodSign>
@@ -42,7 +42,7 @@ export default function WishlistsPage() {
           </p>
         </div>
 
-        {neighbors === null && <p className="text-sm font-bold text-[#FFF9EC]">불러오는 중...</p>}
+        {neighbors === null && <p className="text-sm font-bold text-[#7A5B3E]">불러오는 중...</p>}
         {neighbors?.length === 0 && (
           <div className={`rounded-[28px] border-[3px] border-[#D6C2A5] bg-[#FFF9EC] p-6 text-center font-bold ${SHADOW_AC}`}>
             아직 이웃이 없어요. 첫 이웃이 되어 보세요!

@@ -106,7 +106,7 @@ export default function UserWishlistPage() {
   const done = items.filter((i) => i.status === "purchased");
 
   return (
-    <div className="grass-bg flex-1 text-[#4A3324]">
+    <div className="flex-1 bg-[#E8EDD6] text-[#4A3324]">
       <main className="max-w-4xl mx-auto w-full px-4 sm:px-6 pt-16 pb-16 flex flex-col gap-5">
         <Link
           href="/wishlists"
@@ -138,7 +138,7 @@ export default function UserWishlistPage() {
           </div>
         </header>
 
-        {state === "loading" && <p className="text-sm font-bold text-[#FFF9EC]">불러오는 중...</p>}
+        {state === "loading" && <p className="text-sm font-bold text-[#7A5B3E]">불러오는 중...</p>}
         {state === "not_found" && (
           <p className="text-sm font-bold bg-[#FFF9EC] rounded-2xl px-4 py-3">그런 닉네임의 이웃이 없어요.</p>
         )}
