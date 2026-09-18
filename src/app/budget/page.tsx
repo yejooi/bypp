@@ -45,7 +45,15 @@ export default function BudgetPage() {
   return (
     <main className="flex-1 flex flex-col gap-4 p-6 pt-24 pb-10 max-w-md mx-auto w-full">
       <div className="flex flex-col items-start gap-3">
-        <WoodSign>② 월 예산을 정해주세요</WoodSign>
+        <WoodSign>
+          <span
+            className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#4F8B33] border-2 border-[#BEE88A] text-white text-2xl font-bold leading-none shrink-0"
+            style={HAND}
+          >
+            2
+          </span>
+          월 예산을 정해주세요
+        </WoodSign>
         <div className="inline-flex items-center gap-2 rounded-full border-2 border-[#F0C77A] bg-[#FFF0D4] px-4 py-1.5 text-sm font-black text-[#7A4A00]">
           <GoalIcon goal={goalType} className="w-4 h-4 text-[#C9820F]" />
           <span>{goalType ?? "(미설정)"}</span>
