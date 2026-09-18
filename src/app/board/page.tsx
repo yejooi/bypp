@@ -6,7 +6,7 @@
 // 옮기기/빼기/내리기는 드래그.
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -850,12 +850,57 @@ function ItemTile({
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: item.id });
 
+  const elRef = useRef<HTMLDivElement | null>(null);
+
+  // 계산대로 내릴 때: 원본은 숨기고, 화면 위에 복제본을 띄워 계산대 카드 중심까지 날려 보낸다.
+  // (패널이 overflow-hidden이라 원본을 그대로 옮기면 잘려서, fixed 복제본을 body에 붙인다.)
+  useEffect(() => {
+    if (item.exiting !== "flush") return;
+    const el = elRef.current;
+    const target = document.getElementById("flush-zone");
+    if (!el || !target) return;
+    const a = el.getBoundingClientRect();
+    const b = target.getBoundingClientRect();
+    const dx = b.left + b.width / 2 - (a.left + a.width / 2);
+    const dy = b.top + b.height / 2 - (a.top + a.height / 2);
+    const clone = el.cloneNode(true) as HTMLDivElement;
+    clone.classList.remove("opacity-0", "animate-pop-in");
+    Object.assign(clone.style, {
+      position: "fixed",
+      left: `${a.left}px`,
+      top: `${a.top}px`,
+      width: `${a.width}px`,
+      height: `${a.height}px`,
+      margin: "0",
+      zIndex: "100",
+      pointerEvents: "none",
+      opacity: "1",
+    });
+    document.body.appendChild(clone);
+    const anim = clone.animate(
+      [
+        { transform: "translate(0,0) scale(1) rotate(0deg)", opacity: 1 },
+        { transform: `translate(${dx * 0.6}px,${dy * 0.6 - 30}px) scale(0.7) rotate(-6deg)`, opacity: 1, offset: 0.55 },
+        { transform: `translate(${dx}px,${dy}px) scale(0.15) rotate(8deg)`, opacity: 0 },
+      ],
+      { duration: 520, delay: Math.random() * 180, easing: "cubic-bezier(0.45, 0, 0.9, 0.6)", fill: "both" }
+    );
+    anim.onfinish = () => clone.remove();
+    return () => {
+      // 언마운트돼도 복제본은 끝까지 날아가게 두되, 안전하게 정리 타이머를 건다.
+      setTimeout(() => clone.remove(), 900);
+    };
+  }, [item.exiting]);
+
   const exitClass =
-    item.exiting === "toss" ? "animate-toss-away" : item.exiting === "flush" ? "animate-flush-down" : "animate-pop-in";
+    item.exiting === "toss" ? "animate-toss-away" : item.exiting === "flush" ? "opacity-0" : "animate-pop-in";
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        elRef.current = node;
+        setNodeRef(node);
+      }}
       {...listeners}
       {...attributes}
       className={`group relative flex flex-col items-center touch-none select-none ${exitClass} ${
@@ -934,6 +979,7 @@ function ActionZone({
   return (
     <div
       ref={setNodeRef}
+      id={id}
       className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-4 transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${className} ${
         isOver ? overClass : borderClass
       }`}
