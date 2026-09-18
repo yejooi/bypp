@@ -687,18 +687,10 @@ export default function BoardPage() {
             <ActionZone
               id="toss-zone"
               className="order-4 lg:order-none lg:col-start-1 lg:row-start-3 xl:col-start-1 xl:row-start-1"
-              borderClass="border-[#C9B693] hover:border-[#6B4B32]"
-              overClass="border-[#6B4B32] bg-[#FFF5E6]"
-              visual={
-                <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:rotate-6 transition-transform">
-                  <span className="text-6xl leading-none drop-shadow-sm">📦</span>
-                </div>
-              }
-              titleChip={
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#6B4A2F] text-white">
-                  반품함 (안 살래요)
-                </span>
-              }
+              borderClass="border-[#B89A72] hover:border-[#6B4B32]"
+              overClass="border-[#6B4B32] bg-[#FFF5E6] ring-4 ring-[#B89A72]"
+              visual={<span className="text-6xl leading-none drop-shadow-sm">📦</span>}
+              titleChip="반품함 (안 살래요)"
               sub=""
               desc={"안 사기로 정했어요.\n목록이 가벼워졌어요."}
               hint="반품함에 쏙!"
@@ -707,19 +699,10 @@ export default function BoardPage() {
             <ActionZone
               id="flush-zone"
               className="order-5 lg:order-none lg:col-start-2 lg:row-start-3 xl:col-start-4 xl:row-start-1"
-              borderClass="border-[#A8D48C] hover:border-[#3F8A3A]"
-              overClass="border-[#3F8A3A] bg-[#F0FAEA]"
-              visual={
-                <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:-rotate-6 transition-transform">
-                  <span className="text-6xl leading-none drop-shadow-sm">🧾</span>
-                </div>
-              }
-              titleChip={
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#3F8A3A] text-white">
-                  <StarIcon className="w-3.5 h-3.5 text-[#FFE073]" />
-                  계산대 (샀어요!)
-                </span>
-              }
+              borderClass="border-[#8DBF6A] hover:border-[#3F8A3A]"
+              overClass="border-[#3F8A3A] bg-[#F0FAEA] ring-4 ring-[#8DBF6A]"
+              visual={<span className="text-6xl leading-none drop-shadow-sm">🧾</span>}
+              titleChip="계산대 (샀어요!)"
               sub=""
               desc={"구매 끝!\n계산하고 뿌듯하게."}
               hint="계산대에 척!"
@@ -918,25 +901,28 @@ function ActionZone({
   hintClass: string;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
+  void sub;
   return (
     <div
       ref={setNodeRef}
-      className={`group relative p-5 rounded-[32px] bg-[#FFFBF0]/95 border-[3px] border-dashed transition-all ${SHADOW_AC} flex items-center gap-5 xl:flex-col xl:justify-center xl:text-center xl:gap-3 xl:p-4 text-[#523B28] ${className} ${
+      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-4 transition-all ${SHADOW_AC} flex flex-col items-center justify-center gap-3 text-center text-[#523B28] ${className} ${
         isOver ? overClass : borderClass
       }`}
     >
-      {visual}
-      <div className="flex-1 xl:flex-none flex flex-col xl:items-center">
-        <div className="flex flex-wrap items-center xl:justify-center gap-2 mb-1">
-          {titleChip}
-          {sub && <span className="text-xs font-bold text-[#80644D] bg-[#EFE4CF] px-2 py-0.5 rounded-md">{sub}</span>}
-        </div>
-        <p className="text-base font-bold whitespace-pre-line break-keep leading-snug" style={HAND}>
-          {desc}
-        </p>
-        <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-xs font-black ${hintClass}`}>
-          <span>↓</span> {hint}
-        </div>
+      <div
+        className={`w-full rounded-2xl border-2 border-[#5E371C] wood-grain ${SHADOW_AC_SM} px-3 py-2 text-base font-black text-[#FFF3DE] tracking-tight`}
+        style={HAND}
+      >
+        {titleChip}
+      </div>
+      <div className="pocket-slot w-24 h-24 rounded-3xl flex items-center justify-center group-hover:-translate-y-1 transition-transform">
+        {visual}
+      </div>
+      <p className="text-base font-bold whitespace-pre-line break-keep leading-snug" style={HAND}>
+        {desc}
+      </p>
+      <div className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-xs font-black ${hintClass}`}>
+        <span>↓</span> {hint}
       </div>
     </div>
   );
