@@ -445,34 +445,34 @@ export default function BoardPage() {
                 </h2>
               </div>
 
-              <div className="relative z-10 flex items-center justify-between px-1 pb-2 mb-3 shrink-0 xl:pb-1 xl:mb-2 border-b-2 border-[#D9CDAF]">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
-                    {cartItems.length}/{Math.max(10, cartItems.length)} 보관 중
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xs font-bold text-[#6F523A]">주머니 합계</span>
-                    <span className="text-sm font-black text-[#7A4924]">{won(cartSum)}</span>
-                  </div>
-                  <button
-                    onClick={() => setAddOpen(true)}
-                    className={`px-4 py-1.5 rounded-full bg-[#3F8A3A] text-white text-sm font-black ring-2 ring-[#BEE88A] ${SHADOW_AC_SM} hover:bg-[#2F7A2B] active:translate-y-0.5 transition`}
-                  >
-                    ＋ 물건 추가
-                  </button>
-                </div>
-              </div>
+              <button
+                onClick={() => setAddOpen(true)}
+                className="relative z-10 shrink-0 w-full mb-3 xl:mb-2 flex items-center justify-center gap-2.5 py-2.5 rounded-2xl border-[3px] border-[#6FAE4A] bg-[#E5F5D4] text-[#2D6C2A] font-black text-base hover:bg-[#D6EEBE] active:translate-y-0.5 transition shadow-[0_3px_0_rgba(63,138,58,0.35)]"
+              >
+                <span className="w-7 h-7 rounded-full bg-[#3F8A3A] text-white flex items-center justify-center text-xl leading-none pb-0.5">
+                  +
+                </span>
+                물건 추가하기
+                <span className="text-xs font-bold text-[#4F7A36]">링크 · 스크린샷</span>
+              </button>
 
               <div
                 className={`relative z-10 flex flex-col gap-2 mb-3 shrink-0 xl:mb-2 bg-[#E2D9C2]/80 rounded-[24px] border-2 border-[#C2B18E] p-3 xl:p-2 ${SHADOW_INNER}`}
               >
-                <div className="flex items-center gap-1.5 px-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#5D8A37]" />
-                  <h3 className="text-lg font-bold text-[#5B3E29]" style={HAND}>
-                    내 주머니
-                  </h3>
+                <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#5D8A37]" />
+                    <h3 className="text-lg font-bold text-[#5B3E29]" style={HAND}>
+                      내 주머니
+                    </h3>
+                    <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
+                      {cartItems.length}/{Math.max(10, cartItems.length)} 보관 중
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs font-bold text-[#6F523A]">주머니 합계</span>
+                    <span className="text-sm font-black text-[#7A4924]">{won(cartSum)}</span>
+                  </div>
                 </div>
                 <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
                   {pouchItems.map((it) => (
