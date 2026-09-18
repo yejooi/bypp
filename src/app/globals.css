@@ -136,24 +136,3 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
-/* 초록 버튼: 납작한 단색 대신 위에서 아래로 진해지는 광택 + 두꺼운 아래 그림자로 눌리는 느낌을 준다. */
-.btn-leaf {
-  color: #fff;
-  background: linear-gradient(180deg, #93d56d 0%, #62b847 52%, #4fa238 100%);
-  border: 2px solid #3d8a2c;
-  text-shadow: 0 1px 0 rgba(30, 80, 20, 0.45);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), 0 4px 0 #2f6f22, 0 7px 10px rgba(30, 60, 20, 0.16);
-  transition: transform 80ms ease, box-shadow 80ms ease, filter 120ms ease;
-}
-.btn-leaf:hover:not(:disabled) {
-  filter: brightness(1.05);
-}
-.btn-leaf:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 1px 0 #2f6f22;
-}
-.btn-leaf:disabled {
-  opacity: 0.45;
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.3), 0 2px 0 #2f6f22;
-}

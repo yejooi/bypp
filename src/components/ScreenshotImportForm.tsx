@@ -156,7 +156,8 @@ export function ScreenshotImportForm() {
         <button
           disabled={loading}
           onClick={() => inputRef.current?.click()}
-          className="btn-leaf self-start flex items-center gap-2 px-4 py-2 font-bold text-sm rounded-xl"
+          className="self-start flex items-center gap-2 px-4 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
+          style={{ backgroundColor: "#4F8B33", boxShadow: "0 3px 0 0 rgba(74,46,53,0.16)" }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path

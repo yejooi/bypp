@@ -103,7 +103,8 @@ export function AddItemForm() {
           <button
             disabled={!url || loading}
             onClick={handleFetch}
-            className="btn-leaf px-6 py-2 font-bold text-sm rounded-xl"
+            className="px-6 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
+            style={{ backgroundColor: "#4F8B33", boxShadow: "0 3px 0 0 rgba(74,46,53,0.16)" }}
           >
             {loading ? "가져오는 중..." : "가져오기"}
           </button>
