@@ -778,9 +778,9 @@ export default function BoardPage() {
 
       <DragOverlay>
         {activeItem ? (
-          <div className="rounded-2xl px-3 py-2 shadow-lg border-2 border-[#4EA434] bg-[#FFFDF0] text-[#4A3324]">
-            <span className="font-black text-sm">{activeItem.name}</span>{" "}
-            <span className="text-xs font-bold text-[#82542B]">{won(activeItem.price)}</span>
+          <div className="max-w-[180px] rounded-xl px-2.5 py-1.5 shadow-lg border-2 border-[#4EA434] bg-[#FFFDF0] text-[#4A3324]">
+            <p className="font-black text-xs truncate">{activeItem.name}</p>
+            <p className="text-[11px] font-bold text-[#82542B]">{won(activeItem.price)}</p>
           </div>
         ) : null}
       </DragOverlay>
