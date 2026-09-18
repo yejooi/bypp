@@ -234,6 +234,24 @@ export default function BoardPage() {
       let at = rest.length;
       if (zone === `slot-item-${id}`) return;
       if (zone.startsWith("slot-item-")) {
+        // 이미 아이템이 있는 칸이면 자리를 맞바꾼다 (주머니/판정대에서 온 경우 밀려난 쪽이 주머니로 돌아감).
+        const target = zone.slice("slot-item-".length);
+        const tIdx = orderedBuyIds.indexOf(target);
+        if (tIdx >= 0) {
+          const next = [...orderedBuyIds];
+          const fromIdx = next.indexOf(id);
+          if (fromIdx >= 0) {
+            [next[fromIdx], next[tIdx]] = [next[tIdx], next[fromIdx]];
+          } else {
+            next[tIdx] = id;
+            moveItem(target, "cart");
+            moveItem(id, "buy");
+          }
+          reorderShowcase(next);
+          return;
+        }
+      }
+      if (zone.startsWith("slot-item-")) {
         const idx = rest.indexOf(zone.slice("slot-item-".length));
         if (idx >= 0) at = idx;
       } else if (zone === "slot-end1") {
@@ -830,17 +848,16 @@ function ItemTile({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      title={`${item.name} · ${won(item.price)}`}
       className={`group relative flex flex-col items-center touch-none select-none ${exitClass} ${
         isDragging ? "opacity-30" : ""
       } ${item.exiting ? "pointer-events-none" : ""}`}
     >
       <div
-        className={`pocket-slot active w-full aspect-square rounded-2xl flex flex-col items-center justify-center p-1 cursor-grab hover:-translate-y-1 transition-all border-2 relative ${
+        className={`pocket-slot active w-full aspect-square rounded-2xl flex flex-col items-center justify-between p-1.5 cursor-grab hover:-translate-y-1 transition-all border-2 relative ${
           showcase
             ? dim
               ? "border-dashed border-[#CFB7A1] !bg-[#FFFBF0]/90 opacity-95"
-              : "border-[#E0859D] !bg-[#FFFDF7]"
+              : "border-[#A36B3E] !bg-[#FFFDF7]"
             : "border-[#549E32]"
         }`}
       >
@@ -854,26 +871,24 @@ function ItemTile({
             {badge.text}
           </div>
         )}
-        {item.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.imageUrl}
-            alt=""
-            className="w-9 h-9 rounded-full object-cover border border-[#BEE69E] shadow-sm mt-1"
-          />
-        ) : (
-          <div className="w-9 h-9 rounded-full bg-[#E5F5D4] border border-[#BEE69E] flex items-center justify-center shadow-sm mt-1">
-            <BagIcon className="w-5 h-5 text-[#4F942B]" />
-          </div>
-        )}
-        <span className="text-[11px] font-black text-[#355E1D] mt-1 truncate max-w-full">{item.name}</span>
+        <div className="w-full flex-1 min-h-0 rounded-xl overflow-hidden bg-[#E5F5D4] border border-[#BEE69E] flex items-center justify-center">
+          {item.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={item.imageUrl} alt="" className="w-full h-full object-cover" draggable={false} />
+          ) : (
+            <BagIcon className="w-1/2 h-1/2 text-[#4F942B]" />
+          )}
+        </div>
         <span
-          className={`text-[10px] font-bold ${
-            showcase && !dim ? "text-[#E84364]" : "text-[#82542B]"
+          className={`text-[10px] font-bold leading-none mt-1 ${
+            showcase && !dim ? "text-[#85532F]" : "text-[#82542B]"
           } ${dim ? "line-through text-[#A89481]" : ""}`}
         >
           {short(item.price)}
         </span>
+        <div className="opacity-0 group-hover:opacity-100 pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 z-30 max-w-[220px] bg-[#FFFDF0] border-2 border-[#68472E] text-[#4A3324] text-[11px] font-black py-0.5 px-2.5 rounded-full shadow-[0_3px_0_rgba(74,46,53,0.16)] truncate transition-opacity">
+          {item.name}
+        </div>
       </div>
     </div>
   );
