@@ -181,7 +181,7 @@ export default function BoardPage() {
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
-      <main className="flex-1 flex flex-col gap-4 p-4 pb-28">
+      <main className="flex-1 flex flex-col gap-4 p-4 pb-36">
         <header className="text-sm text-gray-500">
           목표: {goalType ?? "-"} · 월 예산: {budget.toLocaleString()}원
         </header>
@@ -311,8 +311,8 @@ export default function BoardPage() {
           </ColumnDropZone>
         </section>
 
-        {/* 빼기/내리기 드롭존 - 항상 노출 */}
-        <div className="fixed bottom-0 left-0 right-0 flex gap-2 p-3 bg-white border-t border-gray-300">
+        {/* 빼기/내리기 드롭존 - 항상 노출. ProgressRunner(h-8)가 화면 맨 밑을 쓰므로 그 위에 쌓는다. */}
+        <div className="fixed bottom-8 left-0 right-0 flex gap-2 p-3 bg-white border-t border-gray-300">
           <ActionDropZone id="toss-zone" label="빼기 (안 살 것)" />
           <ActionDropZone id="flush-zone" label="내리기 (샀음)" />
         </div>

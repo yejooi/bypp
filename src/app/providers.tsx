@@ -1,6 +1,7 @@
 "use client";
 
 import { AppProvider, useApp } from "@/lib/store";
+import { ProgressRunner } from "@/components/ProgressRunner";
 
 function DbErrorBanner() {
   const { dbError } = useApp();
@@ -15,6 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <AppProvider>
       <DbErrorBanner />
       {children}
+      <ProgressRunner />
     </AppProvider>
   );
 }
