@@ -395,32 +395,27 @@ export default function BoardPage() {
               className={`order-1 lg:order-none lg:col-start-1 lg:row-start-1 xl:col-start-2 flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2.5 rounded-[30px] border-2 border-dashed border-[#CCBFA3] pointer-events-none" />
-              <div className="relative z-10 flex items-center justify-between pb-2 mb-3 border-b-2 border-[#D9CDAF]">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h2
-                        className="text-lg sm:text-xl font-bold text-[#5B3E29] tracking-tight px-4 py-1 rounded-xl"
-                        style={{
-                          fontFamily: "var(--font-gaegu)",
-                          backgroundColor: "#E3CD98",
-                          backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(0,0,0,0.05))",
-                          outline: "2px dashed rgba(255,255,255,0.7)",
-                          outlineOffset: "-5px",
-                          boxShadow: "0 2px 0 rgba(120,80,40,0.25)",
-                        }}
-                      >
-                        장바구니 주머니
-                      </h2>
-                      <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
-                        {cartItems.length}/20 보관 중
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
+              <div
+                className={`relative z-10 w-full rounded-2xl border-2 border-[#B89A62] mb-3 py-3 px-5 ${SHADOW_AC_SM}`}
+                style={{
+                  backgroundColor: "#E3CD98",
+                  backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(0,0,0,0.05))",
+                  outline: "2px dashed rgba(255,255,255,0.7)",
+                  outlineOffset: "-6px",
+                }}
+              >
+                <h2 className="text-lg sm:text-xl font-bold text-[#5B3E29] tracking-tight" style={{ fontFamily: "var(--font-gaegu)" }}>
+                  장바구니 주머니
+                </h2>
+              </div>
+
+              <div className="relative z-10 flex items-center justify-between px-1 pb-2 mb-3 border-b-2 border-[#D9CDAF]">
+                <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
+                  {cartItems.length}/20 보관 중
+                </span>
+                <div className="flex items-baseline gap-2">
                   <span className="text-xs font-bold text-[#8C6D53]">주머니 합계</span>
-                  <p className="text-sm font-black text-[#7A4924]">{won(cartSum)}</p>
+                  <span className="text-sm font-black text-[#7A4924]">{won(cartSum)}</span>
                 </div>
               </div>
 
