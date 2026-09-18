@@ -136,3 +136,10 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* 물건 추가 패널: 위에서 내려온다. */
+@keyframes slide-down {
+  from { transform: translateY(-24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-down { animation: slide-down 220ms ease-out both; }

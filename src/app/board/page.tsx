@@ -103,6 +103,13 @@ export default function BoardPage() {
     }[];
   } | null>(null);
   const [addMode, setAddMode] = useState<"link" | "screenshot">("link");
+  const [addOpen, setAddOpen] = useState(false);
+  const itemCountRef = useRef(items.length);
+  // 물건이 새로 담기면 추가 패널을 자동으로 접는다.
+  useEffect(() => {
+    if (items.length > itemCountRef.current) setAddOpen(false);
+    itemCountRef.current = items.length;
+  }, [items.length]);
   // 판정대에 올려둔 아이템 id. 순위 판정은 여기 있는 것만 대상으로 한다 (DB 상태는 cart 그대로).
   const [judgeIds, setJudgeIds] = useState<string[]>([]);
   const [sheetId, setSheetId] = useState<string | null>(null);
@@ -368,8 +375,8 @@ export default function BoardPage() {
 
   const pouchSlots = Math.max(10, Math.ceil(pouchItems.length / 5) * 5);
   const judgeSlots = Math.max(5, Math.ceil(judgeItems.length / 5) * 5);
-  const shelf1Slots = Math.max(8, Math.ceil(shelf1.length / 4) * 4);
-  const shelf2Slots = Math.max(4, Math.ceil(shelf2.length / 4) * 4);
+  const shelf1Slots = Math.max(10, Math.ceil(shelf1.length / 5) * 5);
+  const shelf2Slots = Math.max(5, Math.ceil(shelf2.length / 5) * 5);
 
   return (
     <DndContext
@@ -413,37 +420,6 @@ export default function BoardPage() {
             </div>
           </header>
 
-          {/* 항목 등록 (우드 팻말) */}
-          <section
-            className={`bg-[#FFFBF2] rounded-[28px] border-[3px] border-[#D6C2A5] p-4 sm:p-5 xl:p-3 ${SHADOW_AC} relative overflow-hidden`}
-          >
-            <div className="absolute left-3 top-3 w-2.5 h-2.5 rounded-full bg-[#9E7A56] border border-[#6B4F33]" />
-            <div className="absolute right-3 top-3 w-2.5 h-2.5 rounded-full bg-[#9E7A56] border border-[#6B4F33]" />
-            <div className="flex flex-wrap items-center gap-2 mb-3 xl:mb-2">
-              <button
-                onClick={() => setAddMode("link")}
-                className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all flex items-center gap-1.5 ${
-                  addMode === "link"
-                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
-                    : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
-                }`}
-              >
-                <LeafIcon className="w-3.5 h-3.5" />
-                링크로 주머니에 넣기
-              </button>
-              <button
-                onClick={() => setAddMode("screenshot")}
-                className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all flex items-center gap-1.5 ${
-                  addMode === "screenshot"
-                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
-                    : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
-                }`}
-              >
-                스샷으로 넣기
-              </button>
-            </div>
-            {addMode === "link" ? <AddItemForm /> : <ScreenshotImportForm />}
-          </section>
 
           {/* 인벤토리 주머니 vs 가판대 */}
           <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[170px_1fr_1fr_170px] gap-6 xl:gap-4 items-stretch xl:flex-1 xl:min-h-0 xl:grid-rows-1">
@@ -454,7 +430,7 @@ export default function BoardPage() {
             >
               <div className="absolute inset-2.5 rounded-[30px] border-2 border-dashed border-[#CCBFA3] pointer-events-none" />
               <div
-                className={`relative z-10 w-full rounded-2xl border-2 border-[#B89A62] mb-3 py-3 px-5 xl:mb-2 xl:py-1.5 ${SHADOW_AC_SM}`}
+                className={`relative z-10 w-full rounded-2xl border-2 border-[#B89A62] shrink-0 mb-3 py-3 px-5 xl:mb-2 xl:py-1.5 ${SHADOW_AC_SM}`}
                 style={{
                   backgroundColor: "#E3CD98",
                   backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.35), rgba(0,0,0,0.05))",
@@ -467,20 +443,28 @@ export default function BoardPage() {
                 </h2>
               </div>
 
-              <div className="relative z-10 flex items-center justify-between px-1 pb-2 mb-3 xl:pb-1 xl:mb-2 border-b-2 border-[#D9CDAF]">
+              <div className="relative z-10 flex items-center justify-between px-1 pb-2 mb-3 shrink-0 xl:pb-1 xl:mb-2 border-b-2 border-[#D9CDAF]">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
                     {cartItems.length}/{Math.max(10, cartItems.length)} 보관 중
                   </span>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xs font-bold text-[#6F523A]">주머니 합계</span>
-                  <span className="text-sm font-black text-[#7A4924]">{won(cartSum)}</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs font-bold text-[#6F523A]">주머니 합계</span>
+                    <span className="text-sm font-black text-[#7A4924]">{won(cartSum)}</span>
+                  </div>
+                  <button
+                    onClick={() => setAddOpen(true)}
+                    className={`px-3 py-1 rounded-full bg-[#4F8B33] text-white text-xs font-black ${SHADOW_AC_SM} active:translate-y-0.5 transition`}
+                  >
+                    ＋ 물건 추가
+                  </button>
                 </div>
               </div>
 
               <div
-                className={`relative z-10 flex flex-col gap-2 mb-3 xl:mb-2 bg-[#E2D9C2]/80 rounded-[24px] border-2 border-[#C2B18E] p-3 xl:p-2 ${SHADOW_INNER}`}
+                className={`relative z-10 flex flex-col gap-2 mb-3 shrink-0 xl:mb-2 bg-[#E2D9C2]/80 rounded-[24px] border-2 border-[#C2B18E] p-3 xl:p-2 ${SHADOW_INNER}`}
               >
                 <div className="flex items-center gap-1.5 px-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#5D8A37]" />
@@ -504,7 +488,7 @@ export default function BoardPage() {
               </div>
 
               <JudgeShell
-                className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-[3px] border-dashed border-[#F6C644] p-3.5 xl:p-2.5 ${SHADOW_AC_SM}`}
+                className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-[3px] border-dashed border-[#F6C644] shrink-0 p-3.5 xl:p-2.5 ${SHADOW_AC_SM}`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -637,7 +621,7 @@ export default function BoardPage() {
             >
               <div className="absolute inset-2 rounded-[28px] border-2 border-dashed border-[#D6C2A5] pointer-events-none" />
               <div
-                className={`relative z-10 rounded-2xl overflow-hidden border-2 border-[#5E371C] ${SHADOW_AC_SM} mb-3 xl:mb-2 wood-grain`}
+                className={`relative z-10 rounded-2xl overflow-hidden border-2 border-[#5E371C] ${SHADOW_AC_SM} shrink-0 mb-3 xl:mb-2 wood-grain`}
               >
                 <div className="py-3 px-4 xl:py-1.5 flex items-center justify-between text-white text-xs font-black">
                   <div className="flex items-center gap-2">
@@ -651,7 +635,7 @@ export default function BoardPage() {
                 </div>
               </div>
 
-              <div className="relative z-10 flex items-center justify-between gap-3 pb-2 mb-2 xl:pb-1 xl:mb-1.5 border-b-2 border-[#E8DCC2]">
+              <div className="relative z-10 flex items-center justify-between gap-3 pb-2 mb-2 shrink-0 xl:pb-1 xl:mb-1.5 border-b-2 border-[#E8DCC2]">
                 <p className="text-xs text-[#7A5B3E] font-bold leading-snug">
                   1층에 원하는 순서대로 놓으세요.
                   <br />
@@ -671,7 +655,7 @@ export default function BoardPage() {
                       1층: 이번 달 구매 선반 · {won(shelf1Sum)}
                     </span>
                   </div>
-                  <div className="grid grid-cols-4 gap-2.5">
+                  <div className="grid grid-cols-5 gap-2">
                     {shelf1.map((r) => (
                       <SlotDrop key={r.item.id} id={`slot-item-${r.item.id}`} label={`${r.index + 1}위`}>
                         <ItemTile item={r.item} showcase />
@@ -720,7 +704,7 @@ export default function BoardPage() {
                       </span>
                     )}
                   </div>
-                  <div className="grid grid-cols-4 gap-2.5">
+                  <div className="grid grid-cols-5 gap-2">
                     {shelf2.map((r) => (
                       <SlotDrop key={r.item.id} id={`slot-item-${r.item.id}`} label="">
                         <ItemTile item={r.item} showcase dim />
@@ -844,6 +828,43 @@ export default function BoardPage() {
                 네 살래요
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {addOpen && (
+        <div className="fixed inset-0 z-[58] bg-black/35" onClick={() => setAddOpen(false)}>
+          <div
+            className="animate-slide-down mx-auto mt-4 w-[min(760px,calc(100vw-24px))] max-h-[88vh] overflow-y-auto bg-[#FFFBF2] rounded-[28px] border-[3px] border-[#D6C2A5] p-4 sm:p-5 shadow-[0_8px_0_rgba(74,46,53,0.2)] relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <button
+                onClick={() => setAddMode("link")}
+                className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all flex items-center gap-1.5 ${
+                  addMode === "link"
+                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
+                    : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
+                }`}
+              >
+                <LeafIcon className="w-3.5 h-3.5" />
+                링크로 넣기
+              </button>
+              <button
+                onClick={() => setAddMode("screenshot")}
+                className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all ${
+                  addMode === "screenshot"
+                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
+                    : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
+                }`}
+              >
+                스샷으로 넣기
+              </button>
+              <button onClick={() => setAddOpen(false)} className="ml-auto text-xs font-bold text-[#6F523A] underline">
+                닫기
+              </button>
+            </div>
+            {addMode === "link" ? <AddItemForm /> : <ScreenshotImportForm />}
           </div>
         </div>
       )}
