@@ -49,13 +49,10 @@ export default function WishlistsPage() {
   return (
     <div className="flex-1 bg-[#E8EDD6] text-[#4A3324]">
       <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 pt-24 pb-16 flex flex-col gap-6">
-        <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div className="flex flex-col gap-2 items-start">
           <WoodSign>🏡 이웃 위시리스트</WoodSign>
-          <Link href={goalType ? "/board" : "/"} className="inline-flex items-center gap-1 text-sm font-black text-[#FFF9EC] bg-[#57351F] border-2 border-[#8C5D35] rounded-full px-4 py-1.5 shadow-[0_3px_0_rgba(74,46,53,0.16)] hover:bg-[#6B4526] active:translate-y-0.5 transition">
-            🏠 내 보드로
-          </Link>
         </div>
-        <div className="flex flex-col gap-2 items-start -mt-3">
+        <div className="flex flex-col gap-2 items-start">
           <p className="text-base font-bold text-[#2F5B1C] bg-[#FFF9EC]/90 border-2 border-[#D6C2A5] rounded-full px-4 py-1" style={HAND}>
             이웃의 주머니와 가판대를 구경해 보세요. 눌러서 들어가요!
           </p>
@@ -92,6 +89,13 @@ export default function WishlistsPage() {
             </Link>
           ))}
         </div>
+
+        <Link
+          href={goalType ? "/board" : "/"}
+          className="self-start inline-flex items-center gap-1 text-sm font-black text-[#FFF9EC] bg-[#57351F] border-2 border-[#8C5D35] rounded-full px-4 py-1.5 shadow-[0_3px_0_rgba(74,46,53,0.16)] hover:bg-[#6B4526] active:translate-y-0.5 transition"
+        >
+          🏠 내 보드로
+        </Link>
       </main>
     </div>
   );

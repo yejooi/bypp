@@ -2,11 +2,16 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useApp } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
 import { Avatar, fileToAvatarDataUrl } from "@/components/neighbor-ui";
 
 export function UserBar() {
   const { user, nickname, avatarUrl, setAvatar, signOut } = useAuth();
+  const pathname = usePathname();
+  const { goalType } = useApp();
+  const onNeighborScreen = pathname.startsWith("/wishlists") || pathname.startsWith("/u/");
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   if (!user) return null;
@@ -52,10 +57,10 @@ export function UserBar() {
       </button>
       <span className="max-w-[8rem] truncate">{nickname ?? "..."}</span>
       <Link
-        href="/wishlists"
+        href={onNeighborScreen ? (goalType && goalType !== "미정" ? "/board" : "/") : "/wishlists"}
         className="px-3 py-1 rounded-full bg-[#4F8B33] text-white text-xs shadow-[0_2px_0_rgba(0,0,0,0.18)] hover:bg-[#3F7A2B] active:translate-y-0.5 transition"
       >
-        🏡 이웃 구경
+        {onNeighborScreen ? "🏠 내 보드로" : "🏡 이웃 구경"}
       </Link>
       <button
         onClick={() => signOut()}

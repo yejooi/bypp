@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { REASON_CODE_LABEL, useApp, type ReasonCode } from "@/lib/store";
+import { REASON_CODE_LABEL, type ReasonCode } from "@/lib/store";
 import { Avatar, SectionTitle, SHADOW_AC, SHADOW_AC_SM, HAND } from "@/components/neighbor-ui";
 
 type ViewItem = {
@@ -63,7 +63,6 @@ function Shelf({ items, empty, dim }: { items: ViewItem[]; empty: string; dim?: 
 export default function UserWishlistPage() {
   const params = useParams<{ nickname: string }>();
   const nickname = decodeURIComponent(params.nickname);
-  const { goalType: myGoal } = useApp();
 
   const [state, setState] = useState<"loading" | "not_found" | "empty" | "ready">("loading");
   const [goalType, setGoalType] = useState<string | null>(null);
@@ -123,9 +122,6 @@ export default function UserWishlistPage() {
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <Link href="/wishlists" className="inline-flex items-center gap-1 text-sm font-black text-[#FFF9EC] bg-[#57351F] border-2 border-[#8C5D35] rounded-full px-4 py-1.5 shadow-[0_3px_0_rgba(74,46,53,0.16)] hover:bg-[#6B4526] active:translate-y-0.5 transition">
             ← 이웃 목록
-          </Link>
-          <Link href={myGoal ? "/board" : "/"} className="inline-flex items-center gap-1 text-sm font-black text-[#FFF9EC] bg-[#57351F] border-2 border-[#8C5D35] rounded-full px-4 py-1.5 shadow-[0_3px_0_rgba(74,46,53,0.16)] hover:bg-[#6B4526] active:translate-y-0.5 transition">
-            🏠 내 보드로
           </Link>
         </div>
 
