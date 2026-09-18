@@ -4,6 +4,7 @@
 // 비주얼: stitch_custom_ui_design_system-2 SignatureGoalRunnerBar (원화 유지).
 
 import { useApp } from "@/lib/store";
+import { Mascot, SpeechBubble } from "@/components/Mascot";
 
 export function ProgressRunner() {
   const { goalType, goalAmount, monthlyBudget, monthlySaving, items } = useApp();
@@ -23,9 +24,12 @@ export function ProgressRunner() {
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5]/95 backdrop-blur-md border-t-[3px] border-[#D6C2A0] py-2.5 px-4 sm:px-8 shadow-2xl z-40 text-[#4A3324]">
       <div className="max-w-[1400px] mx-auto flex items-center gap-4 sm:gap-6">
-        <div className="shrink-0 flex flex-col leading-tight">
-          <span className="text-xs font-bold text-[#7A5B40]">나의 절약 여정</span>
-          <span className="text-lg font-black text-[#2D6C2A]">{progressPct.toFixed(1)}%</span>
+        <div className="shrink-0 flex items-center gap-2.5">
+          <Mascot size={44} mood={spent > 0 && delta > 0 ? "happy" : "idle"} />
+          <div className="flex flex-col leading-tight">
+            <span className="text-xs font-bold text-[#7A5B40]">나의 절약 여정</span>
+            <span className="text-lg font-black text-[#2D6C2A]">{progressPct.toFixed(1)}%</span>
+          </div>
         </div>
         <div className="relative flex-1 h-4 bg-[#EADDC6] rounded-full p-0.5 border-2 border-[#C9B390] overflow-visible">
           <div
@@ -36,36 +40,24 @@ export function ProgressRunner() {
             className="absolute -top-4 -ml-4 flex flex-col items-center animate-ac-float transition-all duration-700"
             style={{ left: `${progressPct}%` }}
           >
-              <div className="w-8 h-8 rounded-full bg-[#FFF0D4] border-2 border-[#69421A] shadow-[0_3px_0_rgba(74,46,53,0.16)] flex items-center justify-center">
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" fill="#FFDFBA" r="9" />
-                  <circle cx="9" cy="11" fill="#4A2810" r="1.5" />
-                  <circle cx="15" cy="11" fill="#4A2810" r="1.5" />
-                  <path d="M10 15c.6 1 3.4 1 4 0" fill="none" stroke="#B85D3B" strokeLinecap="round" strokeWidth="1.5" />
-                  <circle cx="7" cy="13" fill="#FF8C94" r="1.2" />
-                  <circle cx="17" cy="13" fill="#FF8C94" r="1.2" />
-                </svg>
-              </div>
+              <Mascot size={32} mood={delta < 0 && spent > 0 ? "idle" : "happy"} />
           </div>
         </div>
         <div className="hidden sm:block shrink-0 max-w-[9rem] truncate text-xs font-bold text-[#7A5B40]">
           🏁 {goalType}
         </div>
         {spent > 0 && delta !== 0 && (
-          <div
-            className={`hidden md:flex shrink-0 items-center gap-1.5 px-3 py-1 rounded-full border-2 text-xs font-black ${
-              delta > 0 ? "bg-[#E5F5D4] border-[#AED48C] text-[#2D6C2A]" : "bg-[#FFF1D6] border-[#F0C77A] text-[#8A5A00]"
-            }`}
-          >
-            <span>
+          <div className="hidden md:flex shrink-0 items-center gap-2">
+            <Mascot size={28} mood={delta > 0 ? "happy" : "idle"} />
+            <SpeechBubble tone={delta > 0 ? "green" : "amber"}>
               {delta > 0
                 ? `예산보다 ${Math.abs(delta).toLocaleString()}원 아끼고 있어요!`
-                : `예산을 ${Math.abs(delta).toLocaleString()}원 넘었어요`}
-            </span>
-            <span className="opacity-80">
-              ({delta > 0 ? "+" : "-"}
-              {deltaPct.toFixed(2)}%p)
-            </span>
+                : `예산을 ${Math.abs(delta).toLocaleString()}원 넘었어요. 다음 달 저축으로 채워 봐요`}{" "}
+              <span className="opacity-80">
+                ({delta > 0 ? "+" : "-"}
+                {deltaPct.toFixed(2)}%p)
+              </span>
+            </SpeechBubble>
           </div>
         )}
         <div className="shrink-0 flex flex-col leading-tight text-right">

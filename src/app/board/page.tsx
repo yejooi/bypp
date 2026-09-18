@@ -6,6 +6,7 @@
 // 옮기기/빼기/내리기는 드래그.
 
 import Link from "next/link";
+import { Mascot, SpeechBubble } from "@/components/Mascot";
 import { useEffect, useRef, useState } from "react";
 import {
   DndContext,
@@ -448,9 +449,7 @@ export default function BoardPage() {
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-[#FFDE59] border border-[#B37400] flex items-center justify-center text-[#734500]">
-                      <StarIcon className="w-3.5 h-3.5" />
-                    </div>
+                    <Mascot size={34} mood={evalState === "loading" ? "thinking" : "idle"} />
                     <h3 className="text-lg font-bold text-[#693E00]" style={HAND}>
                       AI 심사대
                     </h3>
@@ -462,9 +461,11 @@ export default function BoardPage() {
                     {judgeItems.length}개 후보 대기 중
                   </span>
                 </div>
-                <p className="text-xs text-[#7A5B3E] font-medium leading-tight">
-                  진짜 살 물건 후보만 끌어다 놓고 AI의 판정을 받아보세요!
-                </p>
+                <SpeechBubble className="self-start ml-2">
+                  {evalState === "loading"
+                    ? "음... 잠깐 생각해볼게요"
+                    : "살까 말까 고민되는 것만 끌어다 놓아 보세요. 같이 골라 볼게요!"}
+                </SpeechBubble>
                 <p className="text-xs text-[#7A5B3E] font-bold">
                   판정 기준
                 </p>
@@ -514,9 +515,12 @@ export default function BoardPage() {
                   className={`order-2 lg:order-none lg:col-start-1 lg:row-start-2 xl:col-start-2 rounded-[26px] border-[3px] border-[#C8B693] bg-[#FFFDF7] p-3.5 ${SHADOW_AC_SM} flex flex-col gap-2`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-xl font-bold text-[#5B3E29]" style={HAND}>
-                      AI 판정 결과
-                    </h3>
+                    <div className="flex items-center gap-2.5">
+                      <Mascot size={40} mood="happy" />
+                      <SpeechBubble>
+                        이렇게 봤어요! 순서는 참고만 하고, 마음에 안 들면 직접 바꿔도 돼요.
+                      </SpeechBubble>
+                    </div>
                     <button
                       onClick={() => setJudgeResult(null)}
                       className="text-xs font-bold text-[#8C6D53] underline"
