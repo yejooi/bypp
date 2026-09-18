@@ -845,7 +845,7 @@ function ItemTile({
             ? dim
               ? "border-[#CFB7A1] !bg-[#FFFBF0]/90 opacity-95"
               : "border-[#A36B3E] !bg-[#FFFDF7]"
-            : "border-[#549E32]"
+            : "border-transparent"
         }`}
       >
         {badge && (
