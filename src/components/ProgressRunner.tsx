@@ -15,6 +15,9 @@ export function ProgressRunner() {
   // 직접 입력한 예산이면 권장 저축액이 없어 0으로 본다.
   const spent = items.filter((it) => it.status === "purchased").reduce((sum, it) => sum + it.price, 0);
   const savedThisMonth = Math.max(0, (monthlySaving ?? 0) + (monthlyBudget ?? 0) - spent);
+  // 기준(권장 저축액) 대비 오차: 예산 - 산 금액. 양수면 아낀 만큼, 음수면 넘긴 만큼. 산 게 없으면 표시하지 않는다.
+  const delta = (monthlyBudget ?? 0) - spent;
+  const deltaPct = goalAmount > 0 ? (Math.abs(delta) / goalAmount) * 100 : 0;
   const progressPct = goalAmount > 0 ? Math.min(100, (savedThisMonth / goalAmount) * 100) : 0;
 
   return (
@@ -48,6 +51,23 @@ export function ProgressRunner() {
         <div className="hidden sm:block shrink-0 max-w-[9rem] truncate text-xs font-bold text-[#7A5B40]">
           🏁 {goalType}
         </div>
+        {spent > 0 && delta !== 0 && (
+          <div
+            className={`hidden md:flex shrink-0 items-center gap-1.5 px-3 py-1 rounded-full border-2 text-xs font-black ${
+              delta > 0 ? "bg-[#E5F5D4] border-[#AED48C] text-[#2D6C2A]" : "bg-[#FFF1D6] border-[#F0C77A] text-[#8A5A00]"
+            }`}
+          >
+            <span>
+              {delta > 0
+                ? `예산보다 ${Math.abs(delta).toLocaleString()}원 아끼고 있어요!`
+                : `예산을 ${Math.abs(delta).toLocaleString()}원 넘었어요`}
+            </span>
+            <span className="opacity-80">
+              ({delta > 0 ? "+" : "-"}
+              {deltaPct.toFixed(2)}%p)
+            </span>
+          </div>
+        )}
         <div className="shrink-0 flex flex-col leading-tight text-right">
           <span className="text-xs font-bold text-[#7A5B40]">이번 달 저축액</span>
           <span className="text-base font-black text-[#2D6C2A]">{savedThisMonth.toLocaleString()}원</span>
