@@ -114,3 +114,33 @@ body {
 .animate-flush-down {
   animation: flush-down 420ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
+
+/* 보드 화면: 동물의 숲 스킨 (stitch_custom_ui_design_system-2 그대로) */
+.grass-bg {
+  background-color: #84b857;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 0),
+    repeating-conic-gradient(from 45deg, #7eae51 0deg 90deg, #84b857 90deg 180deg);
+  background-size: 32px 32px;
+}
+.wood-grain {
+  background-color: #a36b3e;
+  background-image: repeating-linear-gradient(0deg, #966035, #966035 8px, #aa7242 8px, #aa7242 16px);
+}
+.pocket-slot {
+  background: #d9d1ba;
+  box-shadow: inset 0 3px 4px rgba(78, 52, 34, 0.2), 0 2px 0 #fffdf5;
+}
+.pocket-slot.active {
+  background: #ffffff;
+  box-shadow: 0 4px 0 #b5a88b, inset 0 2px 0 #fff;
+}
+@keyframes ac-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(1.5deg); }
+}
+.animate-ac-float { animation: ac-float 2.8s ease-in-out infinite; }
+@keyframes balloon-sway {
+  0%, 100% { transform: translateY(0px) rotate(-2deg); }
+  50% { transform: translateY(-8px) rotate(3deg); }
+}
+.animate-balloon { animation: balloon-sway 2.4s ease-in-out infinite; }

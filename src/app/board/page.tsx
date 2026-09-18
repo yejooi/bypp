@@ -1,10 +1,9 @@
 "use client";
 
-// ③④⑤⑥ 항목 등록 / 분류(2단 구조) / 예산 점검 / 정리 (§3, §4, §6-5).
-// Phase 4: AI 판정 연결 + 순위 출력 + 공개 연출 (§6, §8-1).
-// - 옮기기/빼기/내리기는 드래그로 (Phase 3, 사용자 요청).
-// - "순위 보기" 전에는 가격순 폴백 (§9-2: 실패해도 빈 화면 금지 원칙과 동일한 이유로 기본값을 둔다).
-// 비주얼: stitch_custom_ui_design_system/main_organizer.
+// 보드 화면. 비주얼은 stitch_custom_ui_design_system-2/code.html(동물의 숲 스킨)을 그대로 옮겼다.
+// 단, 화폐는 "벨" 대신 "원" 유지 (사용자 결정).
+// 기능: 아이템 주머니(cart)에서 "AI에게 우선순위 배정 부탁하기" -> 판정 후 쇼케이스(buy)로 자동 진열.
+// 옮기기/빼기/내리기는 드래그.
 
 import { useEffect, useState } from "react";
 import {
@@ -19,10 +18,10 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { useApp, REASON_CODE_LABEL, type Item, type ReasonCode } from "@/lib/store";
+import { useApp, type Item } from "@/lib/store";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ScreenshotImportForm } from "@/components/ScreenshotImportForm";
-import { CartIcon, ConfirmedBagIcon, TrashIcon, DoneStampIcon } from "@/components/icons";
+import { CartIcon } from "@/components/icons";
 import {
   computeScores,
   positiveMessage,
@@ -34,15 +33,36 @@ import {
 
 type EvalState = "idle" | "loading" | "ready" | "error";
 
-const REASON_TAG_STYLE: Record<ReasonCode, { bg: string; color: string }> = {
-  broke_replace: { bg: "var(--primary-light)", color: "var(--primary-hover)" },
-  urgent_need: { bg: "var(--primary-light)", color: "var(--primary-hover)" },
-  long_wanted: { bg: "var(--butter)", color: "var(--butter-dark)" },
-  on_sale: { bg: "var(--accent-light)", color: "var(--accent-hover)" },
-  social_proof: { bg: "var(--accent-light)", color: "var(--accent-hover)" },
-  mood_boost: { bg: "var(--accent-light)", color: "var(--accent-hover)" },
-  other: { bg: "var(--surface-alt)", color: "var(--text-sub)" },
-};
+const SHADOW_AC = "shadow-[0_6px_0_rgba(74,46,53,0.18)]";
+const SHADOW_AC_SM = "shadow-[0_3px_0_rgba(74,46,53,0.16)]";
+const SHADOW_INNER = "shadow-[inset_0_3px_6px_rgba(0,0,0,0.1)]";
+
+const won = (n: number) => `${n.toLocaleString()}원`;
+const short = (n: number) => (n >= 10000 ? `${+(n / 10000).toFixed(1)}만원` : `${n.toLocaleString()}원`);
+
+function LeafIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z" />
+    </svg>
+  );
+}
+
+function StarIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M12 2l2.4 7.2L22 10l-6 4.8 2.4 7.2L12 17.5 5.6 22 8 14.8 2 10l7.6-.8z" />
+    </svg>
+  );
+}
+
+function BagIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+      <path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2z" />
+    </svg>
+  );
+}
 
 export default function BoardPage() {
   const { goalType, monthlyBudget, items, moveItem } = useApp();
@@ -50,23 +70,22 @@ export default function BoardPage() {
 
   const [evalState, setEvalState] = useState<EvalState>("idle");
   const [llmEstimates, setLlmEstimates] = useState<LlmEstimate[] | null>(null);
-  // wayfinder #5 결정: 30~100 슬러더 (0=가격순, 100=AI 판단), 기본값 65.
+  // wayfinder #5 결정: 30~100 슬라이더 (0=가격순, 100=AI 판단), 기본값 65.
   const [qualWeight, setQualWeight] = useState(Math.round(DEFAULT_QUAL_WEIGHT * 100));
   const [revealedCount, setRevealedCount] = useState(0);
   const [userPick, setUserPick] = useState<string | null>(null);
   const [addMode, setAddMode] = useState<"link" | "screenshot">("link");
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 4 } });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: { delay: 200, tolerance: 8 },
-  });
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } });
   const sensors = useSensors(mouseSensor, touchSensor);
 
   const cartItems = items.filter((it) => it.status === "cart");
   const buyItems = items.filter((it) => it.status === "buy");
-  const cartTotal = cartItems.reduce((s, it) => s + it.price, 0) + buyItems.reduce((s, it) => s + it.price, 0);
+  const cartSum = cartItems.reduce((s, it) => s + it.price, 0);
+  const buySum = buyItems.reduce((s, it) => s + it.price, 0);
 
-  // 순위 배정 후 새로 쇼케이스에 뜬 항목들을 위에서부터 순차적으로 드러낸다 (§8-1).
+  // 순위 배정 후 쇼케이스에 뜬 항목들을 위에서부터 순차적으로 드러낸다 (§8-1).
   useEffect(() => {
     if (evalState !== "ready") return;
     const total = buyItems.length;
@@ -78,7 +97,6 @@ export default function BoardPage() {
 
   const budget = monthlyBudget ?? 0;
 
-  // 가중치 슬러더(qualWeight)가 바뀌면 즉시 재정렬 -- 결과를 본 다음 사용자가 조정하는 두 번째 판단 기준 (§6-1).
   const scored =
     evalState === "ready" && llmEstimates
       ? computeScores(
@@ -94,14 +112,11 @@ export default function BoardPage() {
         )
       : null;
 
-  // 순위 보기 전: 가격순 폴백. 순위 보기 후: AI 순위. 드래그/애니메이션 상태는 항상 실제 Item에서 가져온다
-  // (ScoredItem은 표시용 파생 데이터라 exiting 같은 필드가 없다).
   const buyItemById = new Map(buyItems.map((it) => [it.id, it]));
   const orderedIds =
     evalState === "ready" && scored
       ? scored.map((s) => s.id)
       : [...buyItems].sort((a, b) => b.price - a.price).map((it) => it.id);
-
   const scoredById = new Map((scored ?? []).map((s) => [s.id, s]));
 
   let cumulative = 0;
@@ -126,13 +141,16 @@ export default function BoardPage() {
     return [{ item, overBudget, message, reasoning, index: i }];
   });
 
+  const shelf1 = rows.filter((r) => !r.overBudget);
+  const shelf2 = rows.filter((r) => r.overBudget);
+  const overAmount = Math.max(0, buySum - budget);
+
   const topPick = evalState === "ready" && scored ? scored[0] : null;
   const pickedItem = scored?.find((s) => s.id === userPick) ?? null;
   const showGapExplanation = evalState === "ready" && pickedItem && topPick && pickedItem.id !== topPick.id;
 
-  // 순위 배정: 아이템 주머니(cart) 쪽에서 시작한다 -- 판정이 끝나면 그 항목들을
-  // 자동으로 쇼케이스(buy)로 승격시킨다. 이미 쇼케이스에 있는 항목들의 판정 결과는
-  // llmEstimates에 계속 남겨서(merge), 여러 번에 걸쳐 담아도 누적된 전체가 같은 기준으로 다시 랭킹된다.
+  // 순위 배정: 아이템 주머니(cart)에서 시작 -> 판정 끝나면 쇼케이스(buy)로 자동 승격.
+  // llmEstimates는 id 기준으로 병합해서 여러 번 나눠 배정해도 누적 전체가 같은 기준으로 다시 랭킹된다.
   async function handleEvaluate() {
     if (cartItems.length === 0) return;
     setEvalState("loading");
@@ -182,6 +200,10 @@ export default function BoardPage() {
     else if (zone === "flush-zone") moveItem(id, "purchased");
   }
 
+  const pouchSlots = Math.max(10, Math.ceil(cartItems.length / 5) * 5);
+  const shelf1Slots = Math.max(8, Math.ceil(shelf1.length / 4) * 4);
+  const shelf2Slots = Math.max(4, Math.ceil(shelf2.length / 4) * 4);
+
   return (
     <DndContext
       sensors={sensors}
@@ -189,230 +211,465 @@ export default function BoardPage() {
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
-      {/* pt-16: 우측 상단 고정 테마 토글(ThemeToggle)에 헤더의 총액 뱃지가 가리지 않도록 여유 공간 확보 */}
-      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-16 pb-40 flex flex-col gap-5">
-        {/* 헤더: 목표/잔여예산/총액 */}
-        <header
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 border-b"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-[var(--accent)] flex items-center justify-center text-white shadow-sm font-bold text-lg shrink-0">
-              🥜
-            </div>
-            <div>
-              <h1
-                className="text-base sm:text-lg font-bold tracking-tight flex items-center gap-2 flex-wrap"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                목표: {goalType ?? "-"} <span style={{ color: "var(--border)" }}>|</span>{" "}
-                <span className="text-[var(--text-sub)] font-medium text-sm">
-                  이번 달 예산: <strong className="text-[var(--accent)] font-bold">{budget.toLocaleString()}원</strong>
-                </span>
-              </h1>
-            </div>
-          </div>
-          <div className="inline-flex items-center gap-2 bg-[var(--butter)] px-3 py-1.5 rounded-full border border-[var(--border)] text-xs font-semibold">
-            🛒 총 담긴 금액: <strong>{cartTotal.toLocaleString()}원</strong>
-          </div>
-        </header>
-
-        <p
-          className="text-sm font-bold px-3 py-2.5 rounded-xl border-2"
-          style={{ backgroundColor: "var(--primary-light)", color: "var(--primary-hover)", borderColor: "var(--primary)" }}
-        >
-          🖐️ 아이템 주머니에 모아두고 AI에게 순위를 부탁하면 쇼케이스에 자동으로 진열돼요. 직접
-          드래그로 옮겨도 돼요
-        </p>
-
-        {/* ③ 항목 등록: 링크 파싱 -> 실패시 수동 입력 폴백 (§5). 스크린샷 일괄 등록은 장바구니 스크래핑이
-            로그인/JS렌더링 문제로 불가능해서(무신사/지그재그/쿠팡/네이버 확인함) 나온 대안. */}
-        <section
-          className="bg-[var(--surface)] rounded-[22px] border-2 p-4 sm:p-5"
-          style={{ borderColor: "var(--border)", boxShadow: "0 4px 0 0 var(--border)" }}
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <button
-              onClick={() => setAddMode("link")}
-              className="px-3.5 py-1.5 text-xs sm:text-sm font-bold rounded-xl transition-all"
-              style={
-                addMode === "link"
-                  ? { backgroundColor: "var(--text)", color: "var(--surface)" }
-                  : { backgroundColor: "var(--surface-alt)", color: "var(--text-sub)" }
-              }
-            >
-              링크로 추가
-            </button>
-            <button
-              onClick={() => setAddMode("screenshot")}
-              className="px-3.5 py-1.5 text-xs sm:text-sm font-bold rounded-xl transition-all"
-              style={
-                addMode === "screenshot"
-                  ? { backgroundColor: "var(--text)", color: "var(--surface)" }
-                  : { backgroundColor: "var(--surface-alt)", color: "var(--text-sub)" }
-              }
-            >
-              스크린샷으로 추가
-            </button>
-          </div>
-          {addMode === "link" ? <AddItemForm /> : <ScreenshotImportForm />}
-        </section>
-
-        {/* ④ 2단 구조 */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
-          <ColumnDropZone
-            id="cart-zone"
-            icon={<CartIcon className="w-9 h-9" />}
-            title="아이템 주머니"
-            count={cartItems.length}
-            action={
-              <button
-                onClick={handleEvaluate}
-                disabled={cartItems.length === 0 || evalState === "loading"}
-                className="px-3 py-1 text-white text-xs font-bold rounded-full shadow-sm transition-all disabled:opacity-40"
-                style={{ backgroundColor: "var(--text)" }}
-              >
-                {evalState === "loading" ? "음... 잠깐 생각해볼게요" : "✨ AI에게 순위 배정 부탁하기"}
-              </button>
-            }
+      <div className="grass-bg flex-1 text-[#4A3324]">
+        <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-16 pb-32 flex flex-col gap-5">
+          {/* 헤더 */}
+          <header
+            className={`flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-[#FFF9EC]/90 backdrop-blur-md p-4 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
           >
-            <p className="text-xs text-[var(--text-sub)]">
-              고민 중인 아이템을 여기 모아두고, 위 버튼을 누르면 AI가 예산과 필요도를 따져 쇼케이스에
-              순위대로 진열해줘요.
-            </p>
-            {evalState === "error" && (
-              <p className="text-xs" style={{ color: "var(--accent)" }}>
-                판정에 실패해서 가격순으로 보여드릴게요
-              </p>
-            )}
-            {cartItems.length === 0 && <p className="text-sm text-[var(--text-sub)]">비어있음</p>}
-            {cartItems.map((it) => (
-              <DraggableItemRow key={it.id} item={it} />
-            ))}
-          </ColumnDropZone>
-
-          <ColumnDropZone
-            id="buy-zone"
-            icon={<ConfirmedBagIcon className="w-9 h-9" />}
-            title="진짜 살 물건 쇼케이스"
-            count={buyItems.length}
-          >
-            {/* §6-1: 결과를 본 다음 사용자가 직접 조정하는 두 번째 판단 기준. 30~100, 기본값 65 (wayfinder #5). */}
-            {evalState === "ready" && (
-              <div className="flex items-center gap-2 text-xs text-[var(--text-sub)] mb-1">
-                <span>가격순</span>
-                <input
-                  type="range"
-                  min={30}
-                  max={100}
-                  value={qualWeight}
-                  onChange={(e) => setQualWeight(Number(e.target.value))}
-                  className="flex-1"
-                />
-                <span>AI 판단</span>
-                <span className="w-8 text-right">{qualWeight}</span>
+            <div className="flex items-center gap-3.5">
+              <div
+                className={`relative w-12 h-12 rounded-2xl bg-[#F6C644] border-2 border-[#C9981A] ${SHADOW_AC_SM} flex items-center justify-center shrink-0 text-[#8C5500] font-black text-xl`}
+              >
+                ₩
               </div>
-            )}
-
-            <p
-              className="text-sm font-bold px-3 py-2.5 rounded-xl border-2 mb-1"
-              style={{ backgroundColor: "var(--accent-light)", color: "var(--accent-hover)", borderColor: "var(--accent)" }}
-            >
-              📋 예산선 아래 항목은 계획 재검토가 필요해요!
-            </p>
-
-            {buyItems.length === 0 && <p className="text-sm text-[var(--text-sub)]">비어있음</p>}
-
-            {rows.map(({ item, overBudget, message, reasoning, index }, i) => {
-              const revealed = evalState !== "ready" || index < revealedCount;
-              if (!revealed) return null;
-              return (
-                <div key={item.id}>
-                  {overBudget && i > 0 && !rows[i - 1].overBudget && (
-                    <div className="py-3 my-1 flex items-center gap-3">
-                      <div className="flex-1 h-1 rounded-full" style={{ backgroundColor: "var(--accent)" }} />
-                      <div
-                        className="text-white text-sm font-extrabold px-4 py-1.5 rounded-full shadow-md flex items-center gap-1.5 shrink-0 whitespace-nowrap"
-                        style={{ backgroundColor: "var(--accent)" }}
-                      >
-                        <span>✂️ 여기까지 예산 안 ({budget.toLocaleString()}원)</span>
-                      </div>
-                      <div className="flex-1 h-1 rounded-full" style={{ backgroundColor: "var(--accent)" }} />
-                    </div>
-                  )}
-                  <DraggableItemRow
-                    item={item}
-                    dim={overBudget}
-                    message={message}
-                    reasoning={reasoning}
-                    rank={evalState === "ready" ? index + 1 : undefined}
-                    positive={evalState === "ready" && !overBudget && index === 0}
-                  />
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-0.5 bg-[#5D8A37] text-white text-xs font-black rounded-full flex items-center gap-1">
+                    <LeafIcon className="w-3 h-3 text-[#BEE88A]" />
+                    목표: {goalType ?? "-"}
+                  </span>
+                  <span className="text-xs text-[#8C6D53] font-bold">이번 달 예산:</span>
+                  <span className="bg-[#FFF0D4] border-2 border-[#F6C644] text-[#A75D00] font-black text-sm sm:text-base px-2.5 py-0.5 rounded-full">
+                    {won(budget)}
+                  </span>
                 </div>
-              );
-            })}
+                <p className="mt-1" style={{ fontFamily: "var(--font-gaegu)" }}>
+                  <span className="text-base text-[#467A26] font-bold">
+                    주머니 아이템을 꺼내 가판대 쇼케이스에 올려보세요!
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 self-end md:self-center">
+              <div
+                className={`bg-[#784A28] border-2 border-[#573318] text-[#FFF3DE] px-4 py-2 rounded-2xl ${SHADOW_AC_SM} flex items-center gap-3`}
+              >
+                <div className="flex flex-col text-right">
+                  <span className="text-[10px] text-[#FFD8A8] font-bold">담긴 금액 총합</span>
+                  <span className="text-sm font-black text-[#FFDE59] tracking-tight">{won(cartSum + buySum)}</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-[#FFDE59] border border-[#B37400] flex items-center justify-center text-[#734500]">
+                  <BagIcon className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </header>
 
-            {/* §6-3: 하나만 살 수 있다면? */}
-            {evalState === "ready" && revealedCount === (scored?.length ?? 0) && scored && scored.length > 1 && (
-              <div className="mt-2 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
-                <p className="text-sm font-bold mb-1.5">이 중에 하나만 살 수 있다면?</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {scored.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => setUserPick(s.id)}
-                      className="text-xs rounded-full px-3 py-1 border-2 font-medium transition-all"
-                      style={
-                        userPick === s.id
-                          ? { borderColor: "var(--primary)", backgroundColor: "var(--primary-light)" }
-                          : { borderColor: "var(--border)" }
-                      }
+          {/* 항목 등록 (우드 팻말) */}
+          <section
+            className={`bg-[#FFFBF2] rounded-[28px] border-[3px] border-[#D6C2A5] p-4 sm:p-5 ${SHADOW_AC} relative overflow-hidden`}
+          >
+            <div className="absolute left-3 top-3 w-2.5 h-2.5 rounded-full bg-[#9E7A56] border border-[#6B4F33]" />
+            <div className="absolute right-3 top-3 w-2.5 h-2.5 rounded-full bg-[#9E7A56] border border-[#6B4F33]" />
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <button
+                onClick={() => setAddMode("link")}
+                className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all flex items-center gap-1.5 ${
+                  addMode === "link"
+                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
+                    : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
+                }`}
+              >
+                <LeafIcon className="w-3.5 h-3.5" />
+                링크로 주머니에 넣기
+              </button>
+              <button
+                onClick={() => setAddMode("screenshot")}
+                className={`px-4 py-1.5 text-xs sm:text-sm font-black rounded-full transition-all flex items-center gap-1.5 ${
+                  addMode === "screenshot"
+                    ? `bg-[#4F8B33] text-white ${SHADOW_AC_SM}`
+                    : "bg-[#EFE8D6] text-[#694D36] border-2 border-[#D4C3A3]"
+                }`}
+              >
+                스샷으로 넣기
+              </button>
+            </div>
+            {addMode === "link" ? <AddItemForm /> : <ScreenshotImportForm />}
+          </section>
+
+          {/* 인벤토리 주머니 vs 가판대 */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            {/* LEFT: 아이템 주머니 */}
+            <ZoneShell
+              id="cart-zone"
+              className={`flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+            >
+              <div className="absolute inset-2.5 rounded-[30px] border-2 border-dashed border-[#CCBFA3] pointer-events-none" />
+              <div className="relative z-10 flex items-center justify-between pb-2 mb-3 border-b-2 border-[#D9CDAF]">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-12 h-12 rounded-2xl bg-[#E68759] border-2 border-[#9F512B] flex items-center justify-center text-white ${SHADOW_AC_SM} p-2 shrink-0`}
+                  >
+                    <CartIcon className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-lg sm:text-xl font-black text-[#5B3E29] tracking-tight">아이템 주머니</h2>
+                      <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
+                        {cartItems.length}/20 보관 중
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#826954] mt-0.5 font-medium">
+                      일반 보관 주머니와 AI 우선순위 판정대로 나뉘어 있어요
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-[11px] font-bold text-[#8C6D53]">주머니 합계</span>
+                  <p className="text-sm font-black text-[#7A4924]">{won(cartSum)}</p>
+                </div>
+              </div>
+
+              <div
+                className={`relative z-10 flex flex-col gap-2 mb-3 bg-[#E2D9C2]/80 rounded-[24px] border-2 border-[#C2B18E] p-3 ${SHADOW_INNER}`}
+              >
+                <div className="flex items-center gap-1.5 px-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#5D8A37]" />
+                  <h3 className="text-xs font-black text-[#5B3E29]">내 주머니 (일반 보관)</h3>
+                  <span className="text-[10px] font-bold text-[#2D6C2A] bg-[#DCF2C7] px-2 rounded-full border border-[#AED48C]">
+                    {cartItems.length}/{pouchSlots} 보관
+                  </span>
+                </div>
+                <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
+                  {cartItems.map((it) => (
+                    <ItemTile key={it.id} item={it} />
+                  ))}
+                  {Array.from({ length: pouchSlots - cartItems.length }).map((_, i) => (
+                    <div
+                      key={`empty-${i}`}
+                      className="pocket-slot w-full aspect-square rounded-2xl flex items-center justify-center opacity-60"
                     >
-                      {s.name}
-                    </button>
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#C9BFAB]" />
+                    </div>
                   ))}
                 </div>
-
-                {/* §6-6: 선택 갭 설명 */}
-                {showGapExplanation && pickedItem && topPick && (
-                  <p
-                    className="text-sm mt-2 rounded-2xl p-3"
-                    style={{ backgroundColor: "var(--surface-alt)", color: "var(--text)" }}
-                  >
-                    당신은 {pickedItem.name}를 골랐는데 계산상으로는 {topPick.name}가 앞서요.{" "}
-                    {pickedItem.name}는 만족이 {pickedItem.satisfaction_months}개월 정도인데{" "}
-                    {topPick.name}는 {topPick.satisfaction_months}개월 가거든요. 그래도{" "}
-                    {pickedItem.name}가 맞다면 그건 그것대로 괜찮아요.
-                  </p>
-                )}
-                {evalState === "ready" && userPick === topPick?.id && (
-                  <p className="text-sm mt-2 text-[var(--primary-hover)] font-medium">
-                    계산이랑 똑같이 고르셨네요, 좋은 선택이에요.
-                  </p>
-                )}
               </div>
-            )}
-          </ColumnDropZone>
-        </section>
 
-        {/* 빼기/내리기 드롭존 - 항상 노출. ProgressRunner(h-8)가 화면 맨 밑을 쓰므로 그 위에 쌓는다. */}
-        <div
-          className="fixed bottom-8 left-0 right-0 grid grid-cols-2 gap-3 p-3 sm:px-6"
-          style={{ backgroundColor: "var(--surface)", borderTop: "2px solid var(--border)" }}
-        >
-          <ActionDropZone id="toss-zone" icon={<TrashIcon className="w-6 h-6" />} title="빼기 (안 살 것)" desc="마음을 비우고 털어내기" />
-          <ActionDropZone id="flush-zone" icon={<DoneStampIcon className="w-6 h-6" />} title="내리기 (샀음!)" desc="구매 완료, 쾌감 느끼기" />
-        </div>
-      </main>
+              <div
+                className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-[3px] border-dashed border-[#F6C644] p-3.5 ${SHADOW_AC_SM}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-[#FFDE59] border border-[#B37400] flex items-center justify-center text-[#734500]">
+                      <StarIcon className="w-3.5 h-3.5" />
+                    </div>
+                    <h3 className="text-xs font-black text-[#693E00]">AI 지름 우선순위 판정대</h3>
+                    <span className="text-[10px] font-bold text-[#A16500] bg-[#FFF0D4] px-2 rounded-full border border-[#D9BA8B]">
+                      연구소 바구니
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#4FA429] bg-[#E4F5D2] px-2 py-0.5 rounded-full border border-[#BBDC9F]">
+                    {cartItems.length}개 후보 대기 중
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#7A5B3E] font-medium leading-tight">
+                  고민 중인 아이템을 주머니에 모아두고 버튼을 누르면, AI가 예산과 필요도를 따져 우측 선반에
+                  1·2위로 자동 진열해요!
+                </p>
+                {evalState === "error" && (
+                  <p className="text-xs font-bold text-[#C93B2B]">판정에 실패해서 가격순으로 보여드릴게요</p>
+                )}
+                <button
+                  onClick={handleEvaluate}
+                  disabled={cartItems.length === 0 || evalState === "loading"}
+                  className={`w-full py-2.5 px-4 bg-[#4EA434] hover:bg-[#3F8829] active:translate-y-0.5 text-white font-black text-xs sm:text-sm rounded-2xl ${SHADOW_AC_SM} transition-all flex items-center justify-center gap-2 disabled:opacity-40`}
+                >
+                  <StarIcon className="w-4 h-4 text-[#FFE073]" />
+                  <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 우선순위 배정 부탁하기"}</span>
+                  <span className="text-[10px] bg-[#355E1D] text-[#D8F5AF] px-2 py-0.5 rounded-full font-bold">
+                    자동 정렬
+                  </span>
+                </button>
+              </div>
+
+              <div className="relative z-10 mt-3 text-center text-[11px] text-[#7A614B] font-medium flex items-center justify-center gap-1">
+                <LeafIcon className="w-3.5 h-3.5 text-[#5D8B33]" />
+                <span>주머니 속 아이템은 언제든 드래그해서 자유롭게 옮길 수 있어요.</span>
+              </div>
+            </ZoneShell>
+
+            {/* RIGHT: 쇼케이스 */}
+            <ZoneShell
+              id="buy-zone"
+              className={`flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+            >
+              <div className="absolute inset-2 rounded-[28px] border-2 border-dashed border-[#D6C2A5] pointer-events-none" />
+              <div
+                className={`relative z-10 rounded-2xl overflow-hidden border-2 border-[#5E371C] ${SHADOW_AC_SM} mb-3 wood-grain`}
+              >
+                <div className="py-2 px-4 flex items-center justify-between text-white text-xs font-black">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-[#FFDE59] border border-[#783F1E] inline-flex items-center justify-center text-[8px] text-[#734500]">
+                      ★
+                    </span>
+                    <span className="tracking-tight text-base text-[#FFF3DE]" style={{ fontFamily: "var(--font-gaegu)" }}>
+                      나의 위시 원목 서랍 진열장
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-[#FFE8C2] bg-[#57351F] px-2.5 py-0.5 rounded-full border border-[#8C5D35]">
+                    우선순위 2단 선반 배치 중
+                  </span>
+                </div>
+              </div>
+
+              <div className="relative z-10 flex items-center justify-between pb-2 mb-2 border-b-2 border-[#E8DCC2]">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-black text-[#57351F] tracking-tight">진짜 살 물건 쇼케이스</h3>
+                  <span className="text-xs font-black text-[#C93B2B] bg-[#FFEAE6] px-2.5 py-0.5 rounded-full border border-[#FFAE9E]">
+                    이번 달 구매
+                  </span>
+                </div>
+                <span className="text-xs font-bold text-[#8A5A35]">{buyItems.length}개 진열 중</span>
+              </div>
+
+              {evalState === "ready" && (
+                <div className="relative z-10 flex items-center gap-2 text-xs text-[#7A5B3E] font-bold mb-2">
+                  <span>가격순</span>
+                  <input
+                    type="range"
+                    min={30}
+                    max={100}
+                    value={qualWeight}
+                    onChange={(e) => setQualWeight(Number(e.target.value))}
+                    className="flex-1 accent-[#4EA434]"
+                  />
+                  <span>AI 판단</span>
+                  <span className="w-8 text-right">{qualWeight}</span>
+                </div>
+              )}
+
+              <div
+                className={`relative z-10 rounded-[28px] bg-[#EFE4CF] border-[3px] border-[#C9B390] p-4 ${SHADOW_INNER} flex-1 flex flex-col justify-between gap-3 select-none`}
+              >
+                {/* 1층 */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs font-black text-[#69421A] flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#E09D1B]" />
+                      1층: 이번 달 구매 확정 칸 (예산 내)
+                    </span>
+                    <span className="text-[11px] font-bold text-[#4FA429] bg-[#DCF2C7] px-2 py-0.5 rounded-full border border-[#BBDC9F]">
+                      {shelf1.length}/{shelf1Slots} 전시 중
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2.5">
+                    {shelf1.map((r) => {
+                      if (evalState === "ready" && r.index >= revealedCount) return null;
+                      return (
+                        <ItemTile
+                          key={r.item.id}
+                          item={r.item}
+                          showcase
+                          badge={
+                            evalState === "ready"
+                              ? { text: r.index === 0 ? `${r.index + 1}위 확정` : `${r.index + 1}위`, kind: "gold" }
+                              : undefined
+                          }
+                        />
+                      );
+                    })}
+                    {Array.from({ length: Math.max(0, shelf1Slots - shelf1.length) }).map((_, i) => (
+                      <EmptyShelf key={`s1-${i}`} label="빈 선반" />
+                    ))}
+                  </div>
+                </div>
+
+                {/* 예산 한도선 리본 */}
+                <div className="py-1 z-20 relative">
+                  <div className="relative flex items-center justify-center">
+                    <div className={`absolute inset-x-0 h-4 bg-[#85532F] rounded-md border-2 border-[#573318] ${SHADOW_AC_SM}`} />
+                    <div className="absolute inset-x-0 h-1 bg-[#A8582C] top-0.5 rounded-t-sm opacity-60" />
+                    <div
+                      className={`relative z-10 bg-[#FFDE59] border-2 border-[#B37400] text-[#693E00] text-xs font-black px-4 py-0.5 rounded-full ${SHADOW_AC} flex items-center gap-1.5`}
+                    >
+                      <span>이번 달 예산 한도선 선반 ({won(budget)})</span>
+                      <span className="w-2 h-2 rounded-full bg-[#E09D1B] border border-[#693E00]" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2층 */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs font-black text-[#755541] flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#A8582C]" />
+                      2층: 다음 달 보관 서랍 (월급날 개봉)
+                    </span>
+                    {overAmount > 0 && (
+                      <span className="text-[11px] font-bold text-[#8C5D35] bg-[#FAF2DC] px-2 py-0.5 rounded-full border border-[#D9CAAF]">
+                        +{won(overAmount)} 초과
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-4 gap-2.5">
+                    {shelf2.map((r) => {
+                      if (evalState === "ready" && r.index >= revealedCount) return null;
+                      return (
+                        <ItemTile
+                          key={r.item.id}
+                          item={r.item}
+                          showcase
+                          dim
+                          badge={
+                            evalState === "ready" ? { text: `${r.index + 1}위 대기`, kind: "brown" } : undefined
+                          }
+                        />
+                      );
+                    })}
+                    {Array.from({ length: Math.max(0, shelf2Slots - shelf2.length) }).map((_, i) => (
+                      <EmptyShelf key={`s2-${i}`} label="서랍 칸" faint />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* AI 한줄평 + 안내 문구 */}
+              {evalState === "ready" && rows.length > 0 && (
+                <div className="relative z-10 mt-3 flex flex-col gap-2">
+                  {rows.map((r) => {
+                    if (r.index >= revealedCount) return null;
+                    return (
+                      <div
+                        key={r.item.id}
+                        className="rounded-2xl border-2 border-[#E3C59E] bg-[#FFFDF7] p-3 text-[#573A23]"
+                      >
+                        <p className="text-sm font-black">
+                          {r.index + 1}위 · {r.item.name} · {won(r.item.price)}
+                        </p>
+                        {r.reasoning && <p className="text-xs italic mt-0.5 text-[#7A5B3E]">&quot;{r.reasoning}&quot;</p>}
+                        {r.message && (
+                          <p className="text-sm font-black mt-2 px-3 py-2 rounded-xl border-2 border-[#E09D1B] bg-[#FFF4D6] text-[#8A5A00]">
+                            💡 {r.message}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {shelf2.length > 0 && (
+                <div className="relative z-10 mt-3 p-3 bg-[#FFFDF7] rounded-2xl border-2 border-[#E3C59E] flex items-center gap-2 text-sm text-[#573A23] font-bold">
+                  <div className="w-6 h-6 rounded-full bg-[#5BA431] text-white flex items-center justify-center font-black text-[11px] shrink-0">
+                    !
+                  </div>
+                  <span>예산선 아래 물건은 계획 재검토가 필요해요! 다음 달 월급날 서랍에서 꺼내는 건 어때요?</span>
+                </div>
+              )}
+
+              {/* §6-3: 하나만 살 수 있다면? */}
+              {evalState === "ready" && revealedCount === (scored?.length ?? 0) && scored && scored.length > 1 && (
+                <div className="relative z-10 mt-3 pt-3 border-t-2 border-[#E8DCC2]">
+                  <p className="text-sm font-black text-[#57351F] mb-1.5">이 중에 하나만 살 수 있다면?</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {scored.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setUserPick(s.id)}
+                        className={`text-xs rounded-full px-3 py-1 border-2 font-bold transition-all ${
+                          userPick === s.id
+                            ? "border-[#4EA434] bg-[#E4F5D2] text-[#2D6C2A]"
+                            : "border-[#D6C2A5] bg-white text-[#694D36]"
+                        }`}
+                      >
+                        {s.name}
+                      </button>
+                    ))}
+                  </div>
+                  {showGapExplanation && pickedItem && topPick && (
+                    <p className="text-sm mt-2 rounded-2xl p-3 bg-[#FAF2DC] text-[#573A23]">
+                      당신은 {pickedItem.name}를 골랐는데 계산상으로는 {topPick.name}가 앞서요. {pickedItem.name}는
+                      만족이 {pickedItem.satisfaction_months}개월 정도인데 {topPick.name}는{" "}
+                      {topPick.satisfaction_months}개월 가거든요. 그래도 {pickedItem.name}가 맞다면 그건 그것대로
+                      괜찮아요.
+                    </p>
+                  )}
+                  {userPick === topPick?.id && (
+                    <p className="text-sm mt-2 text-[#2D6C2A] font-bold">
+                      계산이랑 똑같이 고르셨네요, 좋은 선택이에요.
+                    </p>
+                  )}
+                </div>
+              )}
+            </ZoneShell>
+          </section>
+
+          {/* 드롭존: 빼기 / 내리기 */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+            <ActionZone
+              id="toss-zone"
+              borderClass="border-[#C9B693] hover:border-[#6B4B32]"
+              overClass="border-[#6B4B32] bg-[#FFF5E6]"
+              visual={
+                <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:rotate-6 transition-transform">
+                  <div
+                    className={`w-[72px] h-[72px] rounded-2xl bg-[#E8DCC2] border-2 border-[#9E8665] flex items-center justify-center ${SHADOW_AC_SM} relative overflow-hidden`}
+                  >
+                    <div className="w-14 h-14 rounded-full bg-[#C99863] border-2 border-[#85532F] flex items-center justify-center relative">
+                      <svg className="w-8 h-8 text-[#573318] fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2L9.5 9 2 9.5 7.5 14.5 5.5 22 12 18 18.5 22 16.5 14.5 22 9.5 14.5 9z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <span className="absolute -top-1 -right-1 text-[10px] bg-[#6B4A2F] text-white px-2 py-0.5 rounded-full font-black border border-white">
+                    묻기
+                  </span>
+                </div>
+              }
+              titleChip={
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#6B4A2F] text-white">
+                  빼기 (안 살 것 털어내기)
+                </span>
+              }
+              sub="별 구덩이에 묻기 & 비우기"
+              desc="땅속에 묻어 지름신 봉인하기! 충동구매를 시원하게 털어내고 소중한 돈을 아껴요."
+              hint="구덩이에 묻어버릴 아이템을 퐁당 던지기"
+              hintClass="bg-[#F5EADB] border-[#CBB394] text-[#694A2F]"
+            />
+            <ActionZone
+              id="flush-zone"
+              borderClass="border-[#F0B2BA] hover:border-[#E84364]"
+              overClass="border-[#E84364] bg-[#FFF0F3]"
+              visual={
+                <div className="relative shrink-0 flex items-center justify-center w-20 h-20 group-hover:-rotate-6 transition-transform animate-balloon">
+                  <div className="relative flex flex-col items-center">
+                    <div className="w-10 h-10 rounded-full bg-[#FF4765] border-2 border-[#D12644] shadow-md flex items-center justify-center text-white relative">
+                      <div className="w-2.5 h-2.5 bg-white/40 rounded-full absolute top-1.5 left-2" />
+                    </div>
+                    <div className="w-0.5 h-3 bg-[#8C5D35]" />
+                    <div
+                      className={`w-11 h-9 rounded-lg bg-[#FFFDF0] border-2 border-[#D69651] ${SHADOW_AC_SM} flex items-center justify-center relative`}
+                    >
+                      <div className="absolute inset-y-0 w-2 bg-[#FF4765]" />
+                      <div className="absolute inset-x-0 h-2 bg-[#FF4765]" />
+                    </div>
+                  </div>
+                  <span className="absolute -top-1 -right-1 text-[10px] bg-[#E84364] text-white px-2 py-0.5 rounded-full font-black border border-white">
+                    배송 완료
+                  </span>
+                </div>
+              }
+              titleChip={
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#E84364] text-white">
+                  <StarIcon className="w-3.5 h-3.5 text-[#FFE073]" />
+                  내리기 (샀음!)
+                </span>
+              }
+              sub="선물상자 완성 & 구매 완료"
+              desc="선물상자 완성! 알뜰한 계획 소비로 결제 완료하고 뿌듯함을 챙겨요."
+              hint="결제 완료한 물건을 선물상자에 퐁당 던지기!"
+              hintClass="bg-[#FFEBF0] border-[#FFBFCE] text-[#D83A61]"
+            />
+          </section>
+        </main>
+      </div>
 
       <DragOverlay>
         {activeItem ? (
-          <div
-            className="rounded-2xl px-3 py-2 shadow-lg border-2"
-            style={{ backgroundColor: "var(--surface)", borderColor: "var(--primary)" }}
-          >
-            <span className="font-bold text-sm">{activeItem.name}</span>{" "}
-            <span className="text-[var(--text-sub)] text-xs">{activeItem.price.toLocaleString()}원</span>
+          <div className="rounded-2xl px-3 py-2 shadow-lg border-2 border-[#4EA434] bg-[#FFFDF0] text-[#4A3324]">
+            <span className="font-black text-sm">{activeItem.name}</span>{" "}
+            <span className="text-xs font-bold text-[#82542B]">{won(activeItem.price)}</span>
           </div>
         ) : null}
       </DragOverlay>
@@ -420,185 +677,138 @@ export default function BoardPage() {
   );
 }
 
-function ColumnDropZone({
-  id,
-  icon,
-  title,
-  count,
-  action,
-  children,
-}: {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  count: number;
-  action?: React.ReactNode;
-  children: React.ReactNode;
-}) {
+function ZoneShell({ id, className, children }: { id: string; className: string; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
-    <div
-      ref={setNodeRef}
-      className="rounded-[24px] border-2 p-5 sm:p-6 flex flex-col gap-2 min-h-[300px] transition-colors"
-      style={{
-        backgroundColor: "var(--surface)",
-        borderColor: isOver ? "var(--primary)" : "var(--border)",
-        boxShadow: "0 4px 0 0 var(--border)",
-      }}
-    >
-      <div className="flex items-center justify-between pb-3 mb-1 border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="flex items-center gap-2">
-          <span className="shrink-0" style={{ color: "var(--primary)" }}>
-            {icon}
-          </span>
-          <h2 className="text-lg font-bold">
-            {title} <span style={{ color: "var(--accent)" }}>({count})</span>
-          </h2>
-        </div>
-        {action}
-      </div>
+    <section ref={setNodeRef} className={`${className} ${isOver ? "ring-4 ring-[#4EA434]" : ""}`}>
       {children}
-    </div>
+    </section>
   );
 }
 
-function ActionDropZone({
-  id,
-  icon,
-  title,
-  desc,
-}: {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
-}) {
-  const { setNodeRef, isOver } = useDroppable({ id });
+function EmptyShelf({ label, faint }: { label: string; faint?: boolean }) {
   return (
     <div
-      ref={setNodeRef}
-      className="rounded-2xl p-3 sm:p-4 flex items-center justify-center gap-3 border-2 border-dashed transition-all"
-      style={{
-        borderColor: isOver ? "var(--accent)" : "var(--border)",
-        backgroundColor: isOver ? "var(--accent-light)" : "transparent",
-      }}
+      className={`w-full aspect-square rounded-2xl border-2 border-dashed flex flex-col items-center justify-center ${
+        faint ? "bg-[#E8DCC2]/70 border-[#D4C7A7]" : "bg-[#E8DCC2] border-[#C9B693]"
+      }`}
     >
-      <div
-        className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
-        style={{ backgroundColor: "var(--surface-alt)", color: "var(--accent)" }}
-      >
-        {icon}
-      </div>
-      <div className="text-left">
-        <p className="text-sm font-bold">{title}</p>
-        <p className="text-xs hidden sm:block text-[var(--text-sub)]">{desc}</p>
-      </div>
+      <div className="w-3 h-3 rounded-full bg-[#C9BFAB]" />
+      <span className="text-[10px] text-[#A89481] font-bold mt-1">{label}</span>
     </div>
   );
 }
 
-function DraggableItemRow({
+function ItemTile({
   item,
+  badge,
   dim,
-  message,
-  reasoning,
-  rank,
-  positive,
+  showcase,
 }: {
   item: Item;
+  badge?: { text: string; kind: "gold" | "brown" };
   dim?: boolean;
-  message?: string | null;
-  reasoning?: string | null;
-  rank?: number;
-  positive?: boolean;
+  showcase?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: item.id });
 
-  // §8-1: 빼기="확 털어냄" (toss), 내리기="변기물 내리듯" (flush). 도착/공개 시엔 반동(pop-in).
   const exitClass =
-    item.exiting === "toss"
-      ? "animate-toss-away"
-      : item.exiting === "flush"
-        ? "animate-flush-down"
-        : "animate-pop-in";
-
-  const tag = REASON_TAG_STYLE[item.reasonCode];
-  const reasonLabel =
-    item.reasonCode === "other" && item.customReason ? item.customReason : REASON_CODE_LABEL[item.reasonCode];
+    item.exiting === "toss" ? "animate-toss-away" : item.exiting === "flush" ? "animate-flush-down" : "animate-pop-in";
 
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`relative rounded-[20px] border-2 p-3.5 flex items-center justify-between gap-3 select-none touch-none overflow-hidden ${
-        isDragging ? "opacity-30" : "cursor-grab"
-      } ${exitClass} ${dim ? "opacity-70" : ""} ${item.exiting ? "pointer-events-none" : ""}`}
-      style={{
-        backgroundColor: "var(--surface)",
-        borderColor: rank === 1 ? "var(--primary)" : dim ? "var(--border)" : "var(--border)",
-        borderStyle: dim ? "dashed" : "solid",
-      }}
+      title={`${item.name} · ${won(item.price)}`}
+      className={`group relative flex flex-col items-center touch-none select-none ${exitClass} ${
+        isDragging ? "opacity-30" : ""
+      } ${item.exiting ? "pointer-events-none" : ""}`}
     >
-      {rank != null && (
-        <span
-          className="absolute top-0 left-0 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-br-xl"
-          style={{ backgroundColor: rank === 1 ? "var(--primary)" : "var(--text-sub)" }}
-        >
-          {rank}위{dim ? " (초과)" : ""}
-        </span>
-      )}
-
-      <div className={`flex items-center gap-3 ${rank != null ? "pt-2" : ""}`}>
+      <div
+        className={`pocket-slot active w-full aspect-square rounded-2xl flex flex-col items-center justify-center p-1 cursor-grab hover:-translate-y-1 transition-all border-2 relative ${
+          showcase
+            ? dim
+              ? "border-dashed border-[#CFB7A1] !bg-[#FFFBF0]/90 opacity-95"
+              : "border-[#E0859D] !bg-[#FFFDF7]"
+            : "border-[#549E32]"
+        }`}
+      >
+        {badge && (
+          <div
+            className={`absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black px-2 py-0.5 rounded-full border border-white whitespace-nowrap z-20 flex items-center gap-0.5 ${
+              badge.kind === "gold" ? "bg-[#F6C644] text-[#693E00]" : "bg-[#755541] text-[#FFE8D6]"
+            }`}
+          >
+            {badge.kind === "gold" && <StarIcon className="w-2.5 h-2.5 text-[#A16500]" />}
+            {badge.text}
+          </div>
+        )}
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.imageUrl}
             alt=""
-            className="w-14 h-14 object-cover rounded-2xl border shrink-0"
-            style={{ borderColor: "var(--border)" }}
+            className="w-9 h-9 rounded-full object-cover border border-[#BEE69E] shadow-sm mt-1"
           />
         ) : (
-          <div
-            className="w-14 h-14 rounded-2xl border flex items-center justify-center text-xl shrink-0"
-            style={{ backgroundColor: "var(--surface-alt)", borderColor: "var(--border)" }}
-          >
-            🛍️
+          <div className="w-9 h-9 rounded-full bg-[#E5F5D4] border border-[#BEE69E] flex items-center justify-center shadow-sm mt-1">
+            <BagIcon className="w-5 h-5 text-[#4F942B]" />
           </div>
         )}
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-bold truncate">{item.name}</h3>
-          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            <span className="text-xs font-extrabold" style={{ color: dim ? "var(--text-sub)" : "var(--text)" }}>
-              {item.price.toLocaleString()}원
-            </span>
-            <span
-              className="text-[11px] font-bold px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: tag.bg, color: tag.color }}
-            >
-              #{reasonLabel}
-            </span>
-          </div>
-          {reasoning && <p className="text-xs italic mt-0.5 text-[var(--text-sub)]">&quot;{reasoning}&quot;</p>}
-          {message && (
-            <p
-              className="text-sm font-bold mt-2 px-3 py-2 rounded-xl border-2"
-              style={{ backgroundColor: "var(--butter)", color: "var(--butter-dark)", borderColor: "var(--butter-dark)" }}
-            >
-              💡 {message}
-            </p>
-          )}
+        <span className="text-[11px] font-black text-[#355E1D] mt-1 truncate max-w-full">{item.name}</span>
+        <span
+          className={`text-[10px] font-bold ${
+            showcase && !dim ? "text-[#E84364]" : "text-[#82542B]"
+          } ${dim ? "line-through text-[#A89481]" : ""}`}
+        >
+          {short(item.price)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ActionZone({
+  id,
+  borderClass,
+  overClass,
+  visual,
+  titleChip,
+  sub,
+  desc,
+  hint,
+  hintClass,
+}: {
+  id: string;
+  borderClass: string;
+  overClass: string;
+  visual: React.ReactNode;
+  titleChip: React.ReactNode;
+  sub: string;
+  desc: string;
+  hint: string;
+  hintClass: string;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`group relative p-5 rounded-[32px] bg-[#FFFBF0]/95 border-[3px] border-dashed transition-all ${SHADOW_AC} flex items-center gap-5 text-[#523B28] ${
+        isOver ? overClass : borderClass
+      }`}
+    >
+      {visual}
+      <div className="flex-1">
+        <div className="flex flex-wrap items-center gap-2 mb-1">
+          {titleChip}
+          <span className="text-[11px] font-bold text-[#80644D] bg-[#EFE4CF] px-2 py-0.5 rounded-md">{sub}</span>
+        </div>
+        <p className="text-xs font-medium">{desc}</p>
+        <div className={`mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-[11px] font-black ${hintClass}`}>
+          <span>↓</span> {hint}
         </div>
       </div>
-
-      {positive && (
-        <span
-          className="text-xs font-bold px-2.5 py-1 rounded-full border shrink-0"
-          style={{ backgroundColor: "var(--primary-light)", color: "var(--primary-hover)", borderColor: "var(--primary)" }}
-        >
-          구매 확정권
-        </span>
-      )}
     </div>
   );
 }
