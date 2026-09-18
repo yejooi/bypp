@@ -75,6 +75,8 @@ export default function BoardPage() {
   const [revealedCount, setRevealedCount] = useState(0);
   const [userPick, setUserPick] = useState<string | null>(null);
   const [addMode, setAddMode] = useState<"link" | "screenshot">("link");
+  // 판정대에 올려둔 아이템 id. 순위 판정은 여기 있는 것만 대상으로 한다 (DB 상태는 cart 그대로).
+  const [judgeIds, setJudgeIds] = useState<string[]>([]);
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 4 } });
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } });
@@ -82,6 +84,8 @@ export default function BoardPage() {
 
   const cartItems = items.filter((it) => it.status === "cart");
   const buyItems = items.filter((it) => it.status === "buy");
+  const judgeItems = cartItems.filter((it) => judgeIds.includes(it.id));
+  const pouchItems = cartItems.filter((it) => !judgeIds.includes(it.id));
   const cartSum = cartItems.reduce((s, it) => s + it.price, 0);
   const buySum = buyItems.reduce((s, it) => s + it.price, 0);
 
@@ -152,9 +156,9 @@ export default function BoardPage() {
   // 순위 배정: 아이템 주머니(cart)에서 시작 -> 판정 끝나면 쇼케이스(buy)로 자동 승격.
   // llmEstimates는 id 기준으로 병합해서 여러 번 나눠 배정해도 누적 전체가 같은 기준으로 다시 랭킹된다.
   async function handleEvaluate() {
-    if (cartItems.length === 0) return;
+    if (judgeItems.length === 0) return;
     setEvalState("loading");
-    const toPromote = cartItems;
+    const toPromote = judgeItems;
     try {
       const res = await fetch("/api/evaluate", {
         method: "POST",
@@ -175,6 +179,7 @@ export default function BoardPage() {
       const newIds = new Set(data.items.map((e) => e.id));
       setLlmEstimates((prev) => [...(prev ?? []).filter((e) => !newIds.has(e.id)), ...data.items]);
       toPromote.forEach((it) => moveItem(it.id, "buy"));
+      setJudgeIds((prev) => prev.filter((id) => !newIds.has(id)));
       setEvalState("ready");
       setRevealedCount(0);
     } catch {
@@ -194,13 +199,22 @@ export default function BoardPage() {
     if (!over) return;
     const id = String(active.id);
     const zone = String(over.id);
-    if (zone === "cart-zone") moveItem(id, "cart");
-    else if (zone === "buy-zone") moveItem(id, "buy");
+    const status = items.find((it) => it.id === id)?.status;
+    if (zone === "judge-zone") {
+      if (status !== "cart") moveItem(id, "cart");
+      setJudgeIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+      return;
+    }
+    setJudgeIds((prev) => prev.filter((x) => x !== id));
+    if (zone === "cart-zone") {
+      if (status !== "cart") moveItem(id, "cart");
+    } else if (zone === "buy-zone") moveItem(id, "buy");
     else if (zone === "toss-zone") moveItem(id, "removed");
     else if (zone === "flush-zone") moveItem(id, "purchased");
   }
 
-  const pouchSlots = Math.max(10, Math.ceil(cartItems.length / 5) * 5);
+  const pouchSlots = Math.max(10, Math.ceil(pouchItems.length / 5) * 5);
+  const judgeSlots = Math.max(5, Math.ceil(judgeItems.length / 5) * 5);
   const shelf1Slots = Math.max(8, Math.ceil(shelf1.length / 4) * 4);
   const shelf2Slots = Math.max(4, Math.ceil(shelf2.length / 4) * 4);
 
@@ -328,14 +342,14 @@ export default function BoardPage() {
                   <span className="w-2.5 h-2.5 rounded-full bg-[#5D8A37]" />
                   <h3 className="text-xs font-black text-[#5B3E29]">내 주머니 (일반 보관)</h3>
                   <span className="text-[10px] font-bold text-[#2D6C2A] bg-[#DCF2C7] px-2 rounded-full border border-[#AED48C]">
-                    {cartItems.length}/{pouchSlots} 보관
+                    {pouchItems.length}/{pouchSlots} 보관
                   </span>
                 </div>
                 <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
-                  {cartItems.map((it) => (
+                  {pouchItems.map((it) => (
                     <ItemTile key={it.id} item={it} />
                   ))}
-                  {Array.from({ length: pouchSlots - cartItems.length }).map((_, i) => (
+                  {Array.from({ length: pouchSlots - pouchItems.length }).map((_, i) => (
                     <div
                       key={`empty-${i}`}
                       className="pocket-slot w-full aspect-square rounded-2xl flex items-center justify-center opacity-60"
@@ -346,7 +360,7 @@ export default function BoardPage() {
                 </div>
               </div>
 
-              <div
+              <JudgeShell
                 className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-[3px] border-dashed border-[#F6C644] p-3.5 ${SHADOW_AC_SM}`}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -360,19 +374,33 @@ export default function BoardPage() {
                     </span>
                   </div>
                   <span className="text-[10px] font-bold text-[#4FA429] bg-[#E4F5D2] px-2 py-0.5 rounded-full border border-[#BBDC9F]">
-                    {cartItems.length}개 후보 대기 중
+                    {judgeItems.length}개 후보 대기 중
                   </span>
                 </div>
                 <p className="text-[11px] text-[#7A5B3E] font-medium leading-tight">
-                  고민 중인 아이템을 주머니에 모아두고 버튼을 누르면, AI가 예산과 필요도를 따져 우측 선반에
-                  1·2위로 자동 진열해요!
+                  순위를 정하고 싶은 아이템만 위 주머니에서 이 칸으로 끌어다 놓으세요. 버튼을 누르면 여기 있는 아이템만
+                  AI가 예산과 필요도를 따져 우측 선반에 자동 진열해요!
                 </p>
+                <div className="grid grid-cols-5 gap-2 sm:gap-2.5 py-1">
+                  {judgeItems.map((it) => (
+                    <ItemTile key={it.id} item={it} badge={{ text: "판정 대기", kind: "gold" }} />
+                  ))}
+                  {Array.from({ length: judgeSlots - judgeItems.length }).map((_, i) => (
+                    <div
+                      key={`judge-empty-${i}`}
+                      className="w-full aspect-square rounded-2xl bg-[#FFF9EC] border-2 border-dashed border-[#D6C2A0] flex flex-col items-center justify-center text-center p-1"
+                    >
+                      <span className="text-[#A8582C] text-sm font-bold">+</span>
+                      <span className="text-[10px] text-[#A89481] font-bold leading-tight">아이템 담기</span>
+                    </div>
+                  ))}
+                </div>
                 {evalState === "error" && (
                   <p className="text-xs font-bold text-[#C93B2B]">판정에 실패해서 가격순으로 보여드릴게요</p>
                 )}
                 <button
                   onClick={handleEvaluate}
-                  disabled={cartItems.length === 0 || evalState === "loading"}
+                  disabled={judgeItems.length === 0 || evalState === "loading"}
                   className={`w-full py-2.5 px-4 bg-[#4EA434] hover:bg-[#3F8829] active:translate-y-0.5 text-white font-black text-xs sm:text-sm rounded-2xl ${SHADOW_AC_SM} transition-all flex items-center justify-center gap-2 disabled:opacity-40`}
                 >
                   <StarIcon className="w-4 h-4 text-[#FFE073]" />
@@ -381,7 +409,7 @@ export default function BoardPage() {
                     자동 정렬
                   </span>
                 </button>
-              </div>
+              </JudgeShell>
 
               <div className="relative z-10 mt-3 text-center text-[11px] text-[#7A614B] font-medium flex items-center justify-center gap-1">
                 <LeafIcon className="w-3.5 h-3.5 text-[#5D8B33]" />
@@ -683,6 +711,15 @@ function ZoneShell({ id, className, children }: { id: string; className: string;
     <section ref={setNodeRef} className={`${className} ${isOver ? "ring-4 ring-[#4EA434]" : ""}`}>
       {children}
     </section>
+  );
+}
+
+function JudgeShell({ className, children }: { className: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id: "judge-zone" });
+  return (
+    <div ref={setNodeRef} className={`${className} ${isOver ? "ring-4 ring-[#F6C644]" : ""}`}>
+      {children}
+    </div>
   );
 }
 
