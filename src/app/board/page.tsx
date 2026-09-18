@@ -315,7 +315,7 @@ export default function BoardPage() {
       onDragCancel={() => setActiveId(null)}
     >
       <div className="grass-bg flex-1 text-[#4A3324]">
-        <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-16 pb-32 flex flex-col gap-5">
+        <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-24 pb-32 flex flex-col gap-5">
           {/* 헤더 */}
           <header
             className={`flex items-center gap-4 bg-[#FFF9EC]/90 backdrop-blur-md px-4 py-3 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}

@@ -43,7 +43,7 @@ export default function BudgetPage() {
     "w-full bg-[var(--surface)] border-2 border-[var(--border)] rounded-2xl px-4 py-3 text-[var(--text)] focus:border-[var(--primary)] focus:outline-none";
 
   return (
-    <main className="flex-1 flex flex-col gap-5 p-6 pb-28 max-w-md mx-auto w-full">
+    <main className="flex-1 flex flex-col gap-5 p-6 pt-24 pb-28 max-w-md mx-auto w-full">
       <section>
         <div className="flex items-center gap-2 mb-2">
           <span

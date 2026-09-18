@@ -43,7 +43,7 @@ function GoalForm() {
   const canSubmit = !!goalType && !!amountManwon && Number(amountManwon) > 0;
 
   return (
-    <main className="flex-1 flex flex-col gap-6 p-6 max-w-md mx-auto w-full">
+    <main className="flex-1 flex flex-col gap-6 p-6 pt-24 max-w-md mx-auto w-full">
       <header className="pt-2">
         <div className="inline-flex items-center gap-2 bg-[var(--surface-alt)] px-3.5 py-1.5 rounded-full mb-3 text-xs tracking-wide font-bold border border-[var(--border)]">
           <span>🌰</span>

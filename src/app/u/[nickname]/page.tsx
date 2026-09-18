@@ -119,7 +119,7 @@ export default function UserWishlistPage() {
 
   return (
     <div className="flex-1 bg-[#E8EDD6] text-[#4A3324]">
-      <main className="max-w-4xl mx-auto w-full px-4 sm:px-6 pt-16 pb-16 flex flex-col gap-5">
+      <main className="max-w-4xl mx-auto w-full px-4 sm:px-6 pt-24 pb-16 flex flex-col gap-5">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <Link href="/wishlists" className="inline-flex items-center gap-1 text-sm font-black text-[#FFF9EC] bg-[#57351F] border-2 border-[#8C5D35] rounded-full px-4 py-1.5 shadow-[0_3px_0_rgba(74,46,53,0.16)] hover:bg-[#6B4526] active:translate-y-0.5 transition">
             ← 이웃 목록
