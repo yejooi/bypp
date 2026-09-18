@@ -93,7 +93,7 @@ export function AddItemForm() {
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="상품의 링크를 넣으면 상품 정보가 자동으로 채워져요"
+            placeholder="상품 링크 붙여넣기"
             className={`${inputCls} flex-1`}
             style={inputStyle}
           />
@@ -101,11 +101,12 @@ export function AddItemForm() {
             disabled={!url || loading}
             onClick={handleFetch}
             className="px-6 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
-            style={{ backgroundColor: "var(--primary)", boxShadow: "0 3px 0 0 var(--primary-hover)" }}
+            style={{ backgroundColor: "#4F8B33", boxShadow: "0 3px 0 0 rgba(74,46,53,0.16)" }}
           >
             {loading ? "가져오는 중..." : "가져오기"}
           </button>
         </div>
+        <p className="text-xs font-bold text-[#7A5B3E]">상품의 링크를 넣으면 상품 정보가 자동으로 채워져요</p>
       </div>
     );
   }
