@@ -149,9 +149,9 @@ input[type="number"]::-webkit-inner-spin-button {
   color: #2d6c2a;
   font-weight: 900;
   background: #e5f5d4;
-  border: 3px solid #cfe9b8;
+  border: 1.5px solid #cfe9b8;
   outline: 2px dashed #a7d18a; /* 초록 스티치 테두리 */
-  outline-offset: -6px;
+  outline-offset: -5px;
   box-shadow: 0 3px 0 rgba(63, 138, 58, 0.35);
   transition: transform 80ms ease, background-color 120ms ease, box-shadow 80ms ease;
 }
