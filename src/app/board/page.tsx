@@ -22,6 +22,7 @@ import {
 import { useApp, REASON_CODE_LABEL, type Item, type ReasonCode } from "@/lib/store";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ScreenshotImportForm } from "@/components/ScreenshotImportForm";
+import { CartIcon, ConfirmedBagIcon, TrashIcon, DoneStampIcon } from "@/components/icons";
 import {
   computeScores,
   positiveMessage,
@@ -65,21 +66,15 @@ export default function BoardPage() {
   const buyItems = items.filter((it) => it.status === "buy");
   const cartTotal = cartItems.reduce((s, it) => s + it.price, 0) + buyItems.reduce((s, it) => s + it.price, 0);
 
-  // 진짜 살 물건 목록이 바뀌면(추가/제거) 이전 판정 결과는 더 이상 안 맞으니 리셋 (§9-2 정신: 낡은 정보로 화면을 계속 보여주지 않는다)
+  // 순위 배정 후 새로 쇼케이스에 뜬 항목들을 위에서부터 순차적으로 드러낸다 (§8-1).
   useEffect(() => {
-    if (!llmEstimates) return;
-    const evaluatedIds = new Set(llmEstimates.map((e) => e.id));
-    const currentIds = new Set(buyItems.map((it) => it.id));
-    const same =
-      evaluatedIds.size === currentIds.size && [...evaluatedIds].every((id) => currentIds.has(id));
-    if (!same) {
-      setEvalState("idle");
-      setLlmEstimates(null);
-      setRevealedCount(0);
-      setUserPick(null);
+    if (evalState !== "ready") return;
+    const total = buyItems.length;
+    for (let i = 0; i < total; i++) {
+      setTimeout(() => setRevealedCount((c) => Math.max(c, i + 1)), i * 250);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buyItems.map((it) => it.id).join(",")]);
+  }, [evalState]);
 
   const budget = monthlyBudget ?? 0;
 
@@ -135,15 +130,19 @@ export default function BoardPage() {
   const pickedItem = scored?.find((s) => s.id === userPick) ?? null;
   const showGapExplanation = evalState === "ready" && pickedItem && topPick && pickedItem.id !== topPick.id;
 
+  // 순위 배정: 아이템 주머니(cart) 쪽에서 시작한다 -- 판정이 끝나면 그 항목들을
+  // 자동으로 쇼케이스(buy)로 승격시킨다. 이미 쇼케이스에 있는 항목들의 판정 결과는
+  // llmEstimates에 계속 남겨서(merge), 여러 번에 걸쳐 담아도 누적된 전체가 같은 기준으로 다시 랭킹된다.
   async function handleEvaluate() {
-    if (buyItems.length === 0) return;
+    if (cartItems.length === 0) return;
     setEvalState("loading");
+    const toPromote = cartItems;
     try {
       const res = await fetch("/api/evaluate", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          items: buyItems.map((it) => ({
+          items: toPromote.map((it) => ({
             id: it.id,
             name: it.name,
             price: it.price,
@@ -154,15 +153,12 @@ export default function BoardPage() {
         }),
       });
       if (!res.ok) throw new Error("eval_failed");
-      const data = await res.json();
-      setLlmEstimates(data.items);
+      const data: { items: LlmEstimate[] } = await res.json();
+      const newIds = new Set(data.items.map((e) => e.id));
+      setLlmEstimates((prev) => [...(prev ?? []).filter((e) => !newIds.has(e.id)), ...data.items]);
+      toPromote.forEach((it) => moveItem(it.id, "buy"));
       setEvalState("ready");
       setRevealedCount(0);
-      // §8-1: 순위 공개 연출 - 위에서부터 순차적으로 드러남
-      const count = buyItems.length;
-      for (let i = 0; i < count; i++) {
-        setTimeout(() => setRevealedCount((c) => Math.max(c, i + 1)), i * 250);
-      }
     } catch {
       setEvalState("error");
     }
@@ -225,7 +221,8 @@ export default function BoardPage() {
           className="text-sm font-bold px-3 py-2.5 rounded-xl border-2"
           style={{ backgroundColor: "var(--primary-light)", color: "var(--primary-hover)", borderColor: "var(--primary)" }}
         >
-          🖐️ 장바구니와 살 물건 사이를 드래그로 옮기며 소비 우선순위를 정해보세요
+          🖐️ 아이템 주머니에 모아두고 AI에게 순위를 부탁하면 쇼케이스에 자동으로 진열돼요. 직접
+          드래그로 옮겨도 돼요
         </p>
 
         {/* ③ 항목 등록: 링크 파싱 -> 실패시 수동 입력 폴백 (§5). 스크린샷 일괄 등록은 장바구니 스크래핑이
@@ -263,7 +260,31 @@ export default function BoardPage() {
 
         {/* ④ 2단 구조 */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
-          <ColumnDropZone id="cart-zone" icon="🧺" title="장바구니" count={cartItems.length}>
+          <ColumnDropZone
+            id="cart-zone"
+            icon={<CartIcon className="w-9 h-9" />}
+            title="아이템 주머니"
+            count={cartItems.length}
+            action={
+              <button
+                onClick={handleEvaluate}
+                disabled={cartItems.length === 0 || evalState === "loading"}
+                className="px-3 py-1 text-white text-xs font-bold rounded-full shadow-sm transition-all disabled:opacity-40"
+                style={{ backgroundColor: "var(--text)" }}
+              >
+                {evalState === "loading" ? "음... 잠깐 생각해볼게요" : "✨ AI에게 순위 배정 부탁하기"}
+              </button>
+            }
+          >
+            <p className="text-xs text-[var(--text-sub)]">
+              고민 중인 아이템을 여기 모아두고, 위 버튼을 누르면 AI가 예산과 필요도를 따져 쇼케이스에
+              순위대로 진열해줘요.
+            </p>
+            {evalState === "error" && (
+              <p className="text-xs" style={{ color: "var(--accent)" }}>
+                판정에 실패해서 가격순으로 보여드릴게요
+              </p>
+            )}
             {cartItems.length === 0 && <p className="text-sm text-[var(--text-sub)]">비어있음</p>}
             {cartItems.map((it) => (
               <DraggableItemRow key={it.id} item={it} />
@@ -272,26 +293,10 @@ export default function BoardPage() {
 
           <ColumnDropZone
             id="buy-zone"
-            icon="✨"
-            title="진짜 살 물건"
+            icon={<ConfirmedBagIcon className="w-9 h-9" />}
+            title="진짜 살 물건 쇼케이스"
             count={buyItems.length}
-            action={
-              <button
-                onClick={handleEvaluate}
-                disabled={buyItems.length === 0 || evalState === "loading"}
-                className="px-3 py-1 text-white text-xs font-bold rounded-full shadow-sm transition-all disabled:opacity-40"
-                style={{ backgroundColor: "var(--text)" }}
-              >
-                {evalState === "loading" ? "음... 잠깐 생각해볼게요" : "순위 보기"}
-              </button>
-            }
           >
-            {evalState === "error" && (
-              <p className="text-xs" style={{ color: "var(--accent)" }}>
-                판정에 실패해서 가격순으로 보여드릴게요
-              </p>
-            )}
-
             {/* §6-1: 결과를 본 다음 사용자가 직접 조정하는 두 번째 판단 기준. 30~100, 기본값 65 (wayfinder #5). */}
             {evalState === "ready" && (
               <div className="flex items-center gap-2 text-xs text-[var(--text-sub)] mb-1">
@@ -395,8 +400,8 @@ export default function BoardPage() {
           className="fixed bottom-8 left-0 right-0 grid grid-cols-2 gap-3 p-3 sm:px-6"
           style={{ backgroundColor: "var(--surface)", borderTop: "2px solid var(--border)" }}
         >
-          <ActionDropZone id="toss-zone" icon="🗑️" title="빼기 (안 살 것)" desc="마음을 비우고 털어내기" />
-          <ActionDropZone id="flush-zone" icon="✨" title="내리기 (샀음!)" desc="구매 완료, 쾌감 느끼기" />
+          <ActionDropZone id="toss-zone" icon={<TrashIcon className="w-6 h-6" />} title="빼기 (안 살 것)" desc="마음을 비우고 털어내기" />
+          <ActionDropZone id="flush-zone" icon={<DoneStampIcon className="w-6 h-6" />} title="내리기 (샀음!)" desc="구매 완료, 쾌감 느끼기" />
         </div>
       </main>
 
@@ -424,7 +429,7 @@ function ColumnDropZone({
   children,
 }: {
   id: string;
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   count: number;
   action?: React.ReactNode;
@@ -443,7 +448,9 @@ function ColumnDropZone({
     >
       <div className="flex items-center justify-between pb-3 mb-1 border-b" style={{ borderColor: "var(--border)" }}>
         <div className="flex items-center gap-2">
-          <span className="text-xl">{icon}</span>
+          <span className="shrink-0" style={{ color: "var(--primary)" }}>
+            {icon}
+          </span>
           <h2 className="text-lg font-bold">
             {title} <span style={{ color: "var(--accent)" }}>({count})</span>
           </h2>
@@ -462,7 +469,7 @@ function ActionDropZone({
   desc,
 }: {
   id: string;
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   desc: string;
 }) {
@@ -477,8 +484,8 @@ function ActionDropZone({
       }}
     >
       <div
-        className="w-9 h-9 rounded-full flex items-center justify-center text-base shrink-0"
-        style={{ backgroundColor: "var(--surface-alt)" }}
+        className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+        style={{ backgroundColor: "var(--surface-alt)", color: "var(--accent)" }}
       >
         {icon}
       </div>
