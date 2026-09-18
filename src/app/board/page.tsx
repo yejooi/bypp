@@ -513,9 +513,6 @@ export default function BoardPage() {
                     ? "음... 잠깐 생각해볼게요"
                     : "살까 말까 고민되는 것만 끌어다 놓아 보세요. 같이 골라 볼게요!"}
                 </SpeechBubble>
-                <p className="text-xs text-[#7A5B3E] font-bold">
-                  판정 기준
-                </p>
                 <div className="flex items-center gap-2 text-xs text-[#7A5B3E] font-bold">
                   <span>가격순</span>
                   <input
