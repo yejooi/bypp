@@ -472,7 +472,6 @@ export default function BoardPage() {
                   <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
                     {cartItems.length}/{Math.max(10, cartItems.length)} 보관 중
                   </span>
-                  <span className="text-xs font-bold text-[#6F523A]">톡 누르면 옮기기 메뉴 · 길게 누르면 끌어서 이동</span>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs font-bold text-[#6F523A]">주머니 합계</span>
