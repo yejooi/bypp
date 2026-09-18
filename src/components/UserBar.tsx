@@ -13,7 +13,13 @@ export function UserControls() {
   const { user, nickname, avatarUrl, setAvatar, signOut } = useAuth();
   const pathname = usePathname();
   const { goalType } = useApp();
-  const onNeighborScreen = pathname.startsWith("/wishlists") || pathname.startsWith("/u/");
+  const hasGoal = !!goalType && goalType !== "미정";
+  // 이웃 화면과, 목표/예산을 (다시) 정하는 화면에서는 "이웃 구경" 대신 "내 보드로"를 보여준다.
+  const onNeighborScreen =
+    pathname.startsWith("/wishlists") ||
+    pathname.startsWith("/u/") ||
+    pathname.startsWith("/budget") ||
+    (pathname === "/" && hasGoal);
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   if (!user) return null;
