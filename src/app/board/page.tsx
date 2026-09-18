@@ -470,8 +470,9 @@ export default function BoardPage() {
                   {Array.from({ length: judgeSlots - judgeItems.length }).map((_, i) => (
                     <div
                       key={`judge-empty-${i}`}
-                      className="w-full aspect-square rounded-2xl bg-[#FFF9EC] border-2 border-dashed border-[#D6C2A0] flex flex-col items-center justify-center text-center p-1"
+                      className="pocket-slot w-full aspect-square rounded-2xl flex items-center justify-center opacity-60"
                     >
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#C9BFAB]" />
                     </div>
                   ))}
                 </div>
