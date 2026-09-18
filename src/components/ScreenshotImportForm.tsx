@@ -84,6 +84,7 @@ export function ScreenshotImportForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Draft[] | null>(null);
+  const [missing, setMissing] = useState<Set<string>>(new Set());
 
   async function handleFile(file: File) {
     setLoading(true);
@@ -123,6 +124,12 @@ export function ScreenshotImportForm() {
 
   function updateDraft(key: string, patch: Partial<Draft>) {
     setDrafts((prev) => prev?.map((d) => (d.key === key ? { ...d, ...patch } : d)) ?? null);
+    setMissing((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
   }
 
   function removeDraft(key: string) {
@@ -131,8 +138,14 @@ export function ScreenshotImportForm() {
 
   function addAll() {
     if (!drafts) return;
+    // 가격(또는 이름)이 빠진 물건이 있으면 조용히 빼지 않고, 어디가 비었는지 알려주고 멈춘다.
+    const bad = drafts.filter((d) => !d.name.trim() || !(Number(d.price) > 0));
+    if (bad.length > 0) {
+      setMissing(new Set(bad.map((d) => d.key)));
+      return;
+    }
+    setMissing(new Set());
     for (const d of drafts) {
-      if (!d.name || !d.price) continue;
       addItem({
         name: d.name,
         price: Number(d.price),
@@ -220,7 +233,7 @@ export function ScreenshotImportForm() {
             type="number"
             placeholder="가격"
             className={`${inputCls} w-24`}
-            style={inputStyle}
+            style={missing.has(d.key) ? { ...inputStyle, borderColor: "#E09D1B", backgroundColor: "#FFF4D6" } : inputStyle}
           />
           <select
             value={d.reasonCode}
@@ -251,6 +264,11 @@ export function ScreenshotImportForm() {
           </div>
         </div>
       ))}
+      {missing.size > 0 && (
+        <p className="text-sm font-black text-[#8A5A00] bg-[#FFF1D6] border-2 border-[#F0C77A] rounded-xl px-3 py-2">
+          가격을 입력해 주세요. 노란색으로 표시된 {missing.size}개 물건에 가격이 비어 있어요. (필요 없으면 오른쪽의 "제외"를 눌러 주세요)
+        </p>
+      )}
       <div className="flex gap-2 pt-1">
         <button
           onClick={addAll}
