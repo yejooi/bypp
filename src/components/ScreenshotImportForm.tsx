@@ -115,6 +115,9 @@ export function ScreenshotImportForm() {
   if (!drafts) {
     return (
       <div className="flex flex-col gap-2">
+        <p className="text-xs text-[var(--text-sub)]">
+          장바구니 스크린샷을 넣으면 상품들의 정보가 자동으로 채워져요
+        </p>
         <input
           ref={inputRef}
           type="file"
@@ -124,9 +127,23 @@ export function ScreenshotImportForm() {
             const file = e.target.files?.[0];
             if (file) handleFile(file);
           }}
-          className="text-sm"
+          className="hidden"
         />
-        {loading && <p className="text-xs text-[var(--text-sub)]">스크린샷 읽는 중...</p>}
+        <button
+          disabled={loading}
+          onClick={() => inputRef.current?.click()}
+          className="self-start flex items-center gap-2 px-4 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
+          style={{ backgroundColor: "var(--primary)", boxShadow: "0 3px 0 0 var(--primary-hover)" }}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span>{loading ? "읽는 중..." : "사진 추가"}</span>
+        </button>
         {error && (
           <p className="text-xs" style={{ color: "var(--accent)" }}>
             {error}

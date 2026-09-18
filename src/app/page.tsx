@@ -7,22 +7,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/lib/store";
 
-const FIXED_GOALS = [
-  { label: "1억 모으기", desc: "든든한 목돈의 첫 시작!", icon: "💰" },
-  { label: "내집마련", desc: "따뜻하고 아늑한 나만의 보금자리", icon: "🏡" },
-  { label: "여행 자금", desc: "새로운 곳으로 떠나는 두근두근 힐링", icon: "✈️" },
-  { label: "기타", desc: "나만의 특별한 버킷리스트", icon: "🎁" },
+// defaultManwon: 목표에 금액이 이름에 이미 들어있으면(예: 1억) 자동으로 채워준다 (만원 단위).
+const FIXED_GOALS: { label: string; desc: string; icon: string; defaultManwon: number | null }[] = [
+  { label: "1억 모으기", desc: "든든한 목돈의 첫 시작!", icon: "💰", defaultManwon: 10000 },
+  { label: "내집마련", desc: "따뜻하고 아늑한 나만의 보금자리", icon: "🏡", defaultManwon: null },
+  { label: "여행 자금", desc: "새로운 곳으로 떠나는 두근두근 힐링", icon: "✈️", defaultManwon: null },
+  { label: "기타", desc: "나만의 특별한 버킷리스트", icon: "🎁", defaultManwon: null },
 ];
+
+const AMOUNT_STEP_MANWON = 10;
 
 export default function GoalPage() {
   const router = useRouter();
   const { setGoal } = useApp();
   const [selected, setSelected] = useState<string | null>(null);
   const [customGoal, setCustomGoal] = useState("");
-  const [amount, setAmount] = useState("");
+  // 목표 금액은 만원 단위로 다룬다 (사용자 요청) -- 저장 시 * 10000.
+  const [amountManwon, setAmountManwon] = useState("");
 
   const goalType = selected === "기타" ? customGoal : selected;
-  const canSubmit = !!goalType && !!amount && Number(amount) > 0;
+  const canSubmit = !!goalType && !!amountManwon && Number(amountManwon) > 0;
 
   return (
     <main className="flex-1 flex flex-col gap-6 p-6 max-w-md mx-auto w-full">
@@ -50,7 +54,10 @@ export default function GoalPage() {
           return (
             <button
               key={g.label}
-              onClick={() => setSelected(g.label)}
+              onClick={() => {
+                setSelected(g.label);
+                if (g.defaultManwon != null) setAmountManwon(String(g.defaultManwon));
+              }}
               className={`w-full rounded-[22px] p-4 flex items-center justify-between text-left transition-all border-[2.5px] ${
                 isSelected
                   ? "bg-[var(--primary-light)] border-[var(--primary)]"
@@ -91,19 +98,36 @@ export default function GoalPage() {
       )}
 
       {selected && (
-        <input
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          type="number"
-          placeholder="목표 금액 (원)"
-          className="border-2 border-[var(--border)] bg-[var(--surface)] rounded-2xl px-4 py-3 focus:border-[var(--primary)] focus:outline-none"
-        />
+        <div
+          className="flex items-center gap-2 border-2 border-[var(--border)] bg-[var(--surface)] rounded-2xl px-2 py-1.5 focus-within:border-[var(--primary)]"
+        >
+          <button
+            onClick={() => setAmountManwon(String(Math.max(0, Number(amountManwon || 0) - AMOUNT_STEP_MANWON)))}
+            className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-lg font-bold bg-[var(--surface-alt)] text-[var(--text-sub)]"
+          >
+            −
+          </button>
+          <input
+            value={amountManwon}
+            onChange={(e) => setAmountManwon(e.target.value)}
+            type="number"
+            placeholder="목표 금액"
+            className="flex-1 min-w-0 bg-transparent text-center text-lg font-bold focus:outline-none"
+          />
+          <span className="text-sm font-medium text-[var(--text-sub)] shrink-0">만원</span>
+          <button
+            onClick={() => setAmountManwon(String(Number(amountManwon || 0) + AMOUNT_STEP_MANWON))}
+            className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-lg font-bold bg-[var(--surface-alt)] text-[var(--text-sub)]"
+          >
+            +
+          </button>
+        </div>
       )}
 
       <button
         disabled={!canSubmit}
         onClick={() => {
-          setGoal(goalType!, Number(amount));
+          setGoal(goalType!, Number(amountManwon) * 10000);
           router.push("/budget");
         }}
         className="mt-auto w-full py-4 rounded-full text-white text-lg font-bold tracking-wide flex items-center justify-center gap-2 disabled:opacity-30 transition-all active:translate-y-1"

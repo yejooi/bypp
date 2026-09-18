@@ -88,22 +88,27 @@ export function AddItemForm() {
 
   if (stage === "link") {
     return (
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-        <input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="상품 링크를 붙여넣으세요 (예: https://...)"
-          className={`${inputCls} flex-1`}
-          style={inputStyle}
-        />
-        <button
-          disabled={!url || loading}
-          onClick={handleFetch}
-          className="px-6 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
-          style={{ backgroundColor: "var(--primary)", boxShadow: "0 3px 0 0 var(--primary-hover)" }}
-        >
-          {loading ? "가져오는 중..." : "가져오기"}
-        </button>
+      <div className="flex flex-col gap-2">
+        <p className="text-xs text-[var(--text-sub)]">
+          상품의 링크를 넣으면 상품 정보가 자동으로 채워져요
+        </p>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="상품 링크를 붙여넣으세요 (예: https://...)"
+            className={`${inputCls} flex-1`}
+            style={inputStyle}
+          />
+          <button
+            disabled={!url || loading}
+            onClick={handleFetch}
+            className="px-6 py-2 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-30 active:translate-y-0.5"
+            style={{ backgroundColor: "var(--primary)", boxShadow: "0 3px 0 0 var(--primary-hover)" }}
+          >
+            {loading ? "가져오는 중..." : "가져오기"}
+          </button>
+        </div>
       </div>
     );
   }

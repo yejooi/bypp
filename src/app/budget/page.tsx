@@ -11,7 +11,7 @@ import { runMonteCarlo, DEFAULT_ASSUMPTIONS, type MonteCarloAssumptions } from "
 export default function BudgetPage() {
   const router = useRouter();
   const { goalType, goalAmount, setBudget } = useApp();
-  const [mode, setMode] = useState<"direct" | "montecarlo">("direct");
+  const [mode, setMode] = useState<"direct" | "montecarlo">("montecarlo");
   const [amount, setAmount] = useState("");
 
   const [income, setIncome] = useState("");
@@ -65,15 +65,6 @@ export default function BudgetPage() {
 
       <div className="flex gap-2">
         <button
-          onClick={() => setMode("direct")}
-          className={`text-sm px-4 py-1.5 rounded-full font-bold transition-all ${
-            mode === "direct" ? "text-white" : "bg-[var(--surface-alt)] text-[var(--text-sub)]"
-          }`}
-          style={mode === "direct" ? { backgroundColor: "var(--text)" } : undefined}
-        >
-          내가 안다
-        </button>
-        <button
           onClick={() => setMode("montecarlo")}
           className={`text-sm px-4 py-1.5 rounded-full font-bold transition-all ${
             mode === "montecarlo" ? "text-white" : "bg-[var(--surface-alt)] text-[var(--text-sub)]"
@@ -81,6 +72,15 @@ export default function BudgetPage() {
           style={mode === "montecarlo" ? { backgroundColor: "var(--text)" } : undefined}
         >
           모르겠다
+        </button>
+        <button
+          onClick={() => setMode("direct")}
+          className={`text-sm px-4 py-1.5 rounded-full font-bold transition-all ${
+            mode === "direct" ? "text-white" : "bg-[var(--surface-alt)] text-[var(--text-sub)]"
+          }`}
+          style={mode === "direct" ? { backgroundColor: "var(--text)" } : undefined}
+        >
+          내가 안다
         </button>
       </div>
 

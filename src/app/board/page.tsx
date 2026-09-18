@@ -193,7 +193,8 @@ export default function BoardPage() {
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
-      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-5 flex flex-col gap-5 pb-40">
+      {/* pt-16: 우측 상단 고정 테마 토글(ThemeToggle)에 헤더의 총액 뱃지가 가리지 않도록 여유 공간 확보 */}
+      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-16 pb-40 flex flex-col gap-5">
         {/* 헤더: 목표/잔여예산/총액 */}
         <header
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 border-b"
