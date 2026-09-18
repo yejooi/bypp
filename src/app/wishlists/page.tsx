@@ -5,10 +5,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { useApp } from "@/lib/store";
 
 type ProfileRow = { nickname: string; created_at: string };
 
 export default function WishlistsPage() {
+  const { goalType } = useApp();
   const [profiles, setProfiles] = useState<ProfileRow[] | null>(null);
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function WishlistsPage() {
         ))}
       </div>
 
-      <Link href="/" className="text-sm underline text-[var(--text-sub)] mt-2">
+      <Link href={goalType ? "/board" : "/"} className="text-sm underline text-[var(--text-sub)] mt-2">
         ← 내 목록으로 돌아가기
       </Link>
     </main>
