@@ -690,7 +690,7 @@ export default function BoardPage() {
               borderClass="border-[#B89A72] hover:border-[#6B4B32]"
               overClass="border-[#6B4B32] bg-[#FFF5E6] ring-4 ring-[#B89A72]"
               visual={<span className="text-6xl leading-none drop-shadow-sm">📦</span>}
-              titleChip="반품함 (안 살래요)"
+              titleChip="반품함"
               titleStyle={{
                 color: "#5B3E29",
                 backgroundColor: "#E2C48F",
@@ -710,7 +710,7 @@ export default function BoardPage() {
               borderClass="border-[#8DBF6A] hover:border-[#3F8A3A]"
               overClass="border-[#3F8A3A] bg-[#F0FAEA] ring-4 ring-[#8DBF6A]"
               visual={<span className="text-6xl leading-none drop-shadow-sm">🧾</span>}
-              titleChip="계산대 (샀어요!)"
+              titleChip="계산대"
               titleStyle={{
                 color: "#FFF3DE",
                 backgroundColor: "#4A4A4A",
