@@ -22,7 +22,6 @@ import {
 import { useApp, type Item } from "@/lib/store";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ScreenshotImportForm } from "@/components/ScreenshotImportForm";
-import { CartIcon } from "@/components/icons";
 import {
   computeScores,
   positiveMessage,
@@ -398,15 +397,10 @@ export default function BoardPage() {
               <div className="absolute inset-2.5 rounded-[30px] border-2 border-dashed border-[#CCBFA3] pointer-events-none" />
               <div className="relative z-10 flex items-center justify-between pb-2 mb-3 border-b-2 border-[#D9CDAF]">
                 <div className="flex items-center gap-3">
-                  <div
-                    className={`w-12 h-12 rounded-2xl bg-[#E68759] border-2 border-[#9F512B] flex items-center justify-center text-white ${SHADOW_AC_SM} p-2 shrink-0`}
-                  >
-                    <CartIcon className="w-7 h-7" />
-                  </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <h2
-                        className="text-xl sm:text-2xl font-bold text-[#5B3E29] tracking-tight px-4 py-1 rounded-xl"
+                        className="text-lg sm:text-xl font-bold text-[#5B3E29] tracking-tight px-4 py-1 rounded-xl"
                         style={{
                           fontFamily: "var(--font-gaegu)",
                           backgroundColor: "#E3CD98",
