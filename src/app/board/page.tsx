@@ -974,7 +974,7 @@ function ActionZone({
     <div
       ref={setNodeRef}
       id={id}
-      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-4 transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${className} ${
+      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-6 transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${className} ${
         isOver ? overClass : borderClass
       }`}
     >
