@@ -314,7 +314,7 @@ export default function BoardPage() {
                 </div>
                 <p className="mt-1" style={{ fontFamily: "var(--font-gaegu)" }}>
                   <span className="text-base text-[#467A26] font-bold">
-                    주머니 아이템을 꺼내 가판대 쇼케이스에 올려보세요!
+                    주머니 물건을 꺼내 진열장에 올려보세요!
                   </span>
                 </p>
               </div>
@@ -367,7 +367,7 @@ export default function BoardPage() {
           </section>
 
           {/* 인벤토리 주머니 vs 가판대 */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             {/* LEFT: 아이템 주머니 */}
             <ZoneShell
               id="cart-zone"
@@ -384,7 +384,7 @@ export default function BoardPage() {
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <h2 className="text-xl sm:text-2xl font-bold text-[#5B3E29] tracking-tight" style={{ fontFamily: "var(--font-gaegu)" }}>
-                        아이템 주머니
+                        장바구니 주머니
                       </h2>
                       <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
                         {cartItems.length}/20 보관 중
@@ -404,7 +404,7 @@ export default function BoardPage() {
                 <div className="flex items-center gap-1.5 px-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#5D8A37]" />
                   <h3 className="text-lg font-bold text-[#5B3E29]" style={HAND}>
-                    내 주머니 (일반 보관)
+                    담아둔 물건
                   </h3>
                   <span className="text-[10px] font-bold text-[#2D6C2A] bg-[#DCF2C7] px-2 rounded-full border border-[#AED48C]">
                     {pouchItems.length}/{pouchSlots} 보관
@@ -434,7 +434,7 @@ export default function BoardPage() {
                       <StarIcon className="w-3.5 h-3.5" />
                     </div>
                     <h3 className="text-lg font-bold text-[#693E00]" style={HAND}>
-                      AI 지름 우선순위 판정대
+                      AI 심사대
                     </h3>
                     <span className="text-[10px] font-bold text-[#A16500] bg-[#FFF0D4] px-2 rounded-full border border-[#D9BA8B]">
                       연구소 바구니
@@ -551,7 +551,7 @@ export default function BoardPage() {
             {/* RIGHT: 쇼케이스 */}
             <ZoneShell
               id="buy-zone"
-              className={`flex flex-col lg:sticky lg:top-4 rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+              className={`flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2 rounded-[28px] border-2 border-dashed border-[#D6C2A5] pointer-events-none" />
               <div
@@ -563,19 +563,18 @@ export default function BoardPage() {
                       ★
                     </span>
                     <span className="tracking-tight text-xl sm:text-2xl text-[#FFF3DE]" style={{ fontFamily: "var(--font-gaegu)" }}>
-                      진짜 살 물건 진열장
+                      이번 달 진열장
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="relative z-10 flex items-center justify-between pb-2 mb-2 border-b-2 border-[#E8DCC2]">
-                <span className="ml-auto text-xs font-bold text-[#8A5A35]">{buyItems.length}개 진열 중</span>
+              <div className="relative z-10 flex items-center justify-between gap-3 pb-2 mb-2 border-b-2 border-[#E8DCC2]">
+                <p className="text-xs text-[#7A5B3E] font-bold">
+                  1층에 원하는 순서대로 놓으세요. 예산을 넘는 물건부터 자동으로 2층으로 내려가요.
+                </p>
+                <span className="shrink-0 text-xs font-bold text-[#8A5A35]">{buyItems.length}개 진열 중</span>
               </div>
-
-              <p className="relative z-10 text-xs text-[#7A5B3E] font-bold mb-2">
-                1층에 원하는 순서대로 놓으세요. 예산을 넘는 물건부터 자동으로 2층으로 내려가요.
-              </p>
 
               <div
                 className={`relative z-10 rounded-[28px] bg-[#EFE4CF] border-[3px] border-[#C9B390] p-4 ${SHADOW_INNER} flex-1 flex flex-col justify-between gap-3 select-none`}
@@ -687,7 +686,7 @@ export default function BoardPage() {
               }
               titleChip={
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#6B4A2F] text-white">
-                  빼기 (안 살 것)
+                  구덩이 (안 살래요)
                 </span>
               }
               sub=""
@@ -721,7 +720,7 @@ export default function BoardPage() {
               titleChip={
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-[#E84364] text-white">
                   <StarIcon className="w-3.5 h-3.5 text-[#FFE073]" />
-                  내리기 (샀음!)
+                  선물상자 (샀어요!)
                 </span>
               }
               sub=""
