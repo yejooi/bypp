@@ -56,7 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: existing } = await supabase.from("profiles").select("id").eq("nickname", trimmed).maybeSingle();
     if (existing) return { error: "이미 사용 중인 닉네임이에요" };
 
-    const email = `${crypto.randomUUID()}@bypp.local`;
+    // Supabase가 가짜 도메인(예: .local)은 형식 검증에서 바로 거부해서, DNS가 실제로 존재하는
+    // 도메인을 쓴다. 메일이 실제로 오갈 일은 없다 (project Auth 설정에서 "Confirm email"을 꺼둔 상태여야 함).
+    const email = `bypp-${crypto.randomUUID()}@gmail.com`;
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error || !data.user) return { error: error?.message ?? "가입에 실패했어요" };
 
