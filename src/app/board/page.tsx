@@ -396,7 +396,7 @@ export default function BoardPage() {
             {/* LEFT: 아이템 주머니 */}
             <ZoneShell
               id="cart-zone"
-              className={`flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+              className={`order-1 lg:order-none lg:col-start-1 lg:row-start-1 flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2.5 rounded-[30px] border-2 border-dashed border-[#CCBFA3] pointer-events-none" />
               <div className="relative z-10 flex items-center justify-between pb-2 mb-3 border-b-2 border-[#D9CDAF]">
@@ -511,9 +511,11 @@ export default function BoardPage() {
                 </button>
               </JudgeShell>
 
+            </ZoneShell>
+
               {judgeResult && (
                 <div
-                  className={`relative z-10 mt-3 rounded-[26px] border-[3px] border-[#C8B693] bg-[#FFFDF7] p-3.5 ${SHADOW_AC_SM} flex flex-col gap-2`}
+                  className={`order-2 lg:order-none lg:col-start-1 lg:row-start-2 rounded-[26px] border-[3px] border-[#C8B693] bg-[#FFFDF7] p-3.5 ${SHADOW_AC_SM} flex flex-col gap-2`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="text-xl font-bold text-[#5B3E29]" style={HAND}>
@@ -569,12 +571,10 @@ export default function BoardPage() {
                 </div>
               )}
 
-            </ZoneShell>
-
             {/* RIGHT: 쇼케이스 */}
             <ZoneShell
               id="buy-zone"
-              className={`flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+              className={`order-3 lg:order-none lg:col-start-2 lg:row-start-1 flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2 rounded-[28px] border-2 border-dashed border-[#D6C2A5] pointer-events-none" />
               <div
