@@ -115,16 +115,6 @@ export function ScreenshotImportForm() {
   if (!drafts) {
     return (
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2.5 rounded-2xl border-2 border-dashed border-[#D6C2A5] bg-[#FFF9EC] px-3.5 py-2.5 text-[#7A5B3E]">
-          <svg className="w-5 h-5 shrink-0 text-[#5D8A37]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <p className="text-sm font-bold">장바구니 스크린샷을 넣으면 상품들의 정보가 자동으로 채워져요</p>
-        </div>
         <input
           ref={inputRef}
           type="file"
@@ -151,6 +141,7 @@ export function ScreenshotImportForm() {
           </svg>
           <span>{loading ? "읽는 중..." : "사진 추가"}</span>
         </button>
+        <p className="text-xs font-bold text-[#7A5B3E]">장바구니 스크린샷을 넣으면 상품들의 정보가 자동으로 채워져요</p>
         {error && (
           <p className="text-xs" style={{ color: "var(--accent)" }}>
             {error}
