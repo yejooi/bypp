@@ -21,8 +21,6 @@ type ViewItem = {
   sort_order?: number | null;
 };
 
-const won = (n: number) => `${n.toLocaleString()}원`;
-
 function ItemCard({ it, dim }: { it: ViewItem; dim?: boolean }) {
   const reason = it.reason_code === "other" && it.custom_reason ? it.custom_reason : REASON_CODE_LABEL[it.reason_code];
   return (
@@ -37,12 +35,9 @@ function ItemCard({ it, dim }: { it: ViewItem; dim?: boolean }) {
         )}
       </div>
       <p className="text-xs font-black text-[#573A23] leading-snug line-clamp-2 min-h-[2.2em]">{it.name}</p>
-      <div className="flex items-center justify-between gap-1 flex-wrap">
-        <span className="text-sm font-black text-[#82542B]">{won(it.price)}</span>
-        <span className="text-[10px] font-bold text-[#7A5B3E] bg-[#EFE4CF] px-1.5 py-0.5 rounded-full truncate max-w-full">
-          #{reason}
-        </span>
-      </div>
+      <span className="self-start text-[11px] font-bold text-[#7A5B3E] bg-[#EFE4CF] px-2 py-0.5 rounded-full truncate max-w-full">
+        #{reason}
+      </span>
     </div>
   );
 }
