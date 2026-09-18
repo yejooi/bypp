@@ -444,10 +444,10 @@ export default function BoardPage() {
                     {judgeItems.length}개 후보 대기 중
                   </span>
                 </div>
-                <p className="text-base text-[#7A5B3E] font-bold leading-tight" style={HAND}>
+                <p className="text-[11px] text-[#7A5B3E] font-medium leading-tight">
                   진짜 살 물건 후보만 끌어다 놓고 AI의 판정을 받아보세요!
                 </p>
-                <p className="text-base text-[#7A5B3E] font-bold" style={HAND}>
+                <p className="text-[11px] text-[#7A5B3E] font-bold">
                   판정 기준 (버튼 누르기 전에 미리 정해두세요)
                 </p>
                 <div className="flex items-center gap-2 text-xs text-[#7A5B3E] font-bold">
@@ -484,10 +484,7 @@ export default function BoardPage() {
                   className={`w-full py-2.5 px-4 bg-[#4EA434] hover:bg-[#3F8829] active:translate-y-0.5 text-white font-black text-xs sm:text-sm rounded-2xl ${SHADOW_AC_SM} transition-all flex items-center justify-center gap-2 disabled:opacity-40`}
                 >
                   <StarIcon className="w-4 h-4 text-[#FFE073]" />
-                  <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 쇼케이스 후보 판정 부탁하기"}</span>
-                  <span className="text-[10px] bg-[#355E1D] text-[#D8F5AF] px-2 py-0.5 rounded-full font-bold">
-                    판정
-                  </span>
+                  <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 판정 부탁하기"}</span>
                 </button>
               </JudgeShell>
 
@@ -565,22 +562,14 @@ export default function BoardPage() {
                       진짜 살 물건 진열장
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#FFE8C2] bg-[#57351F] px-2.5 py-0.5 rounded-full border border-[#8C5D35]">
-                    끌어서 순서 정하기
-                  </span>
                 </div>
               </div>
 
               <div className="relative z-10 flex items-center justify-between pb-2 mb-2 border-b-2 border-[#E8DCC2]">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-2xl font-bold text-[#57351F] tracking-tight" style={HAND}>
-                    진짜 살 물건 쇼케이스
-                  </h3>
-                </div>
-                <span className="text-xs font-bold text-[#8A5A35]">{buyItems.length}개 진열 중</span>
+                <span className="ml-auto text-xs font-bold text-[#8A5A35]">{buyItems.length}개 진열 중</span>
               </div>
 
-              <p className="relative z-10 text-base text-[#7A5B3E] font-bold mb-2" style={HAND}>
+              <p className="relative z-10 text-xs text-[#7A5B3E] font-bold mb-2">
                 1층에 원하는 순서대로 놓으세요. 예산을 넘는 물건부터 자동으로 2층으로 내려가요.
               </p>
 
