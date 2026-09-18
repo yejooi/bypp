@@ -26,11 +26,12 @@ const won = (n: number) => `${n.toLocaleString()}원`;
 function ItemCard({ it, dim }: { it: ViewItem; dim?: boolean }) {
   const reason = it.reason_code === "other" && it.custom_reason ? it.custom_reason : REASON_CODE_LABEL[it.reason_code];
   return (
-    <div className={`rounded-2xl bg-[#FFFDF7] border-2 border-[#D6C2A5] p-2.5 flex flex-col gap-1.5 ${SHADOW_AC_SM} ${dim ? "opacity-70" : ""}`}>
-      <div className="pocket-slot aspect-square rounded-xl overflow-hidden flex items-center justify-center">
+    <div className={`rounded-2xl bg-[#FFFDF7] border-2 border-[#D6C2A5] p-2.5 flex flex-col gap-1.5 self-start w-full ${SHADOW_AC_SM} ${dim ? "opacity-70" : ""}`}>
+      <div className="pocket-slot relative w-full aspect-square rounded-xl overflow-hidden flex items-center justify-center">
         {it.image_url ? (
+          // 이미지가 자기 크기로 칸을 키우지 못하게 절대 위치로 채운다 (Safari에서 카드가 세로로 늘어나던 문제).
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={it.image_url} alt="" className="w-full h-full object-cover" />
+          <img src={it.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
         ) : (
           <span className="text-3xl">🛍️</span>
         )}
