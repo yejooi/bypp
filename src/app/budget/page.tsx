@@ -8,6 +8,10 @@ import { useRouter } from "next/navigation";
 import { useApp } from "@/lib/store";
 import { runMonteCarlo, DEFAULT_ASSUMPTIONS, type MonteCarloAssumptions } from "@/lib/montecarlo";
 
+// 화면 입력과 표시는 모두 만원 단위. 내부 계산/저장은 원 단위.
+const MAN = 10000;
+const man = (won: number) => `${Math.round(won / MAN).toLocaleString()}만원`;
+
 export default function BudgetPage() {
   const router = useRouter();
   const { goalType, goalAmount, setBudget } = useApp();
@@ -24,14 +28,15 @@ export default function BudgetPage() {
     canRunMc && mode === "montecarlo"
       ? runMonteCarlo({
           goalAmount: goalAmount!,
-          monthlyIncome: Number(income),
-          monthlyExpense: Number(expense),
+          monthlyIncome: Number(income) * MAN,
+          monthlyExpense: Number(expense) * MAN,
           months: Number(months),
           assumptions,
         })
       : null;
 
-  const finalAmount = mode === "direct" ? Number(amount) : mc ? Math.round(mc.recommendedBudget) : 0;
+  const finalAmount =
+    mode === "direct" ? Number(amount) * MAN : mc ? Math.round(mc.recommendedBudget / MAN) * MAN : 0;
   const canSubmit = finalAmount > 0;
 
   const inputClass =
@@ -57,7 +62,7 @@ export default function BudgetPage() {
             목표: <strong className="text-[var(--text)] font-bold">{goalType ?? "(미설정)"}</strong>{" "}
             <span>·</span>{" "}
             <span className="text-[var(--primary-hover)] font-bold">
-              {goalAmount?.toLocaleString()}원
+              {goalAmount != null ? man(goalAmount) : ""}
             </span>
           </p>
         </div>
@@ -93,7 +98,7 @@ export default function BudgetPage() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 type="number"
-                placeholder="월 예산 (원)"
+                placeholder="월 예산 (만원)"
                 className="w-full bg-transparent border-0 p-0 text-lg font-bold focus:ring-0 focus:outline-none"
               />
             </div>
@@ -111,14 +116,14 @@ export default function BudgetPage() {
             value={income}
             onChange={(e) => setIncome(e.target.value)}
             type="number"
-            placeholder="월 수입 (원)"
+            placeholder="월 수입 (만원)"
             className={inputClass}
           />
           <input
             value={expense}
             onChange={(e) => setExpense(e.target.value)}
             type="number"
-            placeholder="월 고정 소비 (원, 쇼핑 제외)"
+            placeholder="월 고정 소비 (만원, 쇼핑 제외)"
             className={inputClass}
           />
           <label className="text-xs text-[var(--text-sub)] flex flex-col gap-1">
@@ -177,16 +182,16 @@ export default function BudgetPage() {
           {mc && (
             <div className="border-2 border-[var(--border)] bg-[var(--surface)] rounded-2xl p-3.5 text-sm">
               <p>
-                가용 자금(수입-소비): <b>{mc.available.toLocaleString()}원</b>
+                가용 자금(수입-소비): <b>{man(mc.available)}</b>
               </p>
               <p>
-                권장 저축액: <b>{Math.round(mc.recommendedSavings).toLocaleString()}원</b> (1,000회
+                권장 저축액: <b>{man(mc.recommendedSavings)}</b> (1,000회
                 시뮬레이션 중 70%의 경우에서 충분한 값)
               </p>
               <p className="mt-1">
                 → 추천 월 예산:{" "}
                 <b className="text-base text-[var(--primary-hover)]">
-                  {Math.round(mc.recommendedBudget).toLocaleString()}원
+                  {man(mc.recommendedBudget)}
                 </b>
               </p>
             </div>
@@ -197,7 +202,7 @@ export default function BudgetPage() {
       <button
         disabled={!canSubmit}
         onClick={() => {
-          setBudget(finalAmount, mode === "direct" || !mc ? null : Math.round(mc.recommendedSavings));
+          setBudget(finalAmount, mode === "direct" || !mc ? null : Math.round(mc.recommendedSavings / MAN) * MAN);
           router.push("/board");
         }}
         className="mt-auto w-full py-4 rounded-full text-white text-lg tracking-wide flex items-center justify-center gap-2 disabled:opacity-30 transition-all active:translate-y-1"

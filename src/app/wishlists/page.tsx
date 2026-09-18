@@ -7,12 +7,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useApp } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 import { Avatar, WoodSign, SHADOW_AC, HAND } from "@/components/neighbor-ui";
 
 type Neighbor = { id: string; nickname: string; goal: string | null; avatar: string | null };
 
 export default function WishlistsPage() {
   const { goalType } = useApp();
+  const { user } = useAuth();
   const [neighbors, setNeighbors] = useState<Neighbor[] | null>(null);
 
   useEffect(() => {
@@ -36,9 +38,13 @@ export default function WishlistsPage() {
           goalByUser.set(s.user_id, s.goal_type);
         }
       }
-      setNeighbors((profiles ?? []).map((p) => ({ id: p.id, nickname: p.nickname, goal: goalByUser.get(p.id) ?? null, avatar: p.avatar_url ?? null })));
+      setNeighbors(
+        (profiles ?? [])
+          .filter((p) => p.id !== user?.id) // 나 자신은 이웃 목록에서 뺀다
+          .map((p) => ({ id: p.id, nickname: p.nickname, goal: goalByUser.get(p.id) ?? null, avatar: p.avatar_url ?? null }))
+      );
     })();
-  }, []);
+  }, [user?.id]);
 
   return (
     <div className="flex-1 bg-[#E8EDD6] text-[#4A3324]">
