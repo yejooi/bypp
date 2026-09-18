@@ -448,7 +448,7 @@ export default function BoardPage() {
                   진짜 살 물건 후보만 끌어다 놓고 AI의 판정을 받아보세요!
                 </p>
                 <p className="text-[11px] text-[#7A5B3E] font-bold">
-                  판정 기준 (버튼 누르기 전에 미리 정해두세요)
+                  판정 기준
                 </p>
                 <div className="flex items-center gap-2 text-xs text-[#7A5B3E] font-bold">
                   <span>가격순</span>
@@ -494,7 +494,7 @@ export default function BoardPage() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="text-xl font-bold text-[#5B3E29]" style={HAND}>
-                      AI 판정 결과 (순위)
+                      AI 판정 결과
                     </h3>
                     <button
                       onClick={() => setJudgeResult(null)}
@@ -503,10 +503,6 @@ export default function BoardPage() {
                       닫기
                     </button>
                   </div>
-                  <p className="text-xs font-bold text-[#7A5B3E]">
-                    기존 1층 물건 {won(judgeResult.baseSum)}부터 더해서, 예산({won(budget)})에 들어오는 순위까지 표시했어요.
-                    쇼케이스 안의 순서는 직접 바꿀 수 있어요.
-                  </p>
                   {judgeResult.entries.map((e) => (
                     <div
                       key={e.id}
@@ -514,10 +510,18 @@ export default function BoardPage() {
                         e.within ? "border-[#AED48C] bg-[#F4FBEA]" : "border-[#E3C59E] bg-[#FFF9EC]"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-black">
-                          {e.rank}위 · {e.name}
-                        </p>
+                      <div className="flex items-start justify-between gap-2.5">
+                        <span
+                          className={`shrink-0 min-w-11 text-center text-base font-black px-2 py-1 rounded-xl border-2 ${SHADOW_AC_SM} ${
+                            e.within
+                              ? "bg-[#4F8B33] text-white border-[#3B6B26]"
+                              : "bg-[#E09D1B] text-white border-[#B87A0E]"
+                          }`}
+                          style={HAND}
+                        >
+                          {e.rank}위
+                        </span>
+                        <p className="flex-1 text-sm font-black">{e.name}</p>
                         <span
                           className={`shrink-0 text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
                             e.within
@@ -532,7 +536,7 @@ export default function BoardPage() {
                         {won(e.price)} · 누적 {won(e.cumulative)}
                       </p>
                       {e.reasoning && <p className="text-xs italic mt-1 text-[#7A5B3E]">&quot;{e.reasoning}&quot;</p>}
-                      {e.message && (
+                      {e.message && !e.message.startsWith("예산 안에서 여유") && (
                         <p className="text-sm font-black mt-2 px-3 py-2 rounded-xl border-2 border-[#E09D1B] bg-[#FFF4D6] text-[#8A5A00]">
                           💡 {e.message}
                         </p>
@@ -553,12 +557,12 @@ export default function BoardPage() {
               <div
                 className={`relative z-10 rounded-2xl overflow-hidden border-2 border-[#5E371C] ${SHADOW_AC_SM} mb-3 wood-grain`}
               >
-                <div className="py-2 px-4 flex items-center justify-between text-white text-xs font-black">
+                <div className="py-4 px-5 flex items-center justify-between text-white text-xs font-black">
                   <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-[#FFDE59] border border-[#783F1E] inline-flex items-center justify-center text-[8px] text-[#734500]">
+                    <span className="w-6 h-6 rounded-full bg-[#FFDE59] border-2 border-[#783F1E] inline-flex items-center justify-center text-xs text-[#734500]">
                       ★
                     </span>
-                    <span className="tracking-tight text-base text-[#FFF3DE]" style={{ fontFamily: "var(--font-gaegu)" }}>
+                    <span className="tracking-tight text-xl sm:text-2xl text-[#FFF3DE]" style={{ fontFamily: "var(--font-gaegu)" }}>
                       진짜 살 물건 진열장
                     </span>
                   </div>
