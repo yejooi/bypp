@@ -3,85 +3,73 @@
 
 export type MascotMood = "idle" | "thinking" | "happy";
 
-// 치즈냥이: 앉아 있는 주황 태비. 표정(mood)만 바뀌고, 행복할 땐 꼬리가 더 높이 올라간다.
+// 치즈냥이: 앉아 있는 주황 태비. 가는 선, 갸름한 얼굴, 뾰족한 귀. 표정(mood)만 바뀌고 행복할 땐 꼬리가 올라간다.
 export function Mascot({ size = 32, mood = "idle", className = "" }: { size?: number; mood?: MascotMood; className?: string }) {
-  const eyeY = mood === "thinking" ? 15.6 : 16.6;
-  const O = "#8A4B1E"; // 외곽선
+  const eyeY = mood === "thinking" ? 15.2 : 16;
+  const O = "#9A5A26"; // 얇은 외곽선
+  const tail = mood === "happy" ? "M31.5 43 C44 44 45 30 39 23" : "M31.5 43.5 C43 45 45 37 41 31";
   return (
     <svg
-      className={`shrink-0 drop-shadow-[0_2px_0_rgba(74,46,53,0.16)] ${className}`}
+      className={`shrink-0 drop-shadow-[0_1px_0_rgba(74,46,53,0.14)] ${className}`}
       style={{ width: size, height: size }}
       viewBox="0 0 48 48"
       aria-hidden
     >
       {/* 꼬리 (몸 뒤) */}
-      <path
-        d={mood === "happy" ? "M35 42 C46 42 47 30 41 25" : "M35 43 C46 44 47 36 43 32"}
-        fill="none"
-        stroke={O}
-        strokeWidth="7"
-        strokeLinecap="round"
-      />
-      <path
-        d={mood === "happy" ? "M35 42 C46 42 47 30 41 25" : "M35 43 C46 44 47 36 43 32"}
-        fill="none"
-        stroke="#F2A24A"
-        strokeWidth="4"
-        strokeLinecap="round"
-      />
+      <path d={tail} fill="none" stroke={O} strokeWidth="4.4" strokeLinecap="round" />
+      <path d={tail} fill="none" stroke="#F4A94F" strokeWidth="3" strokeLinecap="round" />
       {/* 몸 */}
-      <path d="M13 44 C10 34 14 27 24 27 C34 27 38 34 35 44 Z" fill="#F8B45A" stroke={O} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M16.5 44.5 C14.5 35 18 28 24 28 C30 28 33.5 35 31.5 44.5 Z" fill="#F7B15A" stroke={O} strokeWidth="1" strokeLinejoin="round" />
       {/* 몸 줄무늬 */}
-      <path d="M14.6 33 H18" stroke="#D97F2B" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M13.8 37.5 H17.4" stroke="#D97F2B" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M33.4 33 H30" stroke="#D97F2B" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M34.2 37.5 H30.6" stroke="#D97F2B" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M17 33 H19.6 M16.4 37 H19.2 M31 33 H28.4 M31.6 37 H28.8" stroke="#E08A30" strokeWidth="1.1" strokeLinecap="round" />
       {/* 배 */}
-      <ellipse cx="24" cy="37" rx="5.5" ry="6.5" fill="#FFF3DC" />
+      <path d="M21 44.5 C20 38 21.5 33 24 33 C26.5 33 28 38 27 44.5 Z" fill="#FFF4DE" />
       {/* 앞발 */}
-      <ellipse cx="19.5" cy="44" rx="4" ry="2.6" fill="#FFF3DC" stroke={O} strokeWidth="1.4" />
-      <ellipse cx="28.5" cy="44" rx="4" ry="2.6" fill="#FFF3DC" stroke={O} strokeWidth="1.4" />
+      <path d="M18.6 44.5 C18.3 42.4 21 42.2 21.6 44.5 Z" fill="#FFF4DE" stroke={O} strokeWidth="0.9" strokeLinejoin="round" />
+      <path d="M26.4 44.5 C27 42.2 29.7 42.4 29.4 44.5 Z" fill="#FFF4DE" stroke={O} strokeWidth="0.9" strokeLinejoin="round" />
       {/* 귀 */}
-      <path d="M11.5 14 L12 3.5 L20 8.5 Z" fill="#F2A24A" stroke={O} strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M36.5 14 L36 3.5 L28 8.5 Z" fill="#F2A24A" stroke={O} strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M13.4 11 L13.6 6.6 L17 8.8 Z" fill="#FFB7B0" />
-      <path d="M34.6 11 L34.4 6.6 L31 8.8 Z" fill="#FFB7B0" />
-      {/* 머리 */}
-      <ellipse cx="24" cy="18" rx="13" ry="11" fill="#F8B45A" stroke={O} strokeWidth="1.6" />
+      <path d="M13.6 14.5 L13 1.8 L22 8.6 Z" fill="#F4A94F" stroke={O} strokeWidth="1" strokeLinejoin="round" />
+      <path d="M34.4 14.5 L35 1.8 L26 8.6 Z" fill="#F4A94F" stroke={O} strokeWidth="1" strokeLinejoin="round" />
+      <path d="M14.8 11.6 L14.6 5.6 L19.4 9 Z" fill="#FFB9B2" />
+      <path d="M33.2 11.6 L33.4 5.6 L28.6 9 Z" fill="#FFB9B2" />
+      {/* 머리: 살짝 갸름하게 */}
+      <path
+        d="M12.4 17 C12.4 11 17.4 8.4 24 8.4 C30.6 8.4 35.6 11 35.6 17 C35.6 22.6 31 26.6 24 26.6 C17 26.6 12.4 22.6 12.4 17 Z"
+        fill="#F7B15A"
+        stroke={O}
+        strokeWidth="1"
+      />
       {/* 이마 줄무늬 */}
-      <path d="M24 8 V11.4" stroke="#D97F2B" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M19.8 9 L20.5 11.8" stroke="#D97F2B" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M28.2 9 L27.5 11.8" stroke="#D97F2B" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M24 8.8 V12 M20.4 9.6 L21 12 M27.6 9.6 L27 12" stroke="#E08A30" strokeWidth="1.2" strokeLinecap="round" />
+      {/* 볼 줄무늬 */}
+      <path d="M12.8 19 H15.4 M35.2 19 H32.6" stroke="#E08A30" strokeWidth="1.1" strokeLinecap="round" />
       {/* 주둥이 */}
-      <ellipse cx="24" cy="22.4" rx="5.4" ry="4" fill="#FFF3DC" />
+      <path d="M20 21.4 C20 19.8 22 19.4 24 19.4 C26 19.4 28 19.8 28 21.4 C28 23.6 26.4 24.6 24 24.6 C21.6 24.6 20 23.6 20 21.4 Z" fill="#FFF4DE" />
       {/* 눈 */}
       {mood === "happy" ? (
         <>
-          <path d="M14.6 16.4 q2.6-3 5.2 0" fill="none" stroke="#3B2314" strokeWidth="1.8" strokeLinecap="round" />
-          <path d="M28.2 16.4 q2.6-3 5.2 0" fill="none" stroke="#3B2314" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M15.4 16.4 q2.2-2.6 4.4 0" fill="none" stroke="#3B2314" strokeWidth="1.3" strokeLinecap="round" />
+          <path d="M28.2 16.4 q2.2-2.6 4.4 0" fill="none" stroke="#3B2314" strokeWidth="1.3" strokeLinecap="round" />
         </>
       ) : (
         <>
-          <ellipse cx="17.2" cy={eyeY} rx="2.1" ry="2.7" fill="#3B2314" />
-          <ellipse cx="30.8" cy={eyeY} rx="2.1" ry="2.7" fill="#3B2314" />
-          <circle cx="17.9" cy={eyeY - 1} r="0.8" fill="#fff" />
-          <circle cx="31.5" cy={eyeY - 1} r="0.8" fill="#fff" />
+          <ellipse cx="17.6" cy={eyeY} rx="1.5" ry="2.1" fill="#3B2314" />
+          <ellipse cx="30.4" cy={eyeY} rx="1.5" ry="2.1" fill="#3B2314" />
+          <circle cx="18.1" cy={eyeY - 0.8} r="0.6" fill="#fff" />
+          <circle cx="30.9" cy={eyeY - 0.8} r="0.6" fill="#fff" />
         </>
       )}
       {/* 코 + 입 */}
-      <path d="M22.6 19.8 H25.4 L24 21.4 Z" fill="#F08A8A" stroke="#C25B5B" strokeWidth="0.5" strokeLinejoin="round" />
+      <path d="M22.9 19.9 H25.1 L24 21.1 Z" fill="#EE8F8F" />
       {mood === "thinking" ? (
-        <circle cx="24" cy="24.6" r="1" fill="#C25B5B" />
+        <circle cx="24" cy="23.4" r="0.8" fill="#C25B5B" />
       ) : mood === "happy" ? (
-        <path d="M21 23.2 q1.5 2.8 3 0 q1.5 2.8 3 0" fill="#FFB7B0" stroke={O} strokeWidth="1" strokeLinejoin="round" />
+        <path d="M21.6 22.2 q1.2 2 2.4 0 q1.2 2 2.4 0" fill="#FFB9B2" stroke={O} strokeWidth="0.7" strokeLinejoin="round" />
       ) : (
-        <path d="M21.4 23.4 q1.3 1.6 2.6 0 q1.3 1.6 2.6 0" fill="none" stroke={O} strokeWidth="1.1" strokeLinecap="round" />
+        <path d="M21.8 22.4 q1.1 1.3 2.2 0 q1.1 1.3 2.2 0" fill="none" stroke={O} strokeWidth="0.8" strokeLinecap="round" />
       )}
       {/* 수염 */}
-      <path d="M8 20.5 L14.6 21.4" stroke={O} strokeWidth="0.8" strokeLinecap="round" />
-      <path d="M8.4 24 L14.8 23.2" stroke={O} strokeWidth="0.8" strokeLinecap="round" />
-      <path d="M40 20.5 L33.4 21.4" stroke={O} strokeWidth="0.8" strokeLinecap="round" />
-      <path d="M39.6 24 L33.2 23.2" stroke={O} strokeWidth="0.8" strokeLinecap="round" />
+      <path d="M10 20.4 L15.4 21 M10.4 23 L15.6 22.4 M38 20.4 L32.6 21 M37.6 23 L32.4 22.4" stroke={O} strokeWidth="0.55" strokeLinecap="round" />
     </svg>
   );
 }
