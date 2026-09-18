@@ -366,7 +366,7 @@ export default function BoardPage() {
           </section>
 
           {/* 인벤토리 주머니 vs 가판대 */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             {/* LEFT: 아이템 주머니 */}
             <ZoneShell
               id="cart-zone"
@@ -551,7 +551,7 @@ export default function BoardPage() {
             {/* RIGHT: 쇼케이스 */}
             <ZoneShell
               id="buy-zone"
-              className={`flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
+              className={`flex flex-col lg:sticky lg:top-4 rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2 rounded-[28px] border-2 border-dashed border-[#D6C2A5] pointer-events-none" />
               <div
