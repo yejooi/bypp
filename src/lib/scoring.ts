@@ -70,8 +70,14 @@ export function computeScores(
   const byId = new Map(llmResults.map((r) => [r.id, r]));
 
   const rows = items.map((item) => {
-    const llm = byId.get(item.id);
-    if (!llm) throw new Error(`missing LLM estimate for item ${item.id}`);
+    // §9-2: 응답에 누락된 항목은 중립 기본값으로 채운다 (한 항목 실패가 전체 순위를 막지 않게).
+    const llm: LlmEstimate = byId.get(item.id) ?? {
+      id: item.id,
+      satisfaction_months: 6,
+      usage_frequency: 0.5,
+      cart_duplication: 0,
+      reasoning: "판정 실패 - 기본값 사용",
+    };
 
     const opportunityCost = item.price * Math.pow(1 + MONTHLY_RETURN, llm.satisfaction_months);
     const monthlyOpportunityCost = opportunityCost / llm.satisfaction_months;

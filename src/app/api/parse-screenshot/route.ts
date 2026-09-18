@@ -1,6 +1,7 @@
 // 장바구니/위시리스트 스크린샷에서 상품명·가격을 추출한다.
 // 로그인/JS렌더링 문제로 장바구니 자동 스크래핑이 막혀서(무신사/지그재그/쿠팡/네이버 다 확인함) 나온 대안:
 // 사용자가 이미 가진 스크린샷을 Claude 이미지 인식으로 읽는다. 상품 사진 URL은 못 뽑는다 (픽셀일 뿐).
+// §9-2: JSON 파싱 실패 시 1회 재시도.
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,15 +18,10 @@ const PROMPT = `이 이미지는 쇼핑몰 장바구니 또는 위시리스트 �
 출력 스키마:
 {"items": [{"name": "...", "price": number | null}]}`;
 
-export async function POST(req: NextRequest) {
-  const { imageBase64, mediaType } = (await req.json()) as {
-    imageBase64: string;
-    mediaType: string;
-  };
-  if (!imageBase64) {
-    return NextResponse.json({ error: "no_image" }, { status: 400 });
-  }
-
+async function callClaudeOnce(
+  imageBase64: string,
+  mediaType: string
+): Promise<{ items: { name: string; price: number | null }[] } | null> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -48,21 +44,37 @@ export async function POST(req: NextRequest) {
     }),
   });
 
-  if (!res.ok) {
-    return NextResponse.json({ error: "llm_call_failed", detail: await res.text() }, { status: 502 });
-  }
+  if (!res.ok) return null;
 
   const data = await res.json();
   const textBlock = data.content.find((b: { type: string }) => b.type === "text");
   const jsonMatch = textBlock?.text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    return NextResponse.json({ error: "no_json_in_response" }, { status: 502 });
-  }
+  if (!jsonMatch) return null;
 
   try {
-    const parsed = JSON.parse(jsonMatch[0]);
-    return NextResponse.json(parsed);
+    return JSON.parse(jsonMatch[0]);
   } catch {
-    return NextResponse.json({ error: "json_parse_failed" }, { status: 502 });
+    return null;
   }
+}
+
+export async function POST(req: NextRequest) {
+  const { imageBase64, mediaType } = (await req.json()) as {
+    imageBase64: string;
+    mediaType: string;
+  };
+  if (!imageBase64) {
+    return NextResponse.json({ error: "no_image" }, { status: 400 });
+  }
+
+  let parsed = await callClaudeOnce(imageBase64, mediaType);
+  if (!parsed) {
+    parsed = await callClaudeOnce(imageBase64, mediaType); // 1회 재시도
+  }
+
+  if (!parsed) {
+    return NextResponse.json({ error: "llm_call_failed" }, { status: 502 });
+  }
+
+  return NextResponse.json(parsed);
 }

@@ -1,5 +1,6 @@
 // §6-2: 전 항목 한 번에 평가, 서버 라우트에서만 호출.
 // temperature는 claude-sonnet-5에서 거부됨 (Phase 1에서 확인) -> 보내지 않는다.
+// §9-2: JSON 파싱 실패 시 1회 재시도 -> 그래도 실패하면 에러로 폴백 (클라이언트가 가격순으로 대체).
 
 import { NextRequest, NextResponse } from "next/server";
 import type { EvalInput, LlmEstimate } from "@/lib/scoring";
@@ -36,16 +37,11 @@ ${items
   })
   .join("\n")}
 
-출력 스키마:
+모든 항목의 id에 대해 결과를 빠짐없이 채워라. 출력 스키마 (설명 없이 이 JSON만):
 {"items": [{"id": "...", "satisfaction_months": number, "usage_frequency": number, "cart_duplication": number, "reasoning": "한 줄 근거"}]}`;
 }
 
-export async function POST(req: NextRequest) {
-  const { items } = (await req.json()) as { items: EvalInput[] };
-  if (!items?.length) {
-    return NextResponse.json({ error: "no_items" }, { status: 400 });
-  }
-
+async function callClaudeOnce(items: EvalInput[]): Promise<{ items: LlmEstimate[] } | null> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -60,23 +56,50 @@ export async function POST(req: NextRequest) {
     }),
   });
 
-  if (!res.ok) {
-    return NextResponse.json({ error: "llm_call_failed", detail: await res.text() }, { status: 502 });
-  }
+  if (!res.ok) return null;
 
   const data = await res.json();
   const textBlock = data.content.find((b: { type: string }) => b.type === "text");
   const jsonMatch = textBlock?.text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    return NextResponse.json({ error: "no_json_in_response" }, { status: 502 });
-  }
+  if (!jsonMatch) return null;
 
-  let parsed: { items: LlmEstimate[] };
   try {
-    parsed = JSON.parse(jsonMatch[0]);
+    return JSON.parse(jsonMatch[0]);
   } catch {
-    return NextResponse.json({ error: "json_parse_failed" }, { status: 502 });
+    return null;
+  }
+}
+
+// §9-2: LLM 응답에 항목이 누락되면 그 항목만 기본값(중립)으로 채우고 나머지는 정상 표시.
+function fillMissing(items: EvalInput[], parsed: { items: LlmEstimate[] } | null): LlmEstimate[] {
+  const byId = new Map((parsed?.items ?? []).map((r) => [r.id, r]));
+  return items.map((item) => {
+    const found = byId.get(item.id);
+    if (found) return found;
+    return {
+      id: item.id,
+      satisfaction_months: 6,
+      usage_frequency: 0.5,
+      cart_duplication: 0,
+      reasoning: "판정 실패 - 기본값 사용",
+    };
+  });
+}
+
+export async function POST(req: NextRequest) {
+  const { items } = (await req.json()) as { items: EvalInput[] };
+  if (!items?.length) {
+    return NextResponse.json({ error: "no_items" }, { status: 400 });
   }
 
-  return NextResponse.json(parsed);
+  let parsed = await callClaudeOnce(items);
+  if (!parsed) {
+    parsed = await callClaudeOnce(items); // 1회 재시도
+  }
+
+  if (!parsed) {
+    return NextResponse.json({ error: "llm_call_failed" }, { status: 502 });
+  }
+
+  return NextResponse.json({ items: fillMissing(items, parsed) });
 }
