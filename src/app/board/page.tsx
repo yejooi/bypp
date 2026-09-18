@@ -106,6 +106,7 @@ export default function BoardPage() {
   // 판정대에 올려둔 아이템 id. 순위 판정은 여기 있는 것만 대상으로 한다 (DB 상태는 cart 그대로).
   const [judgeIds, setJudgeIds] = useState<string[]>([]);
   const [sheetId, setSheetId] = useState<string | null>(null);
+  const [confirmBulk, setConfirmBulk] = useState(false);
   const justDraggedRef = useRef(false);
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 4 } });
@@ -388,32 +389,27 @@ export default function BoardPage() {
             className={`flex items-center gap-4 bg-[#FFF9EC]/90 backdrop-blur-md px-4 py-3 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
           >
             <Mascot size={52} mood="idle" className="hidden sm:block" />
-            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 items-center">
-              <div className="flex flex-col gap-0.5 min-w-0">
-                <span className="text-xs font-bold text-[#8C6D53]">목표</span>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#5D8A37] text-white text-sm font-black rounded-full truncate">
-                    <span className="text-sm leading-none">{GOAL_EMOJI[goalType ?? ""] ?? "🎯"}</span>
-                    {goalType ?? "-"}
-                  </span>
-                  <Link href="/?edit=1" className="text-xs font-bold text-[#8C6D53] underline shrink-0">
-                    바꾸기
-                  </Link>
-                </div>
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs font-bold text-[#8C6D53]">이번 달 예산</span>
-                <span className="text-base font-black text-[#A75D00]">{won(totalBudget)}</span>
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs font-bold text-[#8C6D53]">
-                  남은 예산{purchasedSum > 0 && ` (구매 ${won(purchasedSum)})`}
+            <div className="flex-1 flex flex-wrap items-center gap-x-6 gap-y-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#5D8A37] text-white text-sm font-black rounded-full truncate">
+                  <span className="text-sm leading-none">{GOAL_EMOJI[goalType ?? ""] ?? "🎯"}</span>
+                  {goalType ?? "-"}
                 </span>
-                <span className="text-base font-black text-[#2D6C2A]">{won(budget)}</span>
+                <Link href="/?edit=1" className="text-xs font-bold text-[#6F523A] underline shrink-0">
+                  바꾸기
+                </Link>
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-xs font-bold text-[#8C6D53]">담긴 금액 총합</span>
-                <span className="text-base font-black text-[#5B3E29]">{won(cartSum + buySum)}</span>
+                <span className="text-xs font-bold text-[#6F523A]">
+                  이번 달 남은 예산 <span className="font-medium">(총 {won(totalBudget)}{purchasedSum > 0 && ` · 구매 ${won(purchasedSum)}`})</span>
+                </span>
+                <span className="text-xl font-black text-[#2D6C2A]">{won(budget)}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
+                <span className="text-base font-black text-[#5B3E29]">
+                  {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
+                </span>
               </div>
             </div>
           </header>
@@ -477,10 +473,10 @@ export default function BoardPage() {
                   <span className="text-xs font-black text-[#2D6C2A] bg-[#DCF2C7] px-2.5 py-0.5 rounded-full border border-[#AED48C]">
                     {cartItems.length}/{Math.max(10, cartItems.length)} 보관 중
                   </span>
-                  <span className="text-xs font-bold text-[#8C6D53]">물건을 톡 누르면 옮기기 메뉴가 열려요</span>
+                  <span className="text-xs font-bold text-[#6F523A]">톡 누르면 옮기기 메뉴 · 길게 누르면 끌어서 이동</span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-xs font-bold text-[#8C6D53]">주머니 합계</span>
+                  <span className="text-xs font-bold text-[#6F523A]">주머니 합계</span>
                   <span className="text-sm font-black text-[#7A4924]">{won(cartSum)}</span>
                 </div>
               </div>
@@ -518,11 +514,11 @@ export default function BoardPage() {
                     <h3 className="text-lg font-bold text-[#693E00]" style={HAND}>
                       AI 심사대
                     </h3>
-                    <span className="text-[10px] font-bold text-[#A16500] bg-[#FFF0D4] px-2 rounded-full border border-[#D9BA8B]">
+                    <span className="text-[11px] font-bold text-[#A16500] bg-[#FFF0D4] px-2 rounded-full border border-[#D9BA8B]">
                       연구소 바구니
                     </span>
                   </div>
-                  <span className="text-[10px] font-bold text-[#4FA429] bg-[#E4F5D2] px-2 py-0.5 rounded-full border border-[#BBDC9F]">
+                  <span className="text-[11px] font-bold text-[#4FA429] bg-[#E4F5D2] px-2 py-0.5 rounded-full border border-[#BBDC9F]">
                     {judgeItems.length}개 후보 대기 중
                   </span>
                 </div>
@@ -588,7 +584,7 @@ export default function BoardPage() {
                     </div>
                     <button
                       onClick={() => setJudgeResult(null)}
-                      className="text-xs font-bold text-[#8C6D53] underline"
+                      className="text-xs font-bold text-[#6F523A] underline"
                     >
                       닫기
                     </button>
@@ -647,7 +643,7 @@ export default function BoardPage() {
               >
                 <div className="py-3 px-4 flex items-center justify-between text-white text-xs font-black">
                   <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-[#FFDE59] border-2 border-[#783F1E] inline-flex items-center justify-center text-[10px] text-[#734500]">
+                    <span className="w-5 h-5 rounded-full bg-[#FFDE59] border-2 border-[#783F1E] inline-flex items-center justify-center text-[11px] text-[#734500]">
                       ★
                     </span>
                     <span className="tracking-tight text-lg sm:text-xl text-[#FFF3DE]" style={{ fontFamily: "var(--font-gaegu)" }}>
@@ -692,12 +688,11 @@ export default function BoardPage() {
                 </div>
 
                 <button
-                  onClick={buyFirstFloor}
+                  onClick={() => setConfirmBulk(true)}
                   disabled={shelf1.length === 0}
-                  className={`w-full py-3 rounded-2xl text-base font-black text-white bg-[#3F8A3A] hover:bg-[#2F7A2B] border-2 border-[#2A6427] ${SHADOW_AC_SM} active:translate-y-0.5 disabled:opacity-40 transition-all flex items-center justify-center gap-2`}
+                  className={`w-full py-2 rounded-2xl text-sm font-black text-[#2D6C2A] bg-[#F4FBEA] border-2 border-[#8DBF6A] hover:bg-[#E5F5D4] ${SHADOW_AC_SM} active:translate-y-0.5 disabled:opacity-40 transition-all flex items-center justify-center gap-2`}
                 >
-                  <StarIcon className="w-5 h-5 text-[#FFE073]" />
-                  1층 전체 구매 ({shelf1.length}개 · {won(shelf1Sum)})
+                  🧾 1층 전체 계산하기 ({shelf1.length}개 · {won(shelf1Sum)})
                 </button>
 
                 {/* 예산 한도선 리본 */}
@@ -756,6 +751,7 @@ export default function BoardPage() {
             {/* 드롭존: 반품함(왼쪽) / 계산대(오른쪽) */}
             <ActionZone
               id="toss-zone"
+              dim={!activeId}
               className="order-4 lg:order-none lg:col-start-1 lg:row-start-3 xl:col-start-1 xl:row-start-1"
               borderClass="border-[#B89A72] hover:border-[#6B4B32]"
               overClass="border-[#6B4B32] bg-[#FFF5E6] ring-4 ring-[#B89A72]"
@@ -776,6 +772,7 @@ export default function BoardPage() {
             />
             <ActionZone
               id="flush-zone"
+              dim={!activeId}
               className="order-5 lg:order-none lg:col-start-2 lg:row-start-3 xl:col-start-4 xl:row-start-1"
               borderClass="border-[#8DBF6A] hover:border-[#3F8A3A]"
               overClass="border-[#3F8A3A] bg-[#F0FAEA] ring-4 ring-[#8DBF6A]"
@@ -845,6 +842,34 @@ export default function BoardPage() {
         </div>
       )}
 
+      {confirmBulk && (
+        <div className="fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4" onClick={() => setConfirmBulk(false)}>
+          <div
+            className={`bg-[#FFFBF2] border-4 border-[#85532F] rounded-[28px] p-6 max-w-sm w-full text-[#4A3324] ${SHADOW_AC}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-lg font-black">
+              {shelf1.length}개 · {won(shelf1Sum)} 계산할까요?
+            </p>
+            <p className="text-sm mt-1 font-medium">1층에 있는 물건이 한 번에 정리돼요. 바로 뒤에 되돌릴 수도 있어요.</p>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setConfirmBulk(false)} className="flex-1 py-2.5 rounded-full font-black bg-[#EFE8D6] border-2 border-[#D4C3A3]">
+                아직이요
+              </button>
+              <button
+                onClick={() => {
+                  setConfirmBulk(false);
+                  buyFirstFloor();
+                }}
+                className={`flex-1 py-2.5 rounded-full font-black text-white bg-[#3F8A3A] ${SHADOW_AC_SM}`}
+              >
+                네 계산할래요
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {sheetItem && (
         <div className="fixed inset-0 z-[60] bg-black/40 flex items-end sm:items-center justify-center" onClick={() => setSheetId(null)}>
           <div
@@ -864,7 +889,7 @@ export default function BoardPage() {
                 <p className="text-sm font-black leading-snug line-clamp-2">{sheetItem.name}</p>
                 <p className="text-sm font-black text-[#82542B]">{won(sheetItem.price)}</p>
               </div>
-              <button onClick={() => setSheetId(null)} className="text-xs font-bold text-[#8C6D53] underline shrink-0">
+              <button onClick={() => setSheetId(null)} className="text-xs font-bold text-[#6F523A] underline shrink-0">
                 닫기
               </button>
             </div>
@@ -943,7 +968,7 @@ function SlotDrop({ id, label, children }: { id: string; label: string; children
       ref={setNodeRef}
       className={`flex flex-col items-stretch gap-0.5 rounded-2xl ${isOver ? "ring-4 ring-[#4EA434]" : ""}`}
     >
-      {label && <span className="text-[10px] font-black text-[#69421A] leading-none text-center">{label}</span>}
+      {label && <span className="text-[11px] font-black text-[#69421A] leading-none text-center">{label}</span>}
       {children}
     </div>
   );
@@ -1040,9 +1065,12 @@ function ItemTile({
             : "border-transparent"
         }`}
       >
+        <span className="absolute top-1 right-1 z-10 w-5 h-5 rounded-full bg-white/85 border border-[#D6C2A5] text-[#6F523A] text-xs font-black flex items-center justify-center leading-none pointer-events-none">
+          ⋯
+        </span>
         {badge && (
           <div
-            className={`absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black px-2 py-0.5 rounded-full border border-white whitespace-nowrap z-20 flex items-center gap-0.5 ${
+            className={`absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-black px-2 py-0.5 rounded-full border border-white whitespace-nowrap z-20 flex items-center gap-0.5 ${
               badge.kind === "gold" ? "bg-[#F6C644] text-[#693E00]" : "bg-[#755541] text-[#FFE8D6]"
             }`}
           >
@@ -1059,9 +1087,9 @@ function ItemTile({
           )}
         </div>
         <span
-          className={`text-[10px] font-bold leading-none mt-1 ${
+          className={`text-[11px] font-bold leading-none mt-1 ${
             showcase && !dim ? "text-[#85532F]" : "text-[#82542B]"
-          } ${dim ? "text-[#A89481]" : ""}`}
+          } ${dim ? "text-[#8A7460]" : ""}`}
         >
           {short(item.price)}
         </span>
@@ -1078,6 +1106,7 @@ function ActionZone({
   className = "",
   titleStyle,
   stitchClass = "border-[#D6C2A5]",
+  dim = false,
   borderClass,
   overClass,
   visual,
@@ -1091,6 +1120,7 @@ function ActionZone({
   className?: string;
   titleStyle?: React.CSSProperties;
   stitchClass?: string;
+  dim?: boolean;
   borderClass: string;
   overClass: string;
   visual: React.ReactNode;
@@ -1106,7 +1136,7 @@ function ActionZone({
     <div
       ref={setNodeRef}
       id={id}
-      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-6 transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${className} ${
+      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-6 transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${dim ? "opacity-50 saturate-50 hover:opacity-100 hover:saturate-100" : ""} ${className} ${
         isOver ? overClass : borderClass
       }`}
     >
