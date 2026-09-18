@@ -712,6 +712,7 @@ export default function BoardPage() {
               overClass="border-[#3F8A3A] bg-[#F0FAEA] ring-4 ring-[#8DBF6A]"
               visual={<span className="text-6xl leading-none drop-shadow-sm">🧾</span>}
               titleChip="계산대"
+              stitchClass="border-[#B5D99A]"
               titleStyle={{
                 color: "#FFF3DE",
                 backgroundColor: "#4A4A4A",
@@ -944,6 +945,7 @@ function ActionZone({
   id,
   className = "",
   titleStyle,
+  stitchClass = "border-[#D6C2A5]",
   borderClass,
   overClass,
   visual,
@@ -956,6 +958,7 @@ function ActionZone({
   id: string;
   className?: string;
   titleStyle?: React.CSSProperties;
+  stitchClass?: string;
   borderClass: string;
   overClass: string;
   visual: React.ReactNode;
@@ -975,13 +978,14 @@ function ActionZone({
         isOver ? overClass : borderClass
       }`}
     >
+      <div className={`absolute inset-2 rounded-[22px] border-2 border-dashed pointer-events-none ${stitchClass}`} />
       <h3
-        className="self-stretch px-4 py-1.5 text-lg font-black tracking-tight"
+        className="relative self-stretch px-4 py-1.5 text-lg font-black tracking-tight"
         style={{ ...HAND, ...titleStyle }}
       >
         {titleChip}
       </h3>
-      <div className="flex-1 flex flex-col items-center justify-center gap-3">
+      <div className="relative flex-1 flex flex-col items-center justify-center gap-3">
         <div className="w-24 h-24 flex items-center justify-center group-hover:-translate-y-1 transition-transform">
           {visual}
         </div>
