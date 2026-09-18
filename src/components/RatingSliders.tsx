@@ -18,10 +18,10 @@ export function RatingSliders({ value, onChange }: { value: Ratings; onChange: (
         <div key={key} className="flex items-center gap-2 text-xs font-bold text-[#7A5B3E]">
           <span className="w-32 shrink-0">{label}</span>
           <span className="w-16 text-right text-[11px] font-medium opacity-80">{lo}</span>
-          <div className="relative flex-1 h-7 mx-2.5" role="group" aria-label={label}>
-            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-[#DCCFB4]" />
+          <div className="relative flex-1 h-6 mx-2" role="group" aria-label={label}>
+            <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-[#DCCFB4]" />
             <div
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-[#7CB955]"
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-[#7CB955]"
               style={{ width: `${((value[key] - 1) / 4) * 100}%` }}
             />
             {[1, 2, 3, 4, 5].map((n) => {
@@ -35,10 +35,10 @@ export function RatingSliders({ value, onChange }: { value: Ratings; onChange: (
                   aria-pressed={on}
                   className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-all ${
                     on
-                      ? "w-6 h-6 bg-[#4F8B33] border-white shadow-[0_2px_0_rgba(74,46,53,0.25)] ring-2 ring-[#BEE88A]"
+                      ? "w-4 h-4 bg-[#4F8B33] border-white shadow-[0_1px_0_rgba(74,46,53,0.25)] ring-1 ring-[#BEE88A]"
                       : n < value[key]
-                        ? "w-3.5 h-3.5 bg-[#7CB955] border-[#E9F5DC] hover:scale-125"
-                        : "w-3.5 h-3.5 bg-[#F5EEDD] border-[#C9B390] hover:scale-125"
+                        ? "w-2 h-2 bg-[#7CB955] border-[#E9F5DC] hover:scale-150"
+                        : "w-2 h-2 bg-[#F5EEDD] border-[#C9B390] hover:scale-150"
                   }`}
                   style={{ left: `${((n - 1) / 4) * 100}%` }}
                 />
