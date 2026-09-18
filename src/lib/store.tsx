@@ -11,7 +11,8 @@ export type ReasonCode =
   | "broke_replace"
   | "on_sale"
   | "social_proof"
-  | "mood_boost";
+  | "mood_boost"
+  | "other";
 
 export const REASON_CODE_LABEL: Record<ReasonCode, string> = {
   long_wanted: "오래전부터 갖고 싶었음",
@@ -20,6 +21,7 @@ export const REASON_CODE_LABEL: Record<ReasonCode, string> = {
   on_sale: "세일 중이라서",
   social_proof: "남들이 좋다고 해서",
   mood_boost: "그냥 기분전환",
+  other: "기타 (직접 입력)",
 };
 
 export type ItemStatus = "cart" | "buy" | "removed" | "purchased";
@@ -29,6 +31,9 @@ export type Item = {
   name: string;
   price: number;
   reasonCode: ReasonCode;
+  // reasonCode가 "other"일 때의 자유 입력 텍스트. 점수 가중치엔 영향 없음(중립 1.0),
+  // LLM 프롬프트에 보조 맥락으로만 전달한다 (원래 6개 선택지가 다양성을 못 담는 문제 보완).
+  customReason?: string | null;
   status: ItemStatus;
   imageUrl?: string | null;
   category?: string | null;
@@ -44,6 +49,7 @@ export type NewItemInput = {
   name: string;
   price: number;
   reasonCode: ReasonCode;
+  customReason?: string | null;
   imageUrl?: string | null;
   category?: string | null;
   brand?: string | null;

@@ -36,6 +36,7 @@ export function AddItemForm() {
   const [failReason, setFailReason] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [reasonCode, setReasonCode] = useState<ReasonCode>("long_wanted");
+  const [customReason, setCustomReason] = useState("");
 
   async function handleFetch() {
     if (!url) return;
@@ -77,6 +78,7 @@ export function AddItemForm() {
     setUrl("");
     setDraft(EMPTY_DRAFT);
     setFailReason(null);
+    setCustomReason("");
     setStage("link");
   }
 
@@ -145,13 +147,22 @@ export function AddItemForm() {
             </option>
           ))}
         </select>
+        {reasonCode === "other" && (
+          <input
+            value={customReason}
+            onChange={(e) => setCustomReason(e.target.value)}
+            placeholder="어떤 이유인지 직접 적어주세요"
+            className="border border-gray-300 rounded px-2 py-1 flex-1 min-w-[160px]"
+          />
+        )}
         <button
-          disabled={!draft.name || !draft.price}
+          disabled={!draft.name || !draft.price || (reasonCode === "other" && !customReason.trim())}
           onClick={() => {
             addItem({
               name: draft.name,
               price: Number(draft.price),
               reasonCode,
+              customReason: reasonCode === "other" ? customReason.trim() : null,
               imageUrl: draft.imageUrl,
               category: draft.category,
               brand: draft.brand,
