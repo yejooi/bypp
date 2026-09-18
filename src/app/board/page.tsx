@@ -319,54 +319,39 @@ export default function BoardPage() {
         <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-16 pb-32 flex flex-col gap-5">
           {/* 헤더 */}
           <header
-            className={`flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-[#FFF9EC]/90 backdrop-blur-md p-4 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
+            className={`flex items-center gap-4 bg-[#FFF9EC]/90 backdrop-blur-md px-4 py-3 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
           >
-            <div className="flex items-center gap-3.5">
-              <div
-                className={`relative w-12 h-12 rounded-2xl bg-[#F6C644] border-2 border-[#C9981A] ${SHADOW_AC_SM} flex items-center justify-center shrink-0 text-[#8C5500] font-black text-xl`}
-              >
-                ₩
-              </div>
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-0.5 bg-[#5D8A37] text-white text-xs font-black rounded-full flex items-center gap-1">
-                    <LeafIcon className="w-3 h-3 text-[#BEE88A]" />
-                    목표: {goalType ?? "-"}
+            <div
+              className={`hidden sm:flex w-12 h-12 rounded-2xl bg-[#F6C644] border-2 border-[#C9981A] ${SHADOW_AC_SM} items-center justify-center shrink-0 text-[#8C5500] font-black text-xl`}
+            >
+              ₩
+            </div>
+            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 items-center">
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-xs font-bold text-[#8C6D53]">목표</span>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#5D8A37] text-white text-sm font-black rounded-full truncate">
+                    <LeafIcon className="w-3 h-3 text-[#BEE88A] shrink-0" />
+                    {goalType ?? "-"}
                   </span>
-                  <span className="text-xs text-[#8C6D53] font-bold">이번 달 예산:</span>
-                  <span className="bg-[#FFF0D4] border-2 border-[#F6C644] text-[#A75D00] font-black text-sm sm:text-base px-2.5 py-0.5 rounded-full">
-                    {won(totalBudget)}
-                  </span>
-                  {purchasedSum > 0 && (
-                    <>
-                      <span className="text-xs text-[#8C6D53] font-bold">구매 {won(purchasedSum)} ·</span>
-                      <span className="bg-[#E5F5D4] border-2 border-[#AED48C] text-[#2D6C2A] font-black text-sm sm:text-base px-2.5 py-0.5 rounded-full">
-                        남은 {won(budget)}
-                      </span>
-                    </>
-                  )}
-                  <Link href="/?edit=1" className="text-xs font-bold text-[#8C6D53] underline">
+                  <Link href="/?edit=1" className="text-xs font-bold text-[#8C6D53] underline shrink-0">
                     바꾸기
                   </Link>
                 </div>
-                <p className="mt-1" style={{ fontFamily: "var(--font-gaegu)" }}>
-                  <span className="text-base text-[#467A26] font-bold">
-                    주머니 물건을 꺼내 가판대에 올려보세요!
-                  </span>
-                </p>
               </div>
-            </div>
-            <div className="flex items-center gap-2 self-end md:self-center">
-              <div
-                className={`bg-[#784A28] border-2 border-[#573318] text-[#FFF3DE] px-4 py-2 rounded-2xl ${SHADOW_AC_SM} flex items-center gap-3`}
-              >
-                <div className="flex flex-col text-right">
-                  <span className="text-[10px] text-[#FFD8A8] font-bold">담긴 금액 총합</span>
-                  <span className="text-sm font-black text-[#FFDE59] tracking-tight">{won(cartSum + buySum)}</span>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-[#FFDE59] border border-[#B37400] flex items-center justify-center text-[#734500]">
-                  <BagIcon className="w-4 h-4" />
-                </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-bold text-[#8C6D53]">이번 달 예산</span>
+                <span className="text-base font-black text-[#A75D00]">{won(totalBudget)}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-bold text-[#8C6D53]">
+                  남은 예산{purchasedSum > 0 && ` (구매 ${won(purchasedSum)})`}
+                </span>
+                <span className="text-base font-black text-[#2D6C2A]">{won(budget)}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-bold text-[#8C6D53]">담긴 금액 총합</span>
+                <span className="text-base font-black text-[#5B3E29]">{won(cartSum + buySum)}</span>
               </div>
             </div>
           </header>
