@@ -44,10 +44,10 @@ export function Mascot({ size = 32, mood = "idle", className = "" }: { size?: nu
         </>
       ) : (
         <>
-          <ellipse cx="18.6" cy={eyeY} rx="1.3" ry="1.9" fill="#3B2314" />
-          <ellipse cx="29.4" cy={eyeY} rx="1.3" ry="1.9" fill="#3B2314" />
-          <circle cx="19" cy={eyeY - 0.7} r="0.5" fill="#fff" />
-          <circle cx="29.8" cy={eyeY - 0.7} r="0.5" fill="#fff" />
+          <circle cx="18.6" cy={eyeY} r="1.7" fill="#3B2314" />
+          <circle cx="29.4" cy={eyeY} r="1.7" fill="#3B2314" />
+          <circle cx="19.2" cy={eyeY - 0.6} r="0.55" fill="#fff" />
+          <circle cx="30" cy={eyeY - 0.6} r="0.55" fill="#fff" />
         </>
       )}
       {/* 코 + 입 */}
