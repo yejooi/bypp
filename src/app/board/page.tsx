@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Mascot, SpeechBubble } from "@/components/Mascot";
 import { GoalIcon } from "@/components/GoalIcon";
 import { UserControls } from "@/components/UserBar";
+import { Tutorial, TUTORIAL_SEEN_KEY } from "@/components/Tutorial";
 import { authedFetch } from "@/lib/authedFetch";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -105,6 +106,13 @@ export default function BoardPage() {
   } | null>(null);
   const [addMode, setAddMode] = useState<"link" | "screenshot">("link");
   const [addOpen, setAddOpen] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  // 처음 방문하면 사용법을 자동으로 보여준다 (닫으면 다시 안 뜸).
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem(TUTORIAL_SEEN_KEY)) setTutorialOpen(true);
+    } catch {}
+  }, []);
   const itemCountRef = useRef(items.length);
   // 물건이 새로 담기면 추가 패널을 자동으로 접는다.
   useEffect(() => {
@@ -396,7 +404,15 @@ export default function BoardPage() {
           <header
             className={`flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-[#FFF9EC]/90 backdrop-blur-md px-4 py-2 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
           >
-            <UserControls />
+            <div className="flex items-center gap-3">
+              <UserControls />
+              <button
+                onClick={() => setTutorialOpen(true)}
+                className="px-3 py-1 rounded-full bg-[#FFF0D4] border-2 border-[#F0C77A] text-[#7A4A00] text-xs font-black hover:bg-[#FFE7BA] active:translate-y-0.5 transition"
+              >
+                이용 방법
+              </button>
+            </div>
             <div className="flex flex-col leading-tight min-w-0">
               <span className="text-xs font-bold text-[#6F523A] flex items-center gap-2">
                 목표
@@ -836,6 +852,8 @@ export default function BoardPage() {
           </div>
         </div>
       )}
+
+      <Tutorial open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
 
       {addOpen && (
         <div className="fixed inset-0 z-[58] bg-black/35" onClick={() => setAddOpen(false)}>
