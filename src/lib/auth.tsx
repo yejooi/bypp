@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signUp(newNickname: string, password: string): Promise<{ error: string | null }> {
     const trimmed = newNickname.trim();
     if (!trimmed) return { error: "닉네임을 입력해주세요" };
-    if (password.length < 4) return { error: "비밀번호는 4자 이상이어야 해요" };
+    if (password.length < 6) return { error: "비밀번호는 6자 이상이면 돼요 (숫자·영어 상관없어요)" };
 
     const { data: existing } = await supabase.from("profiles").select("id").eq("nickname", trimmed).maybeSingle();
     if (existing) return { error: "이미 사용 중인 닉네임이에요" };
@@ -73,6 +73,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 도메인을 쓴다. 메일이 실제로 오갈 일은 없다 (project Auth 설정에서 "Confirm email"을 꺼둔 상태여야 함).
     const email = `bypp-${crypto.randomUUID()}@gmail.com`;
     const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error?.code === "weak_password" || /password/i.test(error?.message ?? "")) {
+      return { error: "비밀번호는 6자 이상이면 돼요 (숫자·영어 상관없어요)" };
+    }
     if (error || !data.user) return { error: error?.message ?? "가입에 실패했어요" };
 
     const { error: profileError } = await supabase

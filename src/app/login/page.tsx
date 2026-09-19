@@ -78,7 +78,7 @@ export default function LoginPage() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         type="password"
-        placeholder="비밀번호"
+        placeholder={mode === "signup" ? "비밀번호 (6자 이상, 숫자·영어 상관없어요)" : "비밀번호"}
         className={inputCls}
         style={inputStyle}
         onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
