@@ -461,6 +461,18 @@ export default function BoardPage() {
                 </h2>
               </div>
 
+              <button
+                onClick={() => setAddOpen(true)}
+                className="relative z-10 shrink-0 mx-auto w-fit px-8 mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1.5 rounded-2xl btn-soft-green text-lg"
+                style={HAND}
+              >
+                <svg className="w-6 h-6 text-[#3F8A3A]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.86-7.01L19.42 4h-.01l-1.1 2-2.76 5H8.53l-.13-.27L6.16 6l-.95-2-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.13 0-.25-.11-.25-.25z" />
+                </svg>
+                물건 추가하기
+                <span className="text-xs font-bold text-[#4F7A36]" style={{ fontFamily: "var(--font-body)" }}>스크린샷 · 링크</span>
+              </button>
+
               <div
                 className={`relative z-10 flex flex-col gap-2 mb-3 shrink-0 xl:mb-2 bg-[#E2D9C2]/80 rounded-[24px] border-2 border-[#C2B18E] p-3 xl:p-2 ${SHADOW_INNER}`}
               >
@@ -493,18 +505,6 @@ export default function BoardPage() {
                   ))}
                 </div>
               </div>
-
-              <button
-                onClick={() => setAddOpen(true)}
-                className="relative z-10 shrink-0 mx-auto w-fit px-8 mt-0 mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1.5 rounded-2xl btn-soft-green text-lg"
-                style={HAND}
-              >
-                <svg className="w-6 h-6 text-[#3F8A3A]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                  <path d="M11 9h2V6h3V4h-3V1h-2v3H8v2h3v3zm-4 9c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.86-7.01L19.42 4h-.01l-1.1 2-2.76 5H8.53l-.13-.27L6.16 6l-.95-2-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.13 0-.25-.11-.25-.25z" />
-                </svg>
-                물건 추가하기
-                <span className="text-xs font-bold text-[#4F7A36]" style={{ fontFamily: "var(--font-body)" }}>스크린샷 · 링크</span>
-              </button>
 
               <JudgeShell
                 className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-2 border-dashed border-[#F5D671] shrink-0 p-3.5 xl:p-2.5 ${SHADOW_AC_SM}`}
