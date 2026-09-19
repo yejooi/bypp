@@ -30,7 +30,6 @@ export function ProgressRunner() {
     <footer className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5]/95 backdrop-blur-md border-t-[3px] border-[#D6C2A0] py-2.5 px-4 sm:px-8 shadow-2xl z-40 text-[#4A3324]">
       <div className="max-w-[1400px] mx-auto flex items-center gap-4 sm:gap-6">
         <div className="shrink-0 flex items-center gap-2.5">
-          <Mascot size={44} mood={spent > 0 && delta > 0 ? "happy" : "idle"} />
           <div className="flex flex-col leading-tight">
             <span className="text-xs font-bold text-[#7A5B40]">나의 절약 여정</span>
             <span className="text-lg font-black text-[#2D6C2A]">{progressPct.toFixed(1)}%</span>
