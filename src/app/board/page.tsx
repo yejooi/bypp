@@ -745,6 +745,7 @@ export default function BoardPage() {
               overClass="border-[#6B4B32] bg-[#FFF5E6] ring-4 ring-[#B89A72]"
               visual={<span className="text-6xl leading-none drop-shadow-sm">📦</span>}
               titleChip="반품함"
+              desc="안 사기로 정했어요."
               titleStyle={{
                 color: "#5B3E29",
                 backgroundColor: "#E8B84A",
@@ -762,6 +763,7 @@ export default function BoardPage() {
               overClass="border-[#3F8A3A] bg-[#F0FAEA] ring-4 ring-[#8DBF6A]"
               visual={<span className="text-6xl leading-none drop-shadow-sm">🧾</span>}
               titleChip="계산대"
+              desc="구매 끝!"
               stitchClass="border-[#B5D99A]"
               titleStyle={{
                 color: "#FFF3DE",
@@ -1154,6 +1156,7 @@ function ActionZone({
   overClass,
   visual,
   titleChip,
+  desc,
 }: {
   id: string;
   className?: string;
@@ -1164,6 +1167,7 @@ function ActionZone({
   overClass: string;
   visual: React.ReactNode;
   titleChip: React.ReactNode;
+  desc?: string;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
@@ -1185,6 +1189,11 @@ function ActionZone({
         <div className="w-24 h-24 flex items-center justify-center group-hover:-translate-y-1 transition-transform">
           {visual}
         </div>
+        {desc && (
+          <p className="text-base font-bold leading-snug" style={HAND}>
+            {desc}
+          </p>
+        )}
       </div>
     </div>
   );
