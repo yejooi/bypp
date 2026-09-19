@@ -13,19 +13,19 @@ const SLIDES = [
     img: "/tutorial/1-board.jpg",
     title: "장바구니, 같이 정리해요",
     lead: "장바구니에 잔뜩 담아두고 뭘 살지 못 정하는 사람을 위한 서비스예요.",
-    body: "사고 싶은 물건을 순서대로 정리하고, 이번 달 예산 안에서 결정을 끝내 줘요. 사도 되는 것도, 안 사기로 한 것도 모두 \"정리 완료\"예요.",
+    body: "",
   },
   {
     img: "/tutorial/2-add.jpg",
     title: "① 물건을 담아요",
-    lead: "주머니의 \"물건 추가하기\"를 눌러요.",
-    body: "상품 링크를 붙여 넣거나, 장바구니 스크린샷을 올리면 이름과 가격, 사진이 자동으로 채워져요. 급한 정도와 갖고 싶은 정도도 1~5로 골라 주세요.",
+    lead: "\"물건 추가하기\"를 눌러요.",
+    body: "상품 링크를 붙여 넣거나, 장바구니 스크린샷을 올리면 이름과 가격, 사진이 자동으로 채워져요.",
   },
   {
     img: "/tutorial/3-sheet.jpg",
-    title: "② 톡 눌러서 옮겨요",
-    lead: "물건을 톡 누르면 옮기기 메뉴가 열려요.",
-    body: "AI 심사대에 올리거나, 가판대로 바로 올리거나, 반품함으로 보낼 수 있어요. 컴퓨터에서는 끌어다 놓아도 되고, 폰에서는 길게 눌러 끌 수 있어요.",
+    title: "② 드래그해서 옮겨요",
+    lead: "물건을 끌어서 AI 심사대, 가판대, 반품함에 놓아요.",
+    body: "(클릭해서 옮길 수도 있어요)",
   },
   {
     img: "/tutorial/5-result.jpg",
@@ -37,7 +37,7 @@ const SLIDES = [
     img: "/tutorial/6-bulk.jpg",
     title: "④ 정리하면 끝!",
     lead: "예산 안 물건은 1층, 넘는 물건은 2층으로 자동으로 나뉘어요.",
-    body: "산 물건은 계산대로, 안 사기로 한 물건은 반품함으로 보내면 목록이 가벼워져요. 실수해도 바로 되돌릴 수 있어요.",
+    body: "산 물건은 계산대로, 안 사기로 한 물건은 반품함으로 보내면 목록이 가벼워져요.",
   },
 ] as const;
 
@@ -79,7 +79,7 @@ export function Tutorial({ open, onClose }: { open: boolean; onClose: () => void
           <Mascot size={44} mood={last ? "happy" : "idle"} />
           <SpeechBubble className="flex-1">
             <p className="text-sm">{s.lead}</p>
-            <p className="mt-1 text-xs font-medium leading-relaxed opacity-90">{s.body}</p>
+            {s.body && <p className="mt-1 text-xs font-medium leading-relaxed opacity-90">{s.body}</p>}
           </SpeechBubble>
         </div>
 
