@@ -77,7 +77,9 @@ async function callClaudeOnce(items: EvalInput[]): Promise<{ items: LlmEstimate[
     },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 4096,
+      // 생각(thinking)을 끄면 판정이 빨라지고, 생각에 토큰을 다 써서 본문이 비어 재요청하는 일도 없어진다.
+      thinking: { type: "disabled" },
+      max_tokens: 1500,
       messages: [{ role: "user", content: buildPrompt(items) }],
     }),
   });
