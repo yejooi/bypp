@@ -398,7 +398,7 @@ export default function BoardPage() {
       }}
     >
       <TileTapContext.Provider value={openSheet}>
-      <div className="grass-bg flex-1 text-[#4A3324] xl:h-screen xl:overflow-hidden">
+      <div className="grass-bg-calm flex-1 text-[#4A3324] xl:h-screen xl:overflow-hidden">
         <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-4 pb-32 flex flex-col gap-5 xl:pt-3 xl:pb-[84px] xl:h-full xl:gap-3">
           {/* 헤더 */}
           <header
