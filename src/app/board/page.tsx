@@ -47,6 +47,12 @@ const HAND = { fontFamily: "var(--font-gaegu)" } as const;
 
 // 물건을 탭하면 옮기기 메뉴가 열린다 (모바일에서 긴 화면을 드래그로 오가기 어려워서 만든 기본 경로. 드래그는 추가 동작).
 const TileTapContext = createContext<(id: string) => void>(() => {});
+
+// AI 판정 뒤 물건별 점수(0~100)와 "왜 이 순위인지" 설명. 점수는 타일 배지로, 설명은 호버할 때만 보인다.
+// 최하위도 0점처럼 보이지 않게 30~100으로 펼친다 (0점은 "실패" 프레임이 돼서). 순위 순서는 그대로다.
+const SCORE_FLOOR = 30;
+type JudgeInfo = { score: number | null; reasoning: string | null };
+const JudgeInfoContext = createContext<Record<string, JudgeInfo>>({});
 const won = (n: number) => `${n.toLocaleString()}원`;
 const short = (n: number) => (n >= 10000 ? `${+(n / 10000).toFixed(1)}만원` : `${n.toLocaleString()}원`);
 
@@ -123,6 +129,7 @@ export default function BoardPage() {
   const [judgeIds, setJudgeIds] = useState<string[]>([]);
   const [sheetId, setSheetId] = useState<string | null>(null);
   const [confirmBulk, setConfirmBulk] = useState(false);
+  const [judgeInfo, setJudgeInfo] = useState<Record<string, JudgeInfo>>({});
   const justDraggedRef = useRef(false);
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 4 } });
@@ -242,6 +249,16 @@ export default function BoardPage() {
           message,
         };
       });
+      // 점수: 이번 판정에 올린 물건들 안에서의 상대 점수(0~100). 한 개만 올렸으면 비교 대상이 없어 점수 없이 설명만 남긴다.
+      setJudgeInfo((prev) => ({
+        ...prev,
+        ...Object.fromEntries(
+          ranked.map((r) => [
+            r.id,
+            { score: ranked.length >= 2 ? Math.round(SCORE_FLOOR + (100 - SCORE_FLOOR) * r.finalScore) : null, reasoning: r.reasoning ?? null },
+          ])
+        ),
+      }));
       setJudgeResult({ baseSum: shelf1Sum, entries });
       toPromote.forEach((it) => moveItem(it.id, "buy"));
       reorderShowcase([...orderedBuyIds.filter((id) => !newIds.has(id)), ...ranked.map((r) => r.id)]);
@@ -398,6 +415,7 @@ export default function BoardPage() {
       }}
     >
       <TileTapContext.Provider value={openSheet}>
+      <JudgeInfoContext.Provider value={judgeInfo}>
       <div className="grass-bg-calm flex-1 text-[#4A3324] xl:h-screen xl:overflow-hidden">
         <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-4 pb-32 flex flex-col gap-5 xl:pt-3 xl:pb-[84px] xl:h-full xl:gap-3">
           {/* 헤더 */}
@@ -612,9 +630,8 @@ export default function BoardPage() {
                         </span>
                       </div>
                       <p className="text-xs font-bold text-[#82542B] mt-0.5">
-                        {won(e.price)} · 누적 {won(e.cumulative)}
+                        {won(e.price)} · 누적 {won(e.cumulative)}{judgeInfo[e.id]?.score != null && ` · ${judgeInfo[e.id]?.score}점`}
                       </p>
-                      {e.reasoning && <p className="text-xs italic mt-1 text-[#7A5B3E]">&quot;{e.reasoning}&quot;</p>}
                       {e.message && !e.message.startsWith("예산 안에서 여유") && (
                         <p className="text-sm font-black mt-2 px-3 py-2 rounded-xl border-2 border-[#E09D1B] bg-[#FFF4D6] text-[#8A5A00]">
                           💡 {e.message}
@@ -982,6 +999,7 @@ export default function BoardPage() {
           </div>
         ) : null}
       </DragOverlay>
+      </JudgeInfoContext.Provider>
       </TileTapContext.Provider>
     </DndContext>
   );
@@ -1043,6 +1061,8 @@ function ItemTile({
 
   const elRef = useRef<HTMLDivElement | null>(null);
   const onTap = useContext(TileTapContext);
+  const info = useContext(JudgeInfoContext)[item.id];
+  const shownBadge = badge ?? (info?.score != null ? { text: `${info.score}점`, kind: "gold" as const } : undefined);
   // 이름 툴팁은 패널의 overflow에 잘리지 않게 body에 fixed로 띄운다 (가장 위 레이어).
   const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
   function showTip() {
@@ -1120,14 +1140,14 @@ function ItemTile({
         <span className="absolute top-1 right-1 z-10 w-5 h-5 rounded-full bg-white/85 border border-[#D6C2A5] text-[#6F523A] text-xs font-black flex items-center justify-center leading-none pointer-events-none">
           ⋯
         </span>
-        {badge && (
+        {shownBadge && (
           <div
             className={`absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-black px-2 py-0.5 rounded-full border border-white whitespace-nowrap z-20 flex items-center gap-0.5 ${
-              badge.kind === "gold" ? "bg-[#F6C644] text-[#693E00]" : "bg-[#755541] text-[#FFE8D6]"
+              shownBadge.kind === "gold" ? "bg-[#F6C644] text-[#693E00]" : "bg-[#755541] text-[#FFE8D6]"
             }`}
           >
-            {badge.kind === "gold" && <StarIcon className="w-2.5 h-2.5 text-[#A16500]" />}
-            {badge.text}
+            {shownBadge.kind === "gold" && <StarIcon className="w-2.5 h-2.5 text-[#A16500]" />}
+            {shownBadge.text}
           </div>
         )}
         <div className="w-full flex-1 min-h-0 rounded-xl overflow-hidden bg-[#E5F5D4] flex items-center justify-center">
@@ -1153,7 +1173,8 @@ function ItemTile({
             className="pointer-events-none fixed z-[200] max-w-[280px] -translate-x-1/2 -translate-y-full bg-[#FFFDF0] border-2 border-[#68472E] text-[#4A3324] text-xs font-black py-1 px-3 rounded-2xl shadow-[0_3px_0_rgba(74,46,53,0.16)] leading-snug"
             style={{ left: Math.min(Math.max(tip.x, 150), window.innerWidth - 150), top: Math.max(tip.y - 6, 40) }}
           >
-            {item.name}
+            <p>{item.name}</p>
+            {info?.reasoning && <p className="mt-1 font-medium text-[#7A5B3E]">{info.reasoning}</p>}
           </div>,
           document.body
         )}
