@@ -753,10 +753,6 @@ export default function BoardPage() {
                 clipPath:
                   "polygon(0 0,100% 0,97% 25%,100% 50%,97% 75%,100% 100%,0 100%,3% 75%,0 50%,3% 25%)",
               }}
-              sub=""
-              desc={"안 사기로 정했어요.\n목록이 가벼워졌어요."}
-              hint="반품함에 쏙!"
-              hintClass="bg-[#F5EADB] border-[#CBB394] text-[#694A2F]"
             />
             <ActionZone
               id="flush-zone"
@@ -776,10 +772,6 @@ export default function BoardPage() {
                 borderRadius: "999px",
                 boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.08), 0 2px 0 rgba(0,0,0,0.25)",
               }}
-              sub=""
-              desc={"구매 끝!\n계산하고 뿌듯하게."}
-              hint="계산대에 척!"
-              hintClass="bg-[#E5F5D4] border-[#AED48C] text-[#2D6C2A]"
             />
           </section>
           <p className="text-center text-xs font-medium text-[#3F5B2A] leading-relaxed px-4 xl:hidden">
@@ -1162,10 +1154,6 @@ function ActionZone({
   overClass,
   visual,
   titleChip,
-  sub,
-  desc,
-  hint,
-  hintClass,
 }: {
   id: string;
   className?: string;
@@ -1176,13 +1164,8 @@ function ActionZone({
   overClass: string;
   visual: React.ReactNode;
   titleChip: React.ReactNode;
-  sub: string;
-  desc: string;
-  hint: string;
-  hintClass: string;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
-  void sub;
   return (
     <div
       ref={setNodeRef}
@@ -1201,12 +1184,6 @@ function ActionZone({
       <div className="relative flex-1 flex flex-col items-center justify-center gap-3">
         <div className="w-24 h-24 flex items-center justify-center group-hover:-translate-y-1 transition-transform">
           {visual}
-        </div>
-        <p className="text-base font-bold whitespace-pre-line break-keep leading-snug" style={HAND}>
-          {desc}
-        </p>
-        <div className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-xs font-black ${hintClass}`}>
-          <span>↓</span> {hint}
         </div>
       </div>
     </div>
