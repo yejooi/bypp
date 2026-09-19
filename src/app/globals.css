@@ -99,8 +99,8 @@ body {
 /* 얌전한 잔디: 같은 마름모 무늬지만 채도와 대비를 낮추고 타일을 키웠다. (원래 .grass-bg는 위에 그대로 보관) */
 .grass-bg-calm {
   /* 같은 마름모 무늬, 채도를 낮추고 점무늬를 뺀 얌전한 잔디 */
-  background-color: #88ab6f;
-  background-image: repeating-conic-gradient(from 45deg, #84a76b 0deg 90deg, #88ab6f 90deg 180deg);
+  background-color: #8dbb69;
+  background-image: repeating-conic-gradient(from 45deg, #88b665 0deg 90deg, #8dbb69 90deg 180deg);
   background-size: 44px 44px;
 }
 .wood-grain {
