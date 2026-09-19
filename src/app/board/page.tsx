@@ -654,7 +654,7 @@ export default function BoardPage() {
                   <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
                     <span className="text-lg font-bold text-[#69421A] flex items-center gap-1" style={HAND}>
                       <span className="w-2 h-2 rounded-full bg-[#E09D1B]" />
-                      1층: 이번 달 구매 선반 · {won(shelf1Sum)}
+                      이번 달 구매 선반 · {won(shelf1Sum)}
                     </span>
                   </div>
                   <div className="grid grid-cols-5 gap-2">
@@ -702,7 +702,7 @@ export default function BoardPage() {
                   <div className="flex items-center justify-between px-1">
                     <span className="text-lg font-bold text-[#755541] flex items-center gap-1" style={HAND}>
                       <span className="w-2 h-2 rounded-full bg-[#A8582C]" />
-                      2층: 다음 달 선반
+                      다음 달 선반
                     </span>
                     {overAmount > 0 && (
                       <span className="text-xs font-bold text-[#8C5D35] bg-[#FAF2DC] px-2 py-0.5 rounded-full border border-[#D9CAAF]">
