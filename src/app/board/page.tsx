@@ -677,7 +677,8 @@ export default function BoardPage() {
                   className={`btn-soft-green mx-auto w-fit px-8 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
                   style={HAND}
                 >
-                  🧾 전체 계산하기
+                  <ReceiptIcon className="w-5 h-5" />
+                  전체 계산하기
                   <span className="text-xs font-bold text-[#4F7A36]" style={{ fontFamily: "var(--font-body)" }}>
                     ({shelf1.length}개 · {won(shelf1Sum)})
                   </span>
@@ -743,7 +744,11 @@ export default function BoardPage() {
               className="order-4 lg:order-none lg:col-start-1 lg:row-start-3 xl:col-start-1 xl:row-start-1"
               borderClass="border-[#B89A72] hover:border-[#6B4B32]"
               overClass="border-[#6B4B32] bg-[#FFF5E6] ring-4 ring-[#B89A72]"
-              visual={<span className="text-6xl leading-none drop-shadow-sm">📦</span>}
+              visual={
+                <svg className="w-16 h-16 text-[#8A5A35]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z" />
+                </svg>
+              }
               titleChip="반품함"
               desc="안 사기로 정했어요."
               titleStyle={{
@@ -761,7 +766,11 @@ export default function BoardPage() {
               className="order-5 lg:order-none lg:col-start-2 lg:row-start-3 xl:col-start-4 xl:row-start-1"
               borderClass="border-[#8DBF6A] hover:border-[#3F8A3A]"
               overClass="border-[#3F8A3A] bg-[#F0FAEA] ring-4 ring-[#8DBF6A]"
-              visual={<span className="text-6xl leading-none drop-shadow-sm">🧾</span>}
+              visual={
+                <svg className="w-16 h-16 text-[#3F8A3A]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M19.5 3.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5zM19 19.09H5V4.91h14v14.18zM6 15h12v2H6zm0-4h12v2H6zm0-4h12v2H6z" />
+                </svg>
+              }
               titleChip="계산대"
               desc="구매 끝!"
               stitchClass="border-[#B5D99A]"
@@ -948,11 +957,17 @@ export default function BoardPage() {
               {sheetItem.status === "buy" && <SheetBtn onClick={() => sheetToPouch(sheetItem.id)}>👜 주머니로 돌려놓기</SheetBtn>}
               {sheetItem.status === "buy" && (
                 <SheetBtn tone="green" onClick={() => sheetBuy(sheetItem.id)}>
-                  🧾 계산대 (샀어요!)
+                  <span className="inline-flex items-center justify-center gap-1.5">
+                    <ReceiptIcon className="w-4 h-4" />
+                    계산대 (샀어요!)
+                  </span>
                 </SheetBtn>
               )}
               <SheetBtn tone="tape" onClick={() => sheetToss(sheetItem.id)}>
-                📦 반품함 (안 살래요)
+                <span className="inline-flex items-center justify-center gap-1.5">
+                  <BoxIcon className="w-4 h-4" />
+                  반품함 (안 살래요)
+                </span>
               </SheetBtn>
             </div>
           </div>
@@ -1223,5 +1238,22 @@ function SheetBtn({
     >
       {children}
     </button>
+  );
+}
+
+// 반품함/계산대 아이콘 (머티리얼 스타일, 이모지 대신).
+function BoxIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z" />
+    </svg>
+  );
+}
+
+function ReceiptIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M19.5 3.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5zM19 19.09H5V4.91h14v14.18zM6 15h12v2H6zm0-4h12v2H6zm0-4h12v2H6z" />
+    </svg>
   );
 }
