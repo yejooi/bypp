@@ -515,9 +515,6 @@ export default function BoardPage() {
                     <h3 className="text-lg font-bold text-[#693E00]" style={HAND}>
                       AI 심사대
                     </h3>
-                    <span className="text-[11px] font-bold text-[#A16500] bg-[#FFF0D4] px-2 rounded-full border border-[#D9BA8B]">
-                      연구소 바구니
-                    </span>
                   </div>
                   <span className="text-[11px] font-bold text-[#4FA429] bg-[#E4F5D2] px-2 py-0.5 rounded-full border border-[#BBDC9F]">
                     {judgeItems.length}개 후보 대기 중
