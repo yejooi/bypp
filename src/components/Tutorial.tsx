@@ -6,7 +6,8 @@
 import { useState } from "react";
 import { Mascot, SpeechBubble } from "@/components/Mascot";
 
-export const TUTORIAL_SEEN_KEY = "bypp_tutorial_seen";
+// 계정마다 따로 기록한다 (같은 브라우저에서 새로 가입한 사람에게도 처음엔 자동으로 보여주려고).
+export const tutorialSeenKey = (userId: string) => `bypp_tutorial_seen:${userId}`;
 
 const SLIDES = [
   {
@@ -41,7 +42,7 @@ const SLIDES = [
   },
 ] as const;
 
-export function Tutorial({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function Tutorial({ open, onClose, userId }: { open: boolean; onClose: () => void; userId?: string }) {
   const [i, setI] = useState(0);
   if (!open) return null;
   const s = SLIDES[i];
@@ -49,7 +50,7 @@ export function Tutorial({ open, onClose }: { open: boolean; onClose: () => void
 
   function close() {
     try {
-      localStorage.setItem(TUTORIAL_SEEN_KEY, "1");
+      if (userId) localStorage.setItem(tutorialSeenKey(userId), "1");
     } catch {}
     setI(0);
     onClose();

@@ -9,7 +9,8 @@ import Link from "next/link";
 import { Mascot, SpeechBubble } from "@/components/Mascot";
 import { GoalIcon } from "@/components/GoalIcon";
 import { UserControls } from "@/components/UserBar";
-import { Tutorial, TUTORIAL_SEEN_KEY } from "@/components/Tutorial";
+import { Tutorial, tutorialSeenKey } from "@/components/Tutorial";
+import { useAuth } from "@/lib/auth";
 import { authedFetch } from "@/lib/authedFetch";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -100,11 +101,13 @@ export default function BoardPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
   // 처음 방문하면 사용법을 자동으로 보여준다 (닫으면 다시 안 뜸).
+  const { user } = useAuth();
   useEffect(() => {
+    if (!user) return;
     try {
-      if (!localStorage.getItem(TUTORIAL_SEEN_KEY)) setTutorialOpen(true);
+      if (!localStorage.getItem(tutorialSeenKey(user.id))) setTutorialOpen(true);
     } catch {}
-  }, []);
+  }, [user]);
   const itemCountRef = useRef(items.length);
   // 물건이 새로 담기면 추가 패널을 자동으로 접는다.
   useEffect(() => {
@@ -787,7 +790,7 @@ export default function BoardPage() {
         </div>
       )}
 
-      <Tutorial open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
+      <Tutorial open={tutorialOpen} onClose={() => setTutorialOpen(false)} userId={user?.id} />
 
       {addOpen && (
         <div className="fixed inset-0 z-[58] bg-black/35" onClick={() => setAddOpen(false)}>
