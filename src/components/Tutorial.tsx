@@ -70,12 +70,23 @@ export function Tutorial({ open, onClose }: { open: boolean; onClose: () => void
           </button>
         </div>
 
-        <div className="rounded-2xl overflow-hidden border-2 border-[#D6C2A5] bg-[#E8EDD6]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img key={s.img} src={s.img} alt={s.title} className="w-full h-auto block" />
+        {/* 모든 이미지를 미리 깔아 두고 투명도만 바꿔서, 넘길 때 깜빡이거나 높이가 출렁이지 않게 한다. */}
+        <div className="relative w-full aspect-[8/5] rounded-2xl overflow-hidden border-2 border-[#D6C2A5] bg-[#E8EDD6]">
+          {SLIDES.map((sl, n) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={sl.img}
+              src={sl.img}
+              alt={sl.title}
+              loading="eager"
+              decoding="async"
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${n === i ? "opacity-100" : "opacity-0"}`}
+              aria-hidden={n !== i}
+            />
+          ))}
         </div>
 
-        <div className="flex items-start gap-2.5">
+        <div className="flex items-start gap-2.5 min-h-[92px]">
           <Mascot size={44} mood={last ? "happy" : "idle"} />
           <SpeechBubble className="flex-1">
             <p className="text-sm">{s.lead}</p>
