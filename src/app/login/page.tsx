@@ -35,7 +35,7 @@ export default function LoginPage() {
     <main className="flex-1 flex flex-col gap-5 p-6 max-w-md mx-auto w-full justify-center">
       <div className="text-center mb-2">
         <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-heading)" }}>
-          🌰 bypp
+          🌰 Flushlist
         </h1>
         <p className="text-sm text-[var(--text-sub)] mt-1">
           {mode === "login" ? "닉네임으로 로그인해주세요" : "닉네임을 만들어주세요"}

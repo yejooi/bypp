@@ -15,7 +15,7 @@ const notoSansKr = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "bypp",
+  title: "Flushlist",
   description: "장바구니 정리 서비스",
 };
 
