@@ -646,15 +646,6 @@ export default function BoardPage() {
                 </div>
               </div>
 
-              <div className="relative z-10 flex items-center justify-between gap-3 pb-2 mb-2 shrink-0 xl:pb-1 xl:mb-1.5 border-b-2 border-[#E8DCC2]">
-                <p className="text-xs text-[#7A5B3E] font-bold leading-snug">
-                  1층에 원하는 순서대로 놓으세요.
-                  <br />
-                  예산을 넘는 물건부터 자동으로 2층으로 내려가요.
-                </p>
-                <span className="shrink-0 text-xs font-bold text-[#8A5A35]">{buyItems.length}개 진열 중</span>
-              </div>
-
               <div
                 className={`relative z-10 rounded-[28px] bg-[#EFE4CF] border-[3px] border-[#C9B390] p-4 xl:p-2.5 ${SHADOW_INNER} flex-1 flex flex-col justify-between gap-3 xl:gap-2 select-none`}
               >
