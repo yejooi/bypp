@@ -51,7 +51,7 @@ const TileTapContext = createContext<(id: string) => void>(() => {});
 // AI 판정 뒤 물건별 점수(0~100)와 "왜 이 순위인지" 설명. 점수는 타일 배지로, 설명은 호버할 때만 보인다.
 // 최하위도 0점처럼 보이지 않게 30~100으로 펼친다 (0점은 "실패" 프레임이 돼서). 순위 순서는 그대로다.
 const SCORE_FLOOR = 30;
-type JudgeInfo = { score: number | null; reasoning: string | null };
+type JudgeInfo = { score: number | null; reasoning: string | null; rank?: number };
 const JudgeInfoContext = createContext<Record<string, JudgeInfo>>({});
 const won = (n: number) => `${n.toLocaleString()}원`;
 const short = (n: number) => (n >= 10000 ? `${+(n / 10000).toFixed(1)}만원` : `${n.toLocaleString()}원`);
@@ -96,20 +96,6 @@ export default function BoardPage() {
     const t = setTimeout(() => setUndo(null), 5000);
     return () => clearTimeout(t);
   }, [undo]);
-  // 가장 최근 AI 판정 결과 스냅샷 (왼쪽 패널에 표시). baseSum = 판정 시점에 이미 1층에 있던 물건들의 합계.
-  const [judgeResult, setJudgeResult] = useState<{
-    baseSum: number;
-    entries: {
-      id: string;
-      name: string;
-      price: number;
-      reasoning: string | null;
-      rank: number;
-      cumulative: number;
-      within: boolean;
-      message: string | null;
-    }[];
-  } | null>(null);
   const [addMode, setAddMode] = useState<"link" | "screenshot">("screenshot");
   const [addOpen, setAddOpen] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
@@ -223,46 +209,21 @@ export default function BoardPage() {
         data.items,
         qualWeight / 100
       );
-      // 기존 1층 합계까지 더한 누적으로, 예산 안에 들어오는 순위까지 표시한다.
-      let run = shelf1Sum;
-      let over = false;
-      let overSeen = 0;
-      const entries = ranked.map((r, i) => {
-        if (!over && hasBudget && run + r.price > budget) over = true;
-        const before = run;
-        if (!over) run += r.price;
-        const message = over
-          ? overSeen++ === 0
-            ? smallGapMessage(r.price - Math.max(0, budget - before))
-            : bigGapMessage(2)
-          : i === 0
-            ? positiveMessage()
-            : null;
-        return {
-          id: r.id,
-          name: r.name,
-          price: r.price,
-          reasoning: r.reasoning ?? null,
-          rank: i + 1,
-          cumulative: before + r.price,
-          within: !over,
-          message,
-        };
-      });
-      // 점수: 이번 판정에 올린 물건들 안에서의 상대 점수(0~100). 한 개만 올렸으면 비교 대상이 없어 점수 없이 설명만 남긴다.
+      // 점수: 이번 판정에 올린 물건들 안에서의 상대 점수. 한 개만 올렸으면 비교 대상이 없어 점수 없이 설명만 남긴다.
+      // 판정이 끝난 물건은 심사대에 그대로 두고(순위순 정렬), 사용자가 "가판대로 옮기기"를 눌러야 옮겨진다.
       setJudgeInfo((prev) => ({
         ...prev,
         ...Object.fromEntries(
-          ranked.map((r) => [
+          ranked.map((r, i) => [
             r.id,
-            { score: ranked.length >= 2 ? Math.round(SCORE_FLOOR + (100 - SCORE_FLOOR) * r.finalScore) : null, reasoning: r.reasoning ?? null },
+            {
+              score: ranked.length >= 2 ? Math.round(SCORE_FLOOR + (100 - SCORE_FLOOR) * r.finalScore) : null,
+              reasoning: r.reasoning ?? null,
+              rank: i + 1,
+            },
           ])
         ),
       }));
-      setJudgeResult({ baseSum: shelf1Sum, entries });
-      toPromote.forEach((it) => moveItem(it.id, "buy"));
-      reorderShowcase([...orderedBuyIds.filter((id) => !newIds.has(id)), ...ranked.map((r) => r.id)]);
-      setJudgeIds((prev) => prev.filter((id) => !newIds.has(id)));
       setEvalState("ready");
     } catch {
       setEvalState("error");
@@ -400,6 +361,16 @@ export default function BoardPage() {
   }
 
   const pouchSlots = Math.max(10, Math.ceil(pouchItems.length / 5) * 5);
+  // 판정이 끝난 물건은 순위순으로, 아직 안 된 물건은 뒤에.
+  const sortedJudgeItems = [...judgeItems].sort((a, b) => (judgeInfo[a.id]?.rank ?? 999) - (judgeInfo[b.id]?.rank ?? 999));
+  const judgedInStand = sortedJudgeItems.filter((it) => judgeInfo[it.id]?.rank != null);
+  function moveJudgedToStall() {
+    const ids = judgedInStand.map((it) => it.id);
+    if (ids.length === 0) return;
+    ids.forEach((id) => moveItem(id, "buy"));
+    reorderShowcase([...orderedBuyIds.filter((id) => !ids.includes(id)), ...ids]);
+    setJudgeIds((prev) => prev.filter((id) => !ids.includes(id)));
+  }
   const judgeSlots = Math.max(5, Math.ceil(judgeItems.length / 5) * 5);
   const shelf1Slots = Math.max(10, Math.ceil(shelf1.length / 5) * 5);
   const shelf2Slots = Math.max(5, Math.ceil(shelf2.length / 5) * 5);
@@ -554,8 +525,12 @@ export default function BoardPage() {
                   <span className="w-8 text-right">{qualWeight}</span>
                 </div>
                 <div className="grid grid-cols-5 gap-2 sm:gap-2.5 py-1">
-                  {judgeItems.map((it) => (
-                    <ItemTile key={it.id} item={it} badge={{ text: "판정 대기", kind: "gold" }} />
+                  {sortedJudgeItems.map((it) => (
+                    <ItemTile
+                      key={it.id}
+                      item={it}
+                      badge={judgeInfo[it.id]?.score != null ? undefined : { text: "판정 대기", kind: "gold" }}
+                    />
                   ))}
                   {Array.from({ length: judgeSlots - judgeItems.length }).map((_, i) => (
                     <div
@@ -569,78 +544,32 @@ export default function BoardPage() {
                 {evalState === "error" && (
                   <p className="text-xs font-bold text-[#C93B2B]">판정에 실패했어요. 잠시 뒤 다시 눌러주세요</p>
                 )}
-                <button
-                  onClick={handleEvaluate}
-                  disabled={judgeItems.length === 0 || evalState === "loading"}
-                  className={`btn-soft-green mx-auto w-fit px-8 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
-                  style={HAND}
-                >
-                  <StarIcon className="w-4 h-4 text-[#E09D1B]" />
-                  <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 판정 부탁하기"}</span>
-                </button>
+                <div className="flex flex-wrap items-center justify-center gap-2 shrink-0">
+                  <button
+                    onClick={handleEvaluate}
+                    disabled={judgeItems.length === 0 || evalState === "loading"}
+                    className={`btn-soft-green w-fit px-6 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
+                    style={HAND}
+                  >
+                    <StarIcon className="w-4 h-4 text-[#E09D1B]" />
+                    <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 판정 부탁하기"}</span>
+                  </button>
+                  {judgedInStand.length > 0 && (
+                    <button
+                      onClick={moveJudgedToStall}
+                      className="btn-soft-green w-fit px-6 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2"
+                      style={HAND}
+                    >
+                      가판대로 옮기기
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                        <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </JudgeShell>
 
             </ZoneShell>
-
-              {judgeResult && (
-                <div
-                  className={`order-2 lg:order-none lg:col-start-1 lg:row-start-2 xl:fixed xl:left-1/2 xl:top-1/2 xl:-translate-x-1/2 xl:-translate-y-1/2 xl:w-[600px] xl:max-h-[80vh] xl:overflow-y-auto xl:z-[55] xl:shadow-2xl rounded-[26px] border-[3px] border-[#C8B693] bg-[#FFFDF7] p-3.5 ${SHADOW_AC_SM} flex flex-col gap-2`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <Mascot size={40} mood="happy" />
-                      <SpeechBubble>
-                        이렇게 봤어요! 순서는 참고만 하고, 마음에 안 들면 직접 바꿔도 돼요.
-                      </SpeechBubble>
-                    </div>
-                    <button
-                      onClick={() => setJudgeResult(null)}
-                      className="text-xs font-bold text-[#6F523A] underline"
-                    >
-                      닫기
-                    </button>
-                  </div>
-                  {judgeResult.entries.map((e) => (
-                    <div
-                      key={e.id}
-                      className={`rounded-2xl border-2 p-3 text-[#573A23] ${
-                        e.within ? "border-[#AED48C] bg-[#F4FBEA]" : "border-[#E3C59E] bg-[#FFF9EC]"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2.5">
-                        <span
-                          className={`shrink-0 min-w-11 text-center text-base font-black px-2 py-1 rounded-xl border-2 ${SHADOW_AC_SM} ${
-                            e.within
-                              ? "bg-[#4F8B33] text-white border-[#3B6B26]"
-                              : "bg-[#E09D1B] text-white border-[#B87A0E]"
-                          }`}
-                          style={HAND}
-                        >
-                          {e.rank}위
-                        </span>
-                        <p className="flex-1 text-sm font-black">{e.name}</p>
-                        <span
-                          className={`shrink-0 text-xs font-black px-2.5 py-0.5 rounded-full border ${
-                            e.within
-                              ? "bg-[#DCF2C7] text-[#2D6C2A] border-[#AED48C]"
-                              : "bg-[#FFF1D6] text-[#8A5A00] border-[#F0C77A]"
-                          }`}
-                        >
-                          {e.within ? "예산 안" : "예산 밖"}
-                        </span>
-                      </div>
-                      <p className="text-xs font-bold text-[#82542B] mt-0.5">
-                        {won(e.price)} · 누적 {won(e.cumulative)}{judgeInfo[e.id]?.score != null && ` · ${judgeInfo[e.id]?.score}점`}
-                      </p>
-                      {e.message && !e.message.startsWith("예산 안에서 여유") && (
-                        <p className="text-sm font-black mt-2 px-3 py-2 rounded-xl border-2 border-[#E09D1B] bg-[#FFF4D6] text-[#8A5A00]">
-                          💡 {e.message}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
 
             {/* RIGHT: 쇼케이스 */}
             <ZoneShell
@@ -1174,7 +1103,7 @@ function ItemTile({
             style={{ left: Math.min(Math.max(tip.x, 150), window.innerWidth - 150), top: Math.max(tip.y - 6, 40) }}
           >
             <p>{item.name}</p>
-            {info?.reasoning && <p className="mt-1 font-medium text-[#7A5B3E]">{info.reasoning}</p>}
+            {info?.reasoning && item.status !== "buy" && <p className="mt-1 font-medium text-[#7A5B3E]">{info.reasoning}</p>}
           </div>,
           document.body
         )}
