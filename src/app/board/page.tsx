@@ -516,9 +516,6 @@ export default function BoardPage() {
                       AI 심사대
                     </h3>
                   </div>
-                  <span className="text-[11px] font-bold text-[#4FA429] bg-[#E4F5D2] px-2 py-0.5 rounded-full border border-[#BBDC9F]">
-                    {judgeItems.length}개 후보 대기 중
-                  </span>
                 </div>
                 <SpeechBubble tail="top" className="self-start ml-3 mt-1">
                   {evalState === "loading"
