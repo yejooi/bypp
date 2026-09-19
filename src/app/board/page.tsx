@@ -677,7 +677,7 @@ export default function BoardPage() {
                   className={`btn-soft-green mx-auto w-fit px-8 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
                   style={HAND}
                 >
-                  🧾 1층 전체 계산하기
+                  🧾 전체 계산하기
                   <span className="text-xs font-bold text-[#4F7A36]" style={{ fontFamily: "var(--font-body)" }}>
                     ({shelf1.length}개 · {won(shelf1Sum)})
                   </span>
@@ -730,7 +730,7 @@ export default function BoardPage() {
                   <div className="w-6 h-6 rounded-full bg-[#5BA431] text-white flex items-center justify-center font-black text-xs shrink-0">
                     !
                   </div>
-                  <span>2층 물건은 예산을 넘어요. 다음 달 월급날 꺼내거나, 1층 순서를 바꿔보세요.</span>
+                  <span>다음 달 선반의 물건은 예산을 넘어요. 다음 달 월급날 꺼내거나, 이번 달 선반의 순서를 바꿔보세요.</span>
                 </div>
               )}
 
@@ -886,7 +886,7 @@ export default function BoardPage() {
             <p className="text-lg font-black">
               {shelf1.length}개 · {won(shelf1Sum)} 계산할까요?
             </p>
-            <p className="text-sm mt-1 font-medium">1층에 있는 물건이 한 번에 정리돼요. 바로 뒤에 되돌릴 수도 있어요.</p>
+            <p className="text-sm mt-1 font-medium">이번 달 선반의 물건이 한 번에 정리돼요. 바로 뒤에 되돌릴 수도 있어요.</p>
             <div className="flex gap-2 mt-4">
               <button onClick={() => setConfirmBulk(false)} className="flex-1 py-2.5 rounded-full font-black bg-[#EFE8D6] border-2 border-[#D4C3A3]">
                 아직이요
