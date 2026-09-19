@@ -544,29 +544,29 @@ export default function BoardPage() {
                 {evalState === "error" && (
                   <p className="text-xs font-bold text-[#C93B2B]">판정에 실패했어요. 잠시 뒤 다시 눌러주세요</p>
                 )}
-                <div className="flex flex-wrap items-center justify-center gap-2 shrink-0">
+                {/* 판정 전에는 "판정 부탁하기", 판정이 끝나면 같은 자리에 "가판대로 옮기기"가 나온다. */}
+                {judgedInStand.length > 0 && judgedInStand.length === judgeItems.length && evalState !== "loading" ? (
+                  <button
+                    onClick={moveJudgedToStall}
+                    className="btn-soft-green mx-auto w-fit px-8 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2 shrink-0"
+                    style={HAND}
+                  >
+                    가판대로 옮기기
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                      <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                ) : (
                   <button
                     onClick={handleEvaluate}
                     disabled={judgeItems.length === 0 || evalState === "loading"}
-                    className={`btn-soft-green w-fit px-6 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
+                    className="btn-soft-green mx-auto w-fit px-8 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2 shrink-0"
                     style={HAND}
                   >
                     <StarIcon className="w-4 h-4 text-[#E09D1B]" />
                     <span>{evalState === "loading" ? "음... 잠깐 생각해볼게요" : "AI에게 판정 부탁하기"}</span>
                   </button>
-                  {judgedInStand.length > 0 && (
-                    <button
-                      onClick={moveJudgedToStall}
-                      className="btn-soft-green w-fit px-6 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2"
-                      style={HAND}
-                    >
-                      가판대로 옮기기
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                        <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
+                )}
               </JudgeShell>
 
             </ZoneShell>
