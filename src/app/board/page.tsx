@@ -917,6 +917,18 @@ export default function BoardPage() {
                 닫기
               </button>
             </div>
+            {/* 폰에는 호버가 없으니, AI가 매긴 점수와 이유는 옮기기 메뉴에서 보여 준다 (가판대로 옮긴 뒤에는 이유를 숨김) */}
+            {judgeInfo[sheetItem.id]?.reasoning && sheetItem.status !== "buy" && (
+              <div className="flex items-start gap-2.5">
+                <Mascot size={36} mood="idle" />
+                <SpeechBubble className="flex-1">
+                  {judgeInfo[sheetItem.id]?.score != null && (
+                    <p className="text-sm">{judgeInfo[sheetItem.id]?.score}점</p>
+                  )}
+                  <p className="text-xs font-medium leading-relaxed">{judgeInfo[sheetItem.id]?.reasoning}</p>
+                </SpeechBubble>
+              </div>
+            )}
             <p className="text-xs font-bold text-[#7A5B3E]">어디로 옮길까요?</p>
             <div className="flex flex-col gap-2">
               {sheetItem.status === "cart" && !judgeIds.includes(sheetItem.id) && (
