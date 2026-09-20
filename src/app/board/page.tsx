@@ -396,11 +396,11 @@ export default function BoardPage() {
           <header
             className={`flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-[#FFF9EC]/90 backdrop-blur-md px-4 py-2 rounded-[28px] border-[3px] border-[#D6C2A5] ${SHADOW_AC}`}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
               <UserControls />
               <button
                 onClick={() => setTutorialOpen(true)}
-                className="px-3 py-1 rounded-full bg-[#FFF0D4] border-2 border-[#F0C77A] text-[#7A4A00] text-xs font-black hover:bg-[#FFE7BA] active:translate-y-0.5 transition"
+                className="whitespace-nowrap px-3 py-1 rounded-full bg-[#FFF0D4] border-2 border-[#F0C77A] text-[#7A4A00] text-xs font-black hover:bg-[#FFE7BA] active:translate-y-0.5 transition"
               >
                 이용 방법
               </button>
@@ -423,7 +423,7 @@ export default function BoardPage() {
               </span>
               <span className="text-2xl font-bold text-[#2D6C2A]" style={HAND}>{won(budget)}</span>
             </div>
-            <div className="flex flex-col leading-tight text-right">
+            <div className="flex flex-col leading-tight text-right ml-auto">
               <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
               <span className="text-2xl font-bold text-[#5B3E29]" style={HAND}>
                 {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
@@ -1054,8 +1054,8 @@ function ItemTile({
       {...listeners}
       {...attributes}
       onClick={() => onTap(item.id)}
-      onMouseEnter={showTip}
-      onMouseLeave={() => setTip(null)}
+      onPointerEnter={(e) => e.pointerType === "mouse" && showTip()}
+      onPointerLeave={() => setTip(null)}
       className={`group relative flex flex-col items-center touch-manipulation select-none ${exitClass} ${
         isDragging ? "opacity-30" : ""
       } ${item.exiting ? "pointer-events-none" : ""}`}
@@ -1091,7 +1091,7 @@ function ItemTile({
           )}
         </div>
         <span
-          className={`text-[11px] font-bold leading-none mt-1 ${
+          className={`text-[10px] sm:text-[11px] whitespace-nowrap tracking-tight font-bold leading-none mt-1 ${
             showcase && !dim ? "text-[#85532F]" : "text-[#82542B]"
           } ${dim ? "text-[#8A7460]" : ""}`}
         >
@@ -1142,7 +1142,7 @@ function ActionZone({
     <div
       ref={setNodeRef}
       id={id}
-      className={`group relative rounded-[32px] border-4 bg-[#FFFDF2] p-6 xl:p-4 xl:min-h-0 xl:overflow-hidden transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${dim ? "opacity-50 saturate-50 hover:opacity-100 hover:saturate-100" : ""} ${className} ${
+      className={`max-md:hidden group relative rounded-[32px] border-4 bg-[#FFFDF2] p-6 xl:p-4 xl:min-h-0 xl:overflow-hidden transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${dim ? "opacity-50 saturate-50 hover:opacity-100 hover:saturate-100" : ""} ${className} ${
         isOver ? overClass : borderClass
       }`}
     >

@@ -165,3 +165,12 @@ input[type="number"]::-webkit-inner-spin-button {
 .btn-soft-green:disabled {
   opacity: 0.45;
 }
+
+/* 폰에서 입력칸을 눌렀을 때 iOS가 화면을 확대하지 않도록 입력 글씨는 16px 이상으로 둔다. */
+@media (max-width: 640px) {
+  input:not([type="range"]):not([type="checkbox"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
