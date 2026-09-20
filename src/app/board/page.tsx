@@ -99,6 +99,8 @@ export default function BoardPage() {
   }, [undo]);
   const [addMode, setAddMode] = useState<"link" | "screenshot">("screenshot");
   const [addOpen, setAddOpen] = useState(false);
+  // 좁은 화면(lg 미만)에서는 한 번에 한 구역만 보여 준다: 주머니 / 심사대 / 가판대.
+  const [mobileTab, setMobileTab] = useState<"pouch" | "judge" | "stall">("pouch");
   const [tutorialOpen, setTutorialOpen] = useState(false);
   // 처음 방문하면 사용법을 자동으로 보여준다 (닫으면 다시 안 뜸).
   const { user } = useAuth();
@@ -373,6 +375,7 @@ export default function BoardPage() {
     ids.forEach((id) => moveItem(id, "buy"));
     reorderShowcase([...orderedBuyIds.filter((id) => !ids.includes(id)), ...ids]);
     setJudgeIds((prev) => prev.filter((id) => !ids.includes(id)));
+    setMobileTab("stall");
   }
   const judgeSlots = Math.max(5, Math.ceil(judgeItems.length / 5) * 5);
   const shelf1Slots = Math.max(10, Math.ceil(shelf1.length / 5) * 5);
@@ -412,7 +415,7 @@ export default function BoardPage() {
                   바꾸기
                 </Link>
               </span>
-              <span className="text-2xl font-bold text-[#A75D00] flex items-center gap-1.5 truncate" style={HAND}>
+              <span className="text-xl sm:text-2xl font-bold text-[#A75D00] flex items-center gap-1.5 truncate" style={HAND}>
                 <GoalIcon goal={goalType} className="w-5 h-5" />
                 {goalType ?? "-"}
               </span>
@@ -421,15 +424,42 @@ export default function BoardPage() {
               <span className="text-xs font-bold text-[#6F523A]">
                 이번 달 남은 예산 <span className="font-medium">(총 {won(totalBudget)}{purchasedSum > 0 && ` · 구매 ${won(purchasedSum)}`})</span>
               </span>
-              <span className="text-2xl font-bold text-[#2D6C2A]" style={HAND}>{won(budget)}</span>
+              <span className="text-xl sm:text-2xl font-bold text-[#2D6C2A]" style={HAND}>{won(budget)}</span>
             </div>
-            <div className="flex flex-col leading-tight text-right ml-auto">
+            <div className="flex sm:flex-col items-baseline sm:items-stretch justify-between leading-tight sm:text-right sm:ml-auto w-full sm:w-auto">
               <span className="text-xs font-bold text-[#6F523A]">담긴 물건</span>
-              <span className="text-2xl font-bold text-[#5B3E29]" style={HAND}>
+              <span className="text-xl sm:text-2xl font-bold text-[#5B3E29]" style={HAND}>
                 {cartItems.length + buyItems.length}개 · {won(cartSum + buySum)}
               </span>
             </div>
           </header>
+
+          {/* 좁은 화면 전용 탭: 한 번에 한 구역만 */}
+          <nav className="lg:hidden grid grid-cols-3 gap-2" aria-label="구역 선택">
+            {(
+              [
+                ["pouch", "주머니", pouchItems.length],
+                ["judge", "심사대", judgeItems.length],
+                ["stall", "가판대", buyItems.length],
+              ] as const
+            ).map(([key, label, count]) => (
+              <button
+                key={key}
+                onClick={() => setMobileTab(key)}
+                className={`py-1.5 rounded-2xl text-lg flex items-center justify-center gap-1.5 ${
+                  mobileTab === key
+                    ? "btn-soft-green"
+                    : "border-2 border-[#D4C3A3] bg-[#EFE8D6] text-[#694D36] font-black shadow-[0_3px_0_rgba(74,46,53,0.12)] active:translate-y-0.5 transition"
+                }`}
+                style={HAND}
+              >
+                {label}
+                <span className="text-xs font-black px-1.5 rounded-full bg-white/70" style={{ fontFamily: "var(--font-body)" }}>
+                  {count}
+                </span>
+              </button>
+            ))}
+          </nav>
 
 
           {/* 인벤토리 주머니 vs 가판대 */}
@@ -437,7 +467,7 @@ export default function BoardPage() {
             {/* LEFT: 아이템 주머니 */}
             <ZoneShell
               id="cart-zone"
-              className={`order-1 lg:order-none lg:col-start-1 lg:row-start-1 xl:col-start-2 flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 xl:p-4 xl:min-h-0 xl:overflow-y-auto relative ${SHADOW_AC} overflow-hidden`}
+              className={`${mobileTab === "stall" ? "max-lg:hidden" : ""} order-1 lg:order-none lg:col-start-1 lg:row-start-1 xl:col-start-2 flex flex-col rounded-[36px] border-4 border-[#C8B693] bg-[#EFE8D6] p-5 sm:p-6 xl:p-4 xl:min-h-0 xl:overflow-y-auto relative ${SHADOW_AC} overflow-hidden`}
             >
                             <div
                 className={`relative z-10 w-full rounded-2xl border-2 border-[#B89A62] shrink-0 mb-3 py-3 px-5 xl:mb-2 xl:py-1.5 ${SHADOW_AC_SM}`}
@@ -455,7 +485,7 @@ export default function BoardPage() {
 
               <button
                 onClick={() => setAddOpen(true)}
-                className="relative z-10 shrink-0 mx-auto w-fit px-8 mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1.5 rounded-2xl btn-soft-green text-lg"
+                className={`${mobileTab === "judge" ? "max-lg:hidden" : ""} relative z-10 shrink-0 mx-auto w-fit px-8 mb-3 xl:mb-2 flex items-center justify-center gap-2 py-1.5 rounded-2xl btn-soft-green text-lg`}
                 style={HAND}
               >
                 <svg className="w-6 h-6 text-[#3F8A3A]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -466,7 +496,7 @@ export default function BoardPage() {
               </button>
 
               <div
-                className={`relative z-10 flex flex-col gap-2 mb-3 shrink-0 xl:mb-2 bg-[#E2D9C2]/80 rounded-[24px] border-2 border-[#C2B18E] p-3 xl:p-2 ${SHADOW_INNER}`}
+                className={`${mobileTab === "judge" ? "max-lg:hidden" : ""} relative z-10 flex flex-col gap-2 mb-3 shrink-0 xl:mb-2 bg-[#E2D9C2]/80 rounded-[24px] border-2 border-[#C2B18E] p-3 xl:p-2 ${SHADOW_INNER}`}
               >
                 <div className="flex items-center justify-between gap-2 px-1 flex-wrap">
                   <div className="flex items-center gap-1.5">
@@ -499,7 +529,7 @@ export default function BoardPage() {
               </div>
 
               <JudgeShell
-                className={`relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-2 border-dashed border-[#F5D671] shrink-0 p-3.5 xl:p-2.5 ${SHADOW_AC_SM}`}
+                className={`${mobileTab === "pouch" ? "max-lg:hidden" : ""} relative z-10 flex flex-col gap-2 bg-[#FFFDF0] rounded-[26px] border-2 border-dashed border-[#F5D671] shrink-0 p-3.5 xl:p-2.5 ${SHADOW_AC_SM}`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -510,9 +540,14 @@ export default function BoardPage() {
                   </div>
                 </div>
                 <SpeechBubble tail="top" className="self-start ml-3 mt-1">
-                  {evalState === "loading"
-                    ? "음... 잠깐 생각해볼게요"
-                    : "살까 말까 고민되는 것만 끌어다 놓아 보세요. 같이 골라 볼게요!"}
+                  {evalState === "loading" ? (
+                    "음... 잠깐 생각해볼게요"
+                  ) : (
+                    <>
+                      <span className="sm:hidden">고민되는 것만 올려 보세요!</span>
+                      <span className="hidden sm:inline">살까 말까 고민되는 것만 끌어다 놓아 보세요. 같이 골라 볼게요!</span>
+                    </>
+                  )}
                 </SpeechBubble>
                 <div className="flex items-center gap-2 text-xs text-[#7A5B3E] font-bold">
                   <span>가격순</span>
@@ -577,7 +612,7 @@ export default function BoardPage() {
             {/* RIGHT: 쇼케이스 */}
             <ZoneShell
               id="buy-zone"
-              className={`order-3 lg:order-none lg:col-start-2 lg:row-start-1 xl:col-start-3 flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 xl:p-4 xl:min-h-0 xl:overflow-y-auto relative ${SHADOW_AC} overflow-hidden`}
+              className={`${mobileTab !== "stall" ? "max-lg:hidden" : ""} order-3 lg:order-none lg:col-start-2 lg:row-start-1 xl:col-start-3 flex flex-col rounded-[36px] border-4 border-[#85532F] bg-[#FFFDF2] p-5 sm:p-6 xl:p-4 xl:min-h-0 xl:overflow-y-auto relative ${SHADOW_AC} overflow-hidden`}
             >
               <div className="absolute inset-2 rounded-[28px] border-2 border-dashed border-[#D6C2A5] pointer-events-none" />
               <div
@@ -623,12 +658,14 @@ export default function BoardPage() {
                 <button
                   onClick={() => setConfirmBulk(true)}
                   disabled={shelf1.length === 0}
-                  className={`btn-soft-green mx-auto w-fit px-8 py-1.5 rounded-2xl text-lg flex items-center justify-center gap-2`}
+                  className={`btn-soft-green mx-auto w-fit max-w-full px-6 sm:px-8 py-1.5 rounded-2xl text-lg flex flex-wrap items-center justify-center gap-x-2 gap-y-0`}
                   style={HAND}
                 >
-                  <ReceiptIcon className="w-5 h-5" />
-                  전체 계산하기
-                  <span className="text-xs font-bold text-[#4F7A36]" style={{ fontFamily: "var(--font-body)" }}>
+                  <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                    <ReceiptIcon className="w-5 h-5" />
+                    전체 계산하기
+                  </span>
+                  <span className="text-xs font-bold text-[#4F7A36] whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
                     ({shelf1.length}개 · {won(shelf1Sum)})
                   </span>
                 </button>
@@ -1142,7 +1179,7 @@ function ActionZone({
     <div
       ref={setNodeRef}
       id={id}
-      className={`max-md:hidden group relative rounded-[32px] border-4 bg-[#FFFDF2] p-6 xl:p-4 xl:min-h-0 xl:overflow-hidden transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${dim ? "opacity-50 saturate-50 hover:opacity-100 hover:saturate-100" : ""} ${className} ${
+      className={`max-lg:hidden group relative rounded-[32px] border-4 bg-[#FFFDF2] p-6 xl:p-4 xl:min-h-0 xl:overflow-hidden transition-all ${SHADOW_AC} flex flex-col items-center gap-3 text-center text-[#523B28] ${dim ? "opacity-50 saturate-50 hover:opacity-100 hover:saturate-100" : ""} ${className} ${
         isOver ? overClass : borderClass
       }`}
     >

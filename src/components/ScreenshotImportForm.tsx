@@ -191,7 +191,7 @@ export function ScreenshotImportForm() {
           </svg>
           <span>{loading ? "읽는 중..." : "사진 추가"}</span>
         </button>
-        <p className="text-xs font-bold text-[#7A5B3E]">장바구니 스크린샷을 넣으면 상품들의 정보가 자동으로 채워져요</p>
+        <p className="text-xs font-bold text-[#7A5B3E]">장바구니 스크린샷을 넣으면 상품들의 정보가 자동으로 채워져요<span className="sm:hidden"> (앨범에서 골라 주세요)</span></p>
         {error && (
           <p className="text-xs" style={{ color: "var(--accent)" }}>
             {error}

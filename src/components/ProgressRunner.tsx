@@ -27,11 +27,11 @@ export function ProgressRunner() {
   const progressPct = goalAmount > 0 ? Math.min(100, (savedThisMonth / goalAmount) * 100) : 0;
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5]/95 backdrop-blur-md border-t-[3px] border-[#D6C2A0] py-2.5 px-4 sm:px-8 shadow-2xl z-40 text-[#4A3324]">
+    <footer className="fixed bottom-0 left-0 right-0 bg-[#FFFDF5]/95 backdrop-blur-md border-t-[3px] border-[#D6C2A0] py-1.5 sm:py-2.5 px-3 sm:px-8 shadow-2xl z-40 text-[#4A3324]">
       <div className="max-w-[1400px] mx-auto flex items-center gap-4 sm:gap-6">
         <div className="shrink-0 flex items-center gap-2.5">
           <div className="flex flex-col leading-tight">
-            <span className="text-xs font-bold text-[#7A5B40]">나의 절약 여정</span>
+            <span className="hidden sm:block text-xs font-bold text-[#7A5B40]">나의 절약 여정</span>
             <span className="text-lg font-black text-[#2D6C2A]">{progressPct.toFixed(1)}%</span>
           </div>
         </div>
@@ -65,7 +65,7 @@ export function ProgressRunner() {
           </div>
         )}
         <div className="shrink-0 flex flex-col leading-tight text-right">
-          <span className="text-xs font-bold text-[#7A5B40]">이번 달 저축액</span>
+          <span className="hidden sm:block text-xs font-bold text-[#7A5B40]">이번 달 저축액</span>
           <span className="text-base font-black text-[#2D6C2A]">{savedThisMonth.toLocaleString()}원</span>
         </div>
       </div>
